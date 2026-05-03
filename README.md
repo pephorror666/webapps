@@ -320,6 +320,26 @@
                 </div>
                 <div class="card-arrow">Launch App &rarr;</div>
             </a>
+
+            <a href="./notter/" target="_blank" rel="noopener noreferrer" class="card">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                        <line x1="8" y1="6" x2="16" y2="6"></line>
+                        <line x1="16" y1="14" x2="16" y2="18"></line>
+                        <line x1="8" y1="14" x2="8" y2="18"></line>
+                        <line x1="12" y1="14" x2="12" y2="18"></line>
+                        <line x1="16" y1="10" x2="16" y2="10"></line>
+                        <line x1="12" y1="10" x2="12" y2="10"></line>
+                        <line x1="8" y1="10" x2="8" y2="10"></line>
+                    </svg>
+                </div>
+                <div class="card-content">
+                    <h4>Notter</h4>
+                    <p>Save notes in LocalStorage in a twitter-like interface.</p>
+                </div>
+                <div class="card-arrow">Launch App &rarr;</div>
+            </a>
         </div>
 
         <div class="section-title">Music Experience</div>
