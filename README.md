@@ -271,15 +271,6 @@
             <div class="tagline">We forge heavy code</div>
         </header>
 
-        <section class="hero">
-            <h3>About</h3>
-            <p>
-                I build simple apps for fun—and to learn. This site is a small portfolio of those projects. I call it
-                IARANN (a Scottish Gaelic word for “iron”) because I love programming, metal music, and Scotland.
-                Friendly, useful tools—made by me, shared with you.
-            </p>
-        </section>
-
         <div class="section-title">Tools & Utilities</div>
         <div class="grid">
             <a href="./dictio/" target="_blank" rel="noopener noreferrer" class="card">
