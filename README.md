@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -22,6 +21,8 @@
             --font-heading: 'Outfit', sans-serif;
         }
 
+        h1 {opacity: 0.0;}
+        
         * {
             box-sizing: border-box;
             margin: 0;
