@@ -310,7 +310,7 @@
                 <div class="card-arrow">Launch App &rarr;</div>
             </a>
 
-            <a href="./mathjs/" target="_blank" rel="noopener noreferrer" class="card">
+            <a href="./maths/" target="_blank" rel="noopener noreferrer" class="card">
                 <div class="card-icon">
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
