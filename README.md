@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IARANN webapps</title>
+    <style>
+        h1 {opacity: 0.0;}
+    </style>
 </head>
 
 <body>
