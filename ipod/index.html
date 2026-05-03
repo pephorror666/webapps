@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>𐕣Pod Classic Music Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: hsl(225, 20%, 20%);
+            color: hsl(0, 0%, 90%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .ipod {
+            background-color: hsl(0, 0%, 30%);
+            border-radius: 20px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+            width: 320px;
+            overflow: hidden;
+        }
+
+        /* Screen Styles */
+        .screen {
+            background-color: hsl(0, 0%, 0%);
+            height: 220px;
+            padding: 10px;
+            color: hsl(0, 0%, 90%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+        }
+
+        .screen-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: hsl(210, 70%, 70%);
+            padding: 5px 0;
+            margin: 0;
+            margin-bottom: 10px;
+        }
+
+        .album-cover {
+            width: 150px;
+            height: 120px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .no-song-selected {
+            font-size: 14px;
+            font-style: italic;
+            color: hsl(0, 0%, 60%);
+        }
+
+        .time-display {
+            font-size: 12px;
+            color: hsl(0, 0%, 60%);
+            margin-top: 5px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 5px;
+            background-color: hsl(0, 0%, 20%);
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: hsl(210, 70%, 70%);
+            border-radius: 5px;
+            width: 0;
+        }
+
+        /* Menu Styles */
+        .menu-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: hsl(220, 10%, 90%);
+            color: hsl(0, 0%, 20%);
+            display: none;
+            flex-direction: column;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .menu-screen.active {
+            display: flex;
+        }
+
+        .menu-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: hsl(0, 0%, 20%);
+            padding: 5px 0;
+            margin: 0;
+            border-bottom: 1px solid hsl(0, 0%, 80%);
+        }
+
+        .menu-items {
+            margin-top: 10px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            padding: 8px 5px;
+            margin: 3px 0;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .menu-item:hover,
+        .menu-item.selected {
+            background-color: hsl(210, 70%, 70%);
+            color: white;
+            border-radius: 5px;
+        }
+
+        /* Wheel Styles */
+        .wheel-container {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .wheel {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background-color: hsl(0, 0%, 20%);
+            color: hsl(0, 0%, 80%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .menu-button {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .prev-button {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .next-button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .play-pause-button {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .select-button {
+            width: 60px;
+            height: 60px;
+            background-color: hsl(0, 0%, 40%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: hsl(0, 0%, 90%);
+            cursor: pointer;
+        }
+
+        #error-message {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            color: hsl(0, 70%, 50%);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Volume Control Positioning */
+        .volume-control {
+            position: absolute;
+            top: 50%;
+            right: 0px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 20px;
+            z-index: 10;
+        }
+
+        .volume-control button {
+            transform: translateY(+250%);
+            background: none;
+            border: none;
+            color: hsl(0, 0%, 90%);
+            font-size: 8px;
+            cursor: pointer;
+        }
+
+        .volume-control input[type="range"] {
+            width: 100px;
+            transform: rotate(-90deg);
+            margin: 10px 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ipod">
+        <div class="screen">
+            <h1 class="screen-title">𐕣Pod Classic⛧</h1>
+            <img id="album-cover" src="https://via.placeholder.com/150x120?text=No+Cover" alt="Album Cover"
+                class="album-cover">
+            <div id="no-song-selected" class="no-song-selected">No song selected</div>
+            <div class="time-display">
+                <span id="current-time">0:00</span> / <span id="total-time">0:00</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <!-- Volume Control -->
+            <div class="volume-control">
+                <button id="volume-down"><i class="fas fa-volume-down"></i></button>
+                <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1">
+                <button id="volume-up"><i class="fas fa-volume-up"></i></button>
+            </div>
+
+            <div class="menu-screen" id="menu-screen">
+                <div class="menu-title">Menu</div>
+                <div class="menu-items">
+                    <div class="menu-item" id="upload-folder">Upload Folder</div>
+                    <div class="menu-item" id="upload-song">Upload Song</div>
+                    <div class="menu-item" id="clear-playlist">Clear Playlist</div>
+                    <div class="menu-item" id="now-playing">Now Playing</div>
+                </div>
+            </div>
+
+            <div id="error-message"></div>
+        </div>
+
+        <div class="wheel-container">
+            <div class="wheel">
+                <div class="menu-button" id="menu-button">MENU</div>
+                <div class="prev-button"><i class="fas fa-step-backward"></i></div>
+                <div class="next-button"><i class="fas fa-step-forward"></i></div>
+                <div class="play-pause-button"><i class="fas fa-play"></i></div>
+                <div class="select-button" id="select-button">
+                    <i class="fas fa-music"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio" preload="metadata"></audio>
+    <input type="file" id="song-upload" accept="audio/*" multiple webkitdirectory>
+    <input type="file" id="single-song-upload" accept="audio/*">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const audio = document.getElementById("audio");
+            const albumCover = document.getElementById("album-cover");
+            const noSongSelected = document.getElementById("no-song-selected");
+            const currentTimeDisplay = document.getElementById("current-time");
+            const totalTimeDisplay = document.getElementById("total-time");
+            const progressBar = document.getElementById("progress-bar");
+            const menuButton = document.getElementById("menu-button");
+            const selectButton = document.getElementById("select-button");
+            const menuScreen = document.getElementById("menu-screen");
+            const uploadFolderItem = document.getElementById("upload-folder");
+            const uploadSongItem = document.getElementById("upload-song");
+            const clearPlaylistItem = document.getElementById("clear-playlist");
+            const nowPlayingItem = document.getElementById("now-playing");
+            const songUpload = document.getElementById("song-upload");
+            const singleSongUpload = document.getElementById("single-song-upload");
+            const errorMessage = document.getElementById("error-message");
+            const playPauseButton = document.querySelector(".play-pause-button");
+            const prevButton = document.querySelector(".prev-button");
+            const nextButton = document.querySelector(".next-button");
+            const menuItems = document.querySelectorAll(".menu-item");
+
+            let songs = [];
+            let currentSongIndex = 0;
+            let isPlaying = false;
+            let currentMenuItem = 0;
+            let menuActive = false;
+
+            function displayErrorMessage(message) {
+                errorMessage.textContent = message;
+                setTimeout(() => {
+                    errorMessage.textContent = "";
+                }, 5000);
+            }
+
+            function loadAndPlaySong() {
+                if (songs.length === 0) {
+                    displayErrorMessage("No songs uploaded yet.");
+                    return;
+                }
+
+                const song = songs[currentSongIndex];
+                audio.src = song.src;
+                audio.load();
+
+                audio.onloadedmetadata = () => {
+                    totalTimeDisplay.textContent = formatTime(audio.duration);
+                };
+
+                audio.play().then(() => {
+                    isPlaying = true;
+                    updatePlayPauseButton();
+                    displaySongInfo(song);
+                }).catch(error => {
+                    console.error("Playback failed:", error);
+                    isPlaying = false;
+                    updatePlayPauseButton();
+                });
+            }
+
+            function displaySongInfo(song) {
+                albumCover.src = song.coverArt || "https://via.placeholder.com/150x120?text=No+Cover";
+                noSongSelected.textContent = song.title;
+            }
+
+            function updatePlayPauseButton() {
+                playPauseButton.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+            }
+
+            function togglePlayPause() {
+                if (songs.length === 0) {
+                    displayErrorMessage("No songs uploaded yet.");
+                    return;
+                }
+
+                if (isPlaying) {
+                    audio.pause();
+                    isPlaying = false;
+                } else {
+                    audio.play();
+                    isPlaying = true;
+                }
+                updatePlayPauseButton();
+            }
+
+            function playNextSong() {
+                if (songs.length === 0) return;
+                currentSongIndex = (currentSongIndex + 1) % songs.length;
+                loadAndPlaySong();
+            }
+
+            function playPreviousSong() {
+                if (songs.length === 0) return;
+                currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+                loadAndPlaySong();
+            }
+
+            function formatTime(time) {
+                const minutes = Math.floor(time / 60);
+                const seconds = Math.floor(time % 60);
+                return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            }
+
+            function toggleMenu() {
+                menuActive = !menuActive;
+                if (menuActive) {
+                    menuScreen.classList.add('active');
+                    updateSelectedMenuItem();
+                } else {
+                    menuScreen.classList.remove('active');
+                }
+            }
+
+            function updateSelectedMenuItem() {
+                menuItems.forEach((item, index) => {
+                    if (index === currentMenuItem) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+            }
+
+            function selectNextMenuItem() {
+                if (!menuActive) return;
+                currentMenuItem = (currentMenuItem + 1) % menuItems.length;
+                updateSelectedMenuItem();
+            }
+
+            function selectPrevMenuItem() {
+                if (!menuActive) return;
+                currentMenuItem = (currentMenuItem - 1 + menuItems.length) % menuItems.length;
+                updateSelectedMenuItem();
+            }
+
+            function executeSelectedMenuItem() {
+                if (!menuActive) return;
+
+                switch (currentMenuItem) {
+                    case 0: // Upload Folder
+                        songUpload.click();
+                        break;
+                    case 1: // Upload Song
+                        singleSongUpload.click();
+                        break;
+                    case 2: // Clear Playlist
+                        clearPlaylist();
+                        break;
+                    case 3: // Now Playing
+                        toggleMenu();
+                        break;
+                }
+            }
+
+            function clearPlaylist() {
+                songs = [];
+                currentSongIndex = 0;
+                isPlaying = false;
+                audio.pause();
+                audio.src = "";
+                albumCover.src = "https://via.placeholder.com/150x120?text=No+Cover";
+                noSongSelected.textContent = "No song selected";
+                currentTimeDisplay.textContent = "0:00";
+                totalTimeDisplay.textContent = "0:00";
+                progressBar.style.width = "0%";
+                toggleMenu();
+                displayErrorMessage("Playlist cleared.");
+            }
+
+            audio.addEventListener("timeupdate", () => {
+                const currentTime = audio.currentTime;
+                const duration = audio.duration;
+                currentTimeDisplay.textContent = formatTime(currentTime);
+                progressBar.style.width = `${(currentTime / duration) * 100}%`;
+            });
+
+            audio.addEventListener("ended", () => {
+                playNextSong();
+            });
+
+            menuButton.addEventListener("click", toggleMenu);
+            playPauseButton.addEventListener("click", togglePlayPause);
+            nextButton.addEventListener("click", () => {
+                if (menuActive) {
+                    selectNextMenuItem();
+                } else {
+                    playNextSong();
+                }
+            });
+
+            prevButton.addEventListener("click", () => {
+                if (menuActive) {
+                    selectPrevMenuItem();
+                } else {
+                    playPreviousSong();
+                }
+            });
+
+            selectButton.addEventListener("click", () => {
+                if (menuActive) {
+                    executeSelectedMenuItem();
+                } else {
+                    togglePlayPause();
+                }
+            });
+
+            uploadFolderItem.addEventListener("click", () => {
+                songUpload.click();
+                toggleMenu();
+            });
+
+            uploadSongItem.addEventListener("click", () => {
+                singleSongUpload.click();
+                toggleMenu();
+            });
+
+            clearPlaylistItem.addEventListener("click", clearPlaylist);
+
+            nowPlayingItem.addEventListener("click", toggleMenu);
+
+            songUpload.addEventListener("change", handleFileUpload);
+            singleSongUpload.addEventListener("change", handleSingleFileUpload);
+
+            async function handleFileUpload(event) {
+                const files = event.target.files;
+                const audioFiles = [];
+                const imageFiles = {};
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const path = file.webkitRelativePath || file.name;
+                    const directory = path.split('/').slice(0, -1).join('/');
+
+                    if (file.type.startsWith("audio/")) {
+                        audioFiles.push({ file, directory });
+                    } else if (file.type.startsWith("image/")) {
+                        if (!imageFiles[directory]) {
+                            imageFiles[directory] = [];
+                        }
+                        imageFiles[directory].push(file);
+                    }
+                }
+
+                if (audioFiles.length === 0) {
+                    displayErrorMessage("No audio files found in the selected folder.");
+                    return;
+                }
+
+                for (const { file, directory } of audioFiles) {
+                    const coverArt = findCoverArt(imageFiles[directory] || []);
+                    const songInfo = await getSongInfo(file);
+                    songs.push({
+                        title: songInfo.title,
+                        artist: songInfo.artist,
+                        src: URL.createObjectURL(file),
+                        coverArt: coverArt ? URL.createObjectURL(coverArt) : "https://via.placeholder.com/150x120?text=No+Cover"
+                    });
+                }
+
+                if (songs.length > 0) {
+                    currentSongIndex = 0;
+                    loadAndPlaySong();
+                } else {
+                    displayErrorMessage("No valid audio files found.");
+                }
+            }
+
+            async function handleSingleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file || !file.type.startsWith("audio/")) {
+                    displayErrorMessage("Please select a valid audio file.");
+                    return;
+                }
+
+                try {
+                    const songInfo = await getSongInfo(file);
+                    songs.push({
+                        title: songInfo.title,
+                        artist: songInfo.artist,
+                        src: URL.createObjectURL(file),
+                        coverArt: "https://via.placeholder.com/150x120?text=No+Cover"
+                    });
+
+                    if (songs.length === 1) {
+                        currentSongIndex = 0;
+                        loadAndPlaySong();
+                    } else {
+                        displaySongInfo(songs[currentSongIndex]);
+                    }
+                } catch (error) {
+                    console.error("Error processing file:", file.name, error);
+                    displayErrorMessage(`Error processing ${file.name}.`);
+                }
+            }
+
+            function findCoverArt(images) {
+                if (images.length === 0) return null;
+
+                const coverJpg = images.find(img => img.name.toLowerCase() === "cover.jpg");
+                if (coverJpg) return coverJpg;
+
+                const albumJpg = images.find(img => img.name.toLowerCase() === "album.jpg");
+                if (albumJpg) return albumJpg;
+
+                const artworkJpg = images.find(img => img.name.toLowerCase().includes("artwork"));
+                if (artworkJpg) return artworkJpg;
+
+                return images[0];
+            }
+
+            function getSongInfo(file) {
+                return new Promise((resolve) => {
+                    jsmediatags.read(file, {
+                        onSuccess: function (tag) {
+                            resolve({
+                                title: tag.tags.title || file.name.replace(/\.[^/.]+$/, ""),
+                                artist: tag.tags.artist || "Unknown Artist"
+                            });
+                        },
+                        onError: function () {
+                            resolve({
+                                title: file.name.replace(/\.[^/.]+$/, ""),
+                                artist: "Unknown Artist"
+                            });
+                        }
+                    });
+                });
+            }
+        });
+
+        // Volume Control
+        const volumeDown = document.getElementById("volume-down");
+        const volumeUp = document.getElementById("volume-up");
+        const volumeSlider = document.getElementById("volume-slider");
+
+        audio.volume = volumeSlider.value;
+
+        volumeSlider.addEventListener("input", () => {
+            audio.volume = volumeSlider.value;
+        });
+
+        volumeDown.addEventListener("click", () => {
+            audio.volume = Math.max(0, audio.volume - 0.1);
+            volumeSlider.value = audio.volume;
+        });
+
+        volumeUp.addEventListener("click", () => {
+            audio.volume = Math.min(1, audio.volume + 0.1);
+            volumeSlider.value = audio.volume;
+        });
+    </script>
+</body>
+
+</html>
