@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathjs</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+
+    <style>
+        /* Light Theme Base Variables */
+        :root {
+            --bg: #f3f3f3;
+            --text: #333;
+            --panel-bg: #fff;
+            --border: #ccc;
+            --toolbar-bg: #e1e1e1;
+            --btn-bg: #f9f9f9;
+            --btn-hover: #e8e8e8;
+            --keyword: #0000ff;
+            --string: #a31515;
+            --comment: #008000;
+            --error: #d8000c;
+            --font-mono: 'Consolas', 'Courier New', monospace;
+            --font-ui: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: var(--toolbar-bg);
+            padding: 5px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .toolbar button {
+            background: var(--btn-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .toolbar button:hover {
+            background: var(--btn-hover);
+        }
+
+        .toolbar-separator {
+            width: 1px;
+            height: 20px;
+            background: var(--border);
+            margin: 0 5px;
+        }
+
+        /* Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 40px);
+            overflow: hidden;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+        }
+
+        .col-left {
+            width: 35%;
+            resize: horizontal;
+            overflow: auto;
+        }
+
+        .col-mid {
+            width: 40%;
+            resize: horizontal;
+            overflow: auto;
+            flex: 1;
+        }
+
+        .col-right {
+            width: 25%;
+            overflow: auto;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            border-bottom: 1px solid var(--border);
+            min-height: 100px;
+        }
+
+        .panel-header {
+            background: var(--toolbar-bg);
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header button {
+            font-size: 10px;
+            padding: 2px 4px;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+            background: var(--panel-bg);
+        }
+
+        /* Editor */
+        #editor {
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            resize: none;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            padding: 10px;
+            background: transparent;
+            color: var(--text);
+            white-space: pre;
+            tab-size: 4;
+        }
+
+        /* Console & Terminal */
+        .console-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        #console-output {
+            flex: 1;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            padding: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .log-input {
+            color: #888;
+        }
+
+        .log-output {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #005cc5;
+        }
+
+        .log-error {
+            color: var(--error);
+            margin-bottom: 5px;
+        }
+
+        .terminal-line {
+            display: flex;
+            border-top: 1px solid var(--border);
+            background: var(--btn-bg);
+            padding: 5px 10px;
+            align-items: center;
+        }
+
+        .terminal-line span {
+            font-family: var(--font-mono);
+            font-weight: bold;
+            color: #555;
+            margin-right: 5px;
+        }
+
+        #terminal-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            outline: none;
+            color: var(--text);
+        }
+
+        /* Variables Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 4px 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--toolbar-bg);
+            position: sticky;
+            top: 0;
+        }
+
+        code {
+            font-family: var(--font-mono);
+            background: #f0f0f0;
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
+
+        /* Help Panel */
+        #help-content {
+            font-size: 12px;
+            padding: 10px;
+            line-height: 1.4;
+            display: none;
+        }
+
+        #help-content h4 {
+            margin-top: 10px;
+            color: var(--keyword);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="toolbar" role="toolbar" aria-label="Main Toolbar">
+        <button onclick="fileNew()" title="New Script">📄 New</button>
+        <button onclick="fileOpen()" title="Open Local File">📂 Open</button>
+        <button onclick="fileSave()" title="Save Script">💾 Save</button>
+        <div class="toolbar-separator"></div>
+        <button onclick="runEditorCode()" title="Execute Script (Ctrl+Enter)" style="font-weight:bold; color:green;">▶
+            Run Editor</button>
+        <button onclick="clearConsole()" title="Clear Console">🗑 Clear Console</button>
+        <div class="toolbar-separator"></div>
+        <button onclick="insertText('matrix([[1, 2], [3, 4]])')">▦ Insert Matrix</button>
+        <div class="toolbar-separator"></div>
+        <button onclick="toggleHelp()">❓ Help / Syntax</button>
+    </div>
+
+    <div class="main-container">
+        <div class="col col-left">
+            <div class="panel">
+                <div class="panel-header">
+                    <span>Script Editor</span>
+                    <span id="editor-stats" style="font-weight:normal; color:#888;">0 lines</span>
+                </div>
+                <div class="panel-content">
+                    <textarea id="editor" spellcheck="false" oninput="onEditorInput()"
+                        onkeydown="handleEditorKeys(event)">
+# Mathjs - Active Editor
+# Select lines and press Ctrl+Enter to run.
+
+# Basic Arithmetic
+a = 15
+b = 4
+c = a * b + (a / 2)
+
+# Linear Algebra (Math.js syntax)
+M = matrix([[1, 2], [3, 4]])
+detM = det(M)
+invM = inv(M)
+
+# Statistics
+data = [10, 20, 30, 40, 50]
+avg = mean(data)
+dev = std(data)
+
+# Print specific variables to console
+print(c, detM, avg)
+</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="col col-mid">
+            <div class="panel">
+                <div class="panel-header">Console & Terminal</div>
+                <div class="panel-content console-wrapper">
+                    <div id="console-output"></div>
+                    <div class="terminal-line">
+                        <span>>></span>
+                        <input type="text" id="terminal-input" onkeydown="handleTerminalKeys(event)"
+                            placeholder="Type expression and press Enter..." autocomplete="off">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col col-right">
+            <div class="panel" style="flex: 1;">
+                <div class="panel-header">
+                    <span>Session Variables</span>
+                    <button onclick="saveSessionToLocal()" title="Save current session to LocalStorage">💾 Save to
+                        Local</button>
+                </div>
+                <div class="panel-content">
+                    <table id="session-var-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel" style="flex: 1;">
+                <div class="panel-header">
+                    <span>Saved Memory (Local)</span>
+                    <div>
+                        <button onclick="loadLocalToSession()" title="Load saved variables into active session">⬆
+                            Load</button>
+                        <button onclick="clearLocalMemory()" title="Clear saved memory">🗑 Clear</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <table id="local-var-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel" id="help-panel" style="display: none; flex: 1;">
+                <div class="panel-header">Reference Guide <button onclick="toggleHelp()">X</button></div>
+                <div class="panel-content" id="help-content">
+                    <h4>Syntax & Operations</h4>
+                    <code>x = 10; y = 20</code> (Assignment)<br>
+                    <code># comment</code> (Comments)<br>
+                    <h4>Math.js Engine</h4>
+                    <code>matrix([[a,b],[c,d]])</code> (Matrices)<br>
+                    <code>det(M), inv(M), transpose(M)</code><br>
+                    <code>mean(A), std(A), sum(A)</code><br>
+                    <code>sin(x), cos(x), exp(x), log(x)</code><br>
+                    <code>derivative('x^2 + x', 'x')</code><br>
+                    <h4>Console</h4>
+                    <code>print(var1, var2)</code> prints values safely.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="file-input" style="display: none;" onchange="handleFileOpen(event)">
+
+    <script>
+        // --- Global State ---
+        let mathScope = {}; // Active session variables
+        const LOCAL_STORAGE_KEY = 'mathlab_saved_memory';
+
+        function init() {
+            if (typeof math === 'undefined') {
+                logError("CRITICAL: Math.js failed to load from CDN. App will not function.");
+                return;
+            }
+
+            // Configure math.js
+            math.config({ number: 'number' });
+
+            loadEditorDraft();
+            onEditorInput();
+            printConsole("Math.js Engine Ready. Type commands in terminal or run from editor.", "system");
+            updateWorkspaces();
+            document.getElementById('terminal-input').focus();
+        }
+
+        // --- UI & Editor Functions ---
+        function toggleHelp() {
+            const hp = document.getElementById('help-panel');
+            const hc = document.getElementById('help-content');
+            if (hp.style.display === 'none') {
+                hp.style.display = 'flex';
+                hc.style.display = 'block';
+            } else {
+                hp.style.display = 'none';
+                hc.style.display = 'none';
+            }
+        }
+
+        function onEditorInput() {
+            const ed = document.getElementById('editor');
+            localStorage.setItem('mathlab_autosave_script', ed.value);
+            document.getElementById('editor-stats').innerText = `${ed.value.split('\n').length} lines | ${ed.value.length} chars`;
+        }
+
+        function loadEditorDraft() {
+            const savedCode = localStorage.getItem('mathlab_autosave_script');
+            if (savedCode) document.getElementById('editor').value = savedCode;
+        }
+
+        function insertText(txt) {
+            const ed = document.getElementById('editor');
+            const start = ed.selectionStart;
+            const end = ed.selectionEnd;
+            ed.value = ed.value.substring(0, start) + txt + ed.value.substring(end);
+            ed.selectionStart = ed.selectionEnd = start + txt.length;
+            ed.focus();
+            onEditorInput();
+        }
+
+        function handleEditorKeys(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                insertText('    ');
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                runEditorCode();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                fileSave();
+            }
+        }
+
+        // --- File Handling ---
+        function fileNew() {
+            if (confirm("Clear editor? Unsaved script changes will be lost.")) {
+                document.getElementById('editor').value = '';
+                onEditorInput();
+            }
+        }
+
+        function fileOpen() { document.getElementById('file-input').click(); }
+
+        function handleFileOpen(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                document.getElementById('editor').value = ev.target.result;
+                onEditorInput();
+            };
+            reader.readAsText(file);
+            e.target.value = ''; // Reset input
+        }
+
+        function fileSave() {
+            const text = document.getElementById('editor').value;
+            const blob = new Blob([text], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "script.mlite";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // --- Console & Terminal ---
+        function clearConsole() { document.getElementById('console-output').innerHTML = ''; }
+
+        function printConsole(text, type = "output") {
+            const c = document.getElementById('console-output');
+            const div = document.createElement('div');
+            div.className = type === 'input' ? 'log-input' : type === 'error' ? 'log-error' : 'log-output';
+
+            // Format objects
+            let content = text;
+            if (typeof text === 'object' && text !== null) {
+                content = JSON.stringify(text, null, 2);
+            }
+
+            div.innerText = type === 'input' ? `>> ${content}` : content;
+            c.appendChild(div);
+            c.scrollTop = c.scrollHeight;
+        }
+
+        function logError(msg) { printConsole(msg, "error"); }
+
+        function handleTerminalKeys(e) {
+            if (e.key === 'Enter') {
+                const inputField = e.target;
+                const command = inputField.value.trim();
+                if (command) {
+                    inputField.value = ''; // Clear input
+                    executeCommand(command);
+                }
+            }
+        }
+
+        // --- Execution Engine (Math.js) ---
+        function runEditorCode() {
+            const ed = document.getElementById('editor');
+            const code = ed.value.substring(ed.selectionStart, ed.selectionEnd) || ed.value;
+            if (!code.trim()) return;
+
+            printConsole("--- Running Script ---", "system");
+            const lines = code.split('\n');
+
+            for (let line of lines) {
+                let cleanLine = line.trim();
+                if (!cleanLine || cleanLine.startsWith('#') || cleanLine.startsWith('//')) continue;
+                executeCommand(cleanLine, false); // false = don't print the input line for scripts unless error
+            }
+            updateWorkspaces();
+            printConsole("--- Execution Finished ---", "system");
+        }
+
+        function executeCommand(expr, isTerminal = true) {
+            if (isTerminal) printConsole(expr, "input");
+
+            // Custom print interceptor
+            if (expr.startsWith('print(') || expr.startsWith('disp(')) {
+                let inner = expr.substring(expr.indexOf('(') + 1, expr.lastIndexOf(')'));
+                let args = inner.split(',').map(a => a.trim());
+                let out = [];
+                for (let a of args) {
+                    try {
+                        let val = math.evaluate(a, mathScope);
+                        out.push(formatMathResult(val));
+                    } catch (e) {
+                        out.push(`[Error evaluating ${a}]`);
+                    }
+                }
+                printConsole(out.join(' | '));
+                if (isTerminal) updateWorkspaces();
+                return;
+            }
+
+            try {
+                // Evaluate via Math.js (updates mathScope automatically)
+                let result = math.evaluate(expr, mathScope);
+
+                // Only output if it returns a value and is not a pure assignment
+                if (result !== undefined && typeof result !== 'function' && !expr.includes('=')) {
+                    if (result && result.isResultSet) {
+                        // Handle multi-line results
+                        const resStrings = result.entries.map(e => formatMathResult(e));
+                        printConsole(resStrings.join('\n'));
+                    } else {
+                        printConsole(formatMathResult(result));
+                    }
+                }
+            } catch (err) {
+                logError(err.message);
+            }
+
+            if (isTerminal) updateWorkspaces();
+        }
+
+        function formatMathResult(res) {
+            if (res === undefined) return "undefined";
+            if (res === null) return "null";
+            if (res.isMatrix || Array.isArray(res)) return math.format(res);
+            if (typeof res === 'number') return math.format(res, { precision: 14 });
+            return res.toString();
+        }
+
+        // --- Workspaces Management ---
+        function updateWorkspaces() {
+            renderTable('session-var-table', mathScope);
+
+            let localData = {};
+            try {
+                const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (raw) localData = JSON.parse(raw);
+            } catch (e) { }
+            renderTable('local-var-table', localData);
+        }
+
+        function renderTable(tableId, scopeObj) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            for (let key in scopeObj) {
+                let val = scopeObj[key];
+                let type = typeof val;
+                let display = "";
+
+                if (val && val.mathjs === 'DenseMatrix' || val && val.isMatrix) {
+                    const size = val.size ? val.size() : (val.data ? [val.data.length] : ['?']);
+                    display = `Matrix [${size.join('x')}]`;
+                } else if (Array.isArray(val)) {
+                    display = `Array [${val.length}]`;
+                } else if (type === 'function') {
+                    display = "Function";
+                } else if (type === 'object') {
+                    display = "Object";
+                } else {
+                    display = String(val);
+                    if (display.length > 25) display = display.substring(0, 25) + "...";
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td><code>${key}</code></td><td>${display}</td>`;
+                tbody.appendChild(tr);
+            }
+        }
+
+        function saveSessionToLocal() {
+            try {
+                // Need to serialize mathScope. Math.js types need special handling if complex, 
+                // but standard JSON.stringify handles basic numbers, strings, and arrays.
+                // For matrices, we convert them to arrays before saving.
+                const serializableScope = {};
+                for (let key in mathScope) {
+                    let val = mathScope[key];
+                    if (typeof val === 'function') continue; // skip functions
+
+                    if (val && val.isMatrix) {
+                        serializableScope[key] = val.toArray();
+                    } else {
+                        serializableScope[key] = val;
+                    }
+                }
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(serializableScope));
+                updateWorkspaces();
+                printConsole("Session variables saved to LocalStorage.", "system");
+            } catch (e) {
+                logError("Failed to save to local storage: " + e.message);
+            }
+        }
+
+        function loadLocalToSession() {
+            try {
+                const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (!raw) {
+                    printConsole("No saved memory found.", "system");
+                    return;
+                }
+                const data = JSON.parse(raw);
+
+                // Merge into mathScope, restoring arrays to Math.js matrices if needed
+                // By default math.js treats arrays normally, but user can wrap in matrix() later.
+                for (let key in data) {
+                    mathScope[key] = data[key];
+                }
+
+                updateWorkspaces();
+                printConsole("Variables loaded from LocalStorage into Session.", "system");
+            } catch (e) {
+                logError("Failed to load from local storage: " + e.message);
+            }
+        }
+
+        function clearLocalMemory() {
+            if (confirm("Delete all saved variables from LocalStorage?")) {
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
+                updateWorkspaces();
+                printConsole("LocalStorage memory cleared.", "system");
+            }
+        }
+
+        // Initialize app on load
+        window.onload = init;
+    </script>
+</body>
+
+</html>
