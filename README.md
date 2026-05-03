@@ -341,7 +341,7 @@
         </div>
 
         <footer>
-            &copy; 2024 IARANN STUDIO <br> BUILT WITH CLASS
+            &copy; 2026 IARANN<br>
         </footer>
     </div>
 </body>
