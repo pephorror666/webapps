@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -11,6 +10,8 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;600;800&display=swap"
         rel="stylesheet">
     <style>
+        h1 {opacity: 0.0;}
+        
         :root {
             --bg: #0a0a0c;
             --surface: #141417;
