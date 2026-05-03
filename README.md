@@ -10,17 +10,17 @@
 </head>
 
 <body>
-    <h1>IARANN we forge heavy code</h1>
-    <h2>Tools</h2>
+    <h2>IARANN we forge heavy code</h2>
+    <h3>Tools</h3>
     <ul>
         <li><a href="./markdown-editor/">Markdown Studio</a></li>
         <li><a href="./dictio/">Dictio</a></li>
     </ul>
-    <h2>Music</h2>
+    <h3>Music</h3>
     <ul>
         <li><a href="./ipod/">iPod</a></li>
     </ul>
-    <h2>Games</h2>
+    <h3>Games</h3>
     <ul>
         <li><a href="./games/surfer.html">Surfer</a></li>
     </ul>
