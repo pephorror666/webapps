@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dictio - Advanced Dictionary & Writer's Tool</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
     <style>
         /* Base Variables & Reset */
         :root {
@@ -19,6 +22,9 @@
             --toolbar-bg: #e5e7eb;
             --font-ui: system-ui, -apple-system, sans-serif;
             --font-serif: 'Georgia', serif;
+            --radius: 4px;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-blur: 0px;
         }
 
         /* Dark Theme Variables */
@@ -43,6 +49,62 @@
             --primary: #8b4513;
             --primary-hover: #a0522d;
             --toolbar-bg: #e2d5c3;
+        }
+
+        /* macGlass Theme */
+        body.theme-macos {
+            --bg-color: #f5f5f7;
+            --surface: rgba(255, 255, 255, 0.6);
+            --text: #1d1d1f;
+            --text-muted: #86868b;
+            --border: rgba(0, 0, 0, 0.05);
+            --primary: #0071e3;
+            --primary-hover: #0077ed;
+            --toolbar-bg: rgba(245, 245, 247, 0.8);
+            --glass-blur: 20px;
+            --radius: 12px;
+            background-image: radial-gradient(circle at 20% 20%, #e3e3e3 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, #d2d2d2 0%, transparent 40%);
+        }
+
+        /* Pixel Art Theme */
+        body.theme-pixel {
+            --bg-color: #000;
+            --surface: #000;
+            --text: #00ff00;
+            --text-muted: #008f11;
+            --border: #00ff00;
+            --primary: #ffff00;
+            --primary-hover: #ffffff;
+            --toolbar-bg: #111;
+            --font-ui: 'Silkscreen', cursive;
+            --font-serif: 'Silkscreen', cursive;
+            --radius: 0px;
+        }
+
+        /* Pride Theme */
+        body.theme-pride {
+            --bg-color: #fff;
+            --surface: #fff;
+            --text: #2d3436;
+            --text-muted: #636e72;
+            --border: #dfe6e9;
+            --primary: #d63031;
+            --primary-hover: #e17055;
+            --toolbar-bg: #f5f5f5;
+            --rainbow-border: linear-gradient(90deg, #FF0018, #FFA52C, #FFFF41, #008018, #0000F9, #86007D);
+        }
+
+        /* Nature Theme */
+        body.theme-nature {
+            --bg-color: #f1f8e9;
+            --surface: #ffffff;
+            --text: #2e7d32;
+            --text-muted: #689f38;
+            --border: rgba(46, 125, 50, 0.2);
+            --primary: #1b5e20;
+            --primary-hover: #388e3c;
+            --toolbar-bg: #e8f5e9;
         }
 
         * {
@@ -76,6 +138,14 @@
             display: flex;
             gap: 15px;
             font-size: 14px;
+            backdrop-filter: blur(var(--glass-blur));
+            position: relative;
+            z-index: 1001;
+        }
+
+        body.theme-pride .menubar {
+            border-bottom: 4px solid;
+            border-image: var(--rainbow-border) 1;
         }
 
         .menu-item {
@@ -83,11 +153,11 @@
             cursor: pointer;
             padding: 5px 8px;
             user-select: none;
+            border-radius: var(--radius);
         }
 
         .menu-item:hover {
             background-color: var(--toolbar-bg);
-            border-radius: 4px;
         }
 
         .dropdown {
@@ -100,6 +170,8 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             min-width: 200px;
             z-index: 1000;
+            backdrop-filter: blur(var(--glass-blur));
+            border-radius: var(--radius);
         }
 
         .menu-item:hover .dropdown {
@@ -124,6 +196,7 @@
             display: flex;
             gap: 10px;
             align-items: center;
+            backdrop-filter: blur(var(--glass-blur));
         }
 
         .search-container {
@@ -137,11 +210,15 @@
             flex: 1;
             padding: 8px 12px;
             border: 1px solid var(--border);
-            border-radius: 4px;
+            border-radius: var(--radius);
             background: var(--surface);
             color: var(--text);
             font-size: 16px;
             outline: none;
+        }
+
+        body.theme-pixel input[type="text"] {
+            border-width: 2px;
         }
 
         input[type="text"]:focus {
@@ -153,7 +230,7 @@
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: var(--radius);
             cursor: pointer;
             font-size: 14px;
             transition: background 0.2s;
@@ -161,6 +238,11 @@
             align-items: center;
             gap: 5px;
             white-space: nowrap;
+        }
+
+        body.theme-pixel button {
+            border: 2px solid var(--primary);
+            text-transform: uppercase;
         }
 
         button:hover {
@@ -202,6 +284,7 @@
             display: flex;
             flex-direction: column;
             overflow-y: auto;
+            backdrop-filter: blur(var(--glass-blur));
         }
 
         .sidebar-header {
@@ -212,6 +295,7 @@
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            backdrop-filter: blur(var(--glass-blur));
         }
 
         .history-list {
@@ -245,9 +329,15 @@
             margin: 0 auto;
             background: var(--surface);
             padding: 40px;
-            border-radius: 8px;
+            border-radius: var(--radius);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             display: none;
+            backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border);
+        }
+
+        body.theme-pixel .result-container {
+            border: 4px solid var(--border);
         }
 
         .result-header {
@@ -422,6 +512,51 @@
             bottom: 60px;
         }
 
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .workspace {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                max-height: 200px;
+            }
+
+            .main-content {
+                padding: 10px;
+            }
+
+            .result-container {
+                padding: 20px;
+            }
+
+            .word-title {
+                font-size: 2em;
+            }
+
+            .toolbar {
+                padding: 10px;
+            }
+
+            .search-container {
+                max-width: none;
+            }
+
+            .menubar {
+                overflow-x: visible;
+                white-space: nowrap;
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .menu-item {
+                display: inline-block;
+            }
+        }
+
         /* Print Styles */
         @media print {
 
@@ -493,6 +628,10 @@
                     <div class="dropdown-item" onclick="app.theme.set('light')">Light</div>
                     <div class="dropdown-item" onclick="app.theme.set('dark')">Dark</div>
                     <div class="dropdown-item" onclick="app.theme.set('paper')">Paper Mode</div>
+                    <div class="dropdown-item" onclick="app.theme.set('macos')">macGlass</div>
+                    <div class="dropdown-item" onclick="app.theme.set('pixel')">Pixel Art</div>
+                    <div class="dropdown-item" onclick="app.theme.set('nature')">Nature</div>
+                    <div class="dropdown-item" onclick="app.theme.set('pride')">Pride</div>
                 </div>
             </div>
             <div class="menu-item" onclick="document.getElementById('aboutModal').showModal()">About</div>
@@ -576,12 +715,12 @@
 
         <footer class="statusbar">
             <div id="statusMsg">Ready. Waiting for input.</div>
-            <div>Lexicon Studio v2.0 | English Mode</div>
+            <div>IARANN | Dictio v2.0</div>
         </footer>
     </div>
 
     <dialog id="aboutModal">
-        <h3>About Lexicon Studio</h3>
+        <h3>About Dictio</h3>
         <p style="margin: 15px 0; font-size: 14px; line-height: 1.6;">
             A web application for linguists and writers. It combines <strong>Free Dictionary API</strong> for semantics
             and <strong>Datamuse API</strong> for lexical creativity.
@@ -719,7 +858,7 @@
                 getFormattedText() {
                     const data = app.state.lastResult;
                     if (!data) return "";
-                    let text = `LEXICON STUDIO REPORT\nWord: ${data.word.toUpperCase()}\nPhonetic: ${data.phonetic || ''}\n\n`;
+                    let text = `DICTIO REPORT\nWord: ${data.word.toUpperCase()}\nPhonetic: ${data.phonetic || ''}\n\n`;
 
                     data.meanings.forEach(m => {
                         text += `[${m.partOfSpeech.toUpperCase()}]\n`;
