@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IARANN | Last.fm Manual Scrobbler</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@300;500;600&family=Silkscreen&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- THEME CONFIGURATION --- */
+        :root {
+            --bg: #ededed;
+            --surface: #ffffff;
+            --text-main: #1a1a1a;
+            --text-muted: #64748b;
+            --accent: #d51007;
+            /* Last.fm Red Default */
+            --accent-hover: #b90e06;
+            --border: rgba(0, 0, 0, 0.1);
+            --card-bg: transparent;
+            --font-header: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius: 8px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="macos"] {
+            --bg: #f5f5f7;
+            --surface: rgba(255, 255, 255, 0.7);
+            --text-main: #1d1d1f;
+            --radius: 12px;
+            backdrop-filter: blur(20px);
+            background-image: radial-gradient(circle at 20% 20%, #e3e3e3 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, #d2d2d2 0%, transparent 40%);
+        }
+
+        [data-theme="pixel"] {
+            --bg: #000000;
+            --surface: #000000;
+            --text-main: #00ff00;
+            --text-muted: #008f11;
+            --accent: #00ff00;
+            --accent-hover: #00cc00;
+            --border: 2px solid #00ff00;
+            --font-header: 'Silkscreen', cursive;
+            --font-body: 'Silkscreen', cursive;
+            --radius: 0px;
+        }
+
+        /* --- BASE STYLES --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            position: relative;
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- COMPONENTS --- */
+        .theme-switcher {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            border-radius: var(--radius);
+            font-size: 0.8rem;
+            color: var(--text-main);
+            outline: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-family: var(--font-header);
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        h1 span {
+            font-weight: 300;
+            color: var(--text-muted);
+        }
+
+        h2 {
+            font-family: var(--font-header);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.75rem;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: var(--accent);
+        }
+
+        .btn {
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .flex-row>* {
+            flex: 1;
+        }
+
+        /* --- NOTIFICATIONS --- */
+        .notification {
+            padding: 1rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .notif-error {
+            background-color: rgba(220, 38, 38, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+        }
+
+        .notif-success {
+            background-color: rgba(22, 163, 74, 0.1);
+            color: #22c55e;
+            border: 1px solid rgba(22, 163, 74, 0.2);
+        }
+
+        .notif-info {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: #3b82f6;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        [data-theme="pixel"] .notification {
+            background: transparent;
+        }
+
+        /* --- RESULTS AREA --- */
+        #resultsArea {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .album-header {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            align-items: flex-end;
+        }
+
+        .album-cover {
+            width: 120px;
+            height: 120px;
+            border-radius: var(--radius);
+            object-fit: cover;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .album-info {
+            flex: 1;
+        }
+
+        .album-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .album-artist {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .tracklist {
+            list-style: none;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .track-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .track-item:last-child {
+            border-bottom: none;
+        }
+
+        .track-item:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        [data-theme="dark"] .track-item:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .track-checkbox {
+            margin-right: 1rem;
+            accent-color: var(--accent);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .track-title {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .track-duration {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+
+        .list-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0 0.5rem;
+        }
+
+        .select-all-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Utilities */
+        .hidden {
+            display: none !important;
+        }
+
+        .settings-toggle {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .settings-toggle:hover {
+            color: var(--text-main);
+        }
+    </style>
+
+    <script>
+        var md5 = function () { for (var m = [], l = 0; 64 > l;)m[l] = 0 | 4294967296 * Math.abs(Math.sin(++l)); return function (c) { var e, g, f, a, h = []; c = unescape(encodeURI(c)); for (var b = c.length, k = [e = 1732584193, g = -271733879, ~e, ~g], d = 0; d <= b;)h[d >> 2] |= (c.charCodeAt(d) || 128) << 8 * (d++ % 4); h[c = 16 * (b + 8 >> 6) + 14] = 8 * b; for (d = 0; d < c; d += 16) { b = k; for (a = 0; 64 > a;)b = [f = b[3], (e = b[1] | 0) + ((f = b[0] + [e & (g = b[2]) | ~e & f, f & e | ~f & g, e ^ g ^ f, g ^ (e | ~f)][b = a >> 4] + (m[a] + (h[[a, 5 * a + 1, 3 * a + 5, 7 * a][b] % 16 + d] | 0))) << (b = [7, 12, 17, 22, 5, 9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21][4 * b + a++ % 4]) | f >>> 32 - b), e, g]; for (a = 4; a;)k[--a] = k[a] + b[a] } for (c = ""; 32 > a;)c += (k[a >> 3] >> 4 * (1 ^ a++ & 7) & 15).toString(16); return c } }();
+    </script>
+</head>
+
+<body data-theme="dark">
+
+    <div class="container">
+        <select class="theme-switcher" id="themeSelector">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="macos">macOS Glass</option>
+            <option value="pixel">Pixel Art</option>
+        </select>
+
+        <header>
+            <h1>IARANN <span>| Scrobbler</span></h1>
+            <button id="btnToggleSettings" class="settings-toggle" title="Settings">⚙️</button>
+        </header>
+
+        <div id="notification" class="notification"></div>
+
+        <div id="settingsSection" class="card hidden">
+            <h2>API Configuration</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                Your password is only used once to obtain a secure Session Key from Last.fm and is NEVER stored locally.
+            </p>
+
+            <div class="form-group">
+                <label>Last.fm Username</label>
+                <input type="text" id="cfgUser" placeholder="e.g. RJ">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="cfgPass" placeholder="Required for initial authentication">
+            </div>
+            <div class="form-group">
+                <label>API Key</label>
+                <input type="text" id="cfgKey" placeholder="32-character API Key">
+            </div>
+            <div class="form-group">
+                <label>API Secret</label>
+                <input type="password" id="cfgSecret" placeholder="Your API Secret">
+            </div>
+
+            <button id="btnAuth" class="btn btn-primary">Save & Authenticate</button>
+        </div>
+
+        <div id="appSection" class="hidden">
+            <div class="card">
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>Artist</label>
+                        <input type="text" id="inArtist" placeholder="e.g. Iron Maiden">
+                    </div>
+                    <div class="form-group">
+                        <label>Album</label>
+                        <input type="text" id="inAlbum" placeholder="e.g. The Number of the Beast">
+                    </div>
+                </div>
+                <button id="btnSearch" class="btn btn-primary">🔍 Search Album</button>
+            </div>
+
+            <div id="resultsArea">
+                <div class="album-header">
+                    <img id="resCover" class="album-cover"
+                        src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Cover">
+                    <div class="album-info">
+                        <div id="resTitle" class="album-title">Album Title</div>
+                        <div id="resArtist" class="album-artist">Artist Name</div>
+                    </div>
+                </div>
+
+                <div class="list-actions">
+                    <label class="select-all-wrap">
+                        <input type="checkbox" id="chkSelectAll" class="track-checkbox" checked>
+                        Select All Tracks
+                    </label>
+                </div>
+
+                <ul id="trackList" class="tracklist">
+                </ul>
+
+                <button id="btnScrobble" class="btn btn-primary">🚀 Scrobble Selected</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- CONSTANTS & STATE ---
+        const API_ROOT = 'https://ws.audioscrobbler.com/2.0/';
+        let currentTracks = [];
+        let config = { user: '', key: '', secret: '', sk: '' };
+
+        // --- DOM ELEMENTS ---
+        const themeSelector = document.getElementById('themeSelector');
+        const notification = document.getElementById('notification');
+        const settingsSection = document.getElementById('settingsSection');
+        const appSection = document.getElementById('appSection');
+        const btnToggleSettings = document.getElementById('btnToggleSettings');
+
+        // Settings Inputs
+        const cfgUser = document.getElementById('cfgUser');
+        const cfgPass = document.getElementById('cfgPass');
+        const cfgKey = document.getElementById('cfgKey');
+        const cfgSecret = document.getElementById('cfgSecret');
+        const btnAuth = document.getElementById('btnAuth');
+
+        // App Inputs
+        const inArtist = document.getElementById('inArtist');
+        const inAlbum = document.getElementById('inAlbum');
+        const btnSearch = document.getElementById('btnSearch');
+
+        // Results
+        const resultsArea = document.getElementById('resultsArea');
+        const resCover = document.getElementById('resCover');
+        const resTitle = document.getElementById('resTitle');
+        const resArtist = document.getElementById('resArtist');
+        const trackList = document.getElementById('trackList');
+        const chkSelectAll = document.getElementById('chkSelectAll');
+        const btnScrobble = document.getElementById('btnScrobble');
+
+        // --- THEME MANAGEMENT ---
+        function changeTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('iarann-theme', theme);
+            themeSelector.value = theme;
+        }
+        themeSelector.addEventListener('change', (e) => changeTheme(e.target.value));
+
+        // --- UTILITIES ---
+        function showNotif(msg, type) {
+            notification.className = `notification notif-${type}`;
+            notification.innerHTML = msg;
+            notification.style.display = 'block';
+            if (type !== 'error') setTimeout(() => notification.style.display = 'none', 5000);
+        }
+
+        function formatTime(seconds) {
+            if (!seconds || seconds === 0) return "--:--";
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        // --- LAST.FM API CORE ---
+        function generateSignature(params, secret) {
+            const keys = Object.keys(params).sort();
+            let sigString = '';
+            for (const key of keys) {
+                if (key !== 'format' && key !== 'callback') {
+                    sigString += key + params[key];
+                }
+            }
+            sigString += secret;
+            return md5(sigString);
+        }
+
+        async function apiCall(method, params, requiresAuth = false, isPost = false) {
+            params.method = method;
+            params.api_key = config.key;
+
+            if (requiresAuth) {
+                params.sk = config.sk;
+                params.api_sig = generateSignature(params, config.secret);
+            }
+            params.format = 'json';
+
+            const urlParams = new URLSearchParams();
+            for (const key in params) {
+                urlParams.append(key, params[key]);
+            }
+
+            const fetchOptions = {
+                method: isPost ? 'POST' : 'GET',
+                headers: isPost ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}
+            };
+
+            const url = isPost ? API_ROOT : `${API_ROOT}?${urlParams.toString()}`;
+            if (isPost) fetchOptions.body = urlParams.toString();
+
+            try {
+                const response = await fetch(url, fetchOptions);
+                const data = await response.json();
+                if (data.error) throw new Error(data.message || `API Error ${data.error}`);
+                return data;
+            } catch (err) {
+                throw err;
+            }
+        }
+
+        // --- AUTHENTICATION ---
+        btnAuth.addEventListener('click', async () => {
+            const user = cfgUser.value.trim();
+            const pass = cfgPass.value.trim();
+            const key = cfgKey.value.trim();
+            const secret = cfgSecret.value.trim();
+
+            if (!user || !pass || !key || !secret) {
+                showNotif("All fields are required to authenticate.", "error");
+                return;
+            }
+
+            btnAuth.disabled = true;
+            btnAuth.innerText = "Authenticating...";
+
+            try {
+                // To get session, signature needs standard params + username + password
+                const authParams = {
+                    method: 'auth.getMobileSession',
+                    username: user,
+                    password: pass,
+                    api_key: key
+                };
+                authParams.api_sig = generateSignature(authParams, secret);
+                authParams.format = 'json';
+
+                const urlParams = new URLSearchParams(authParams);
+                const response = await fetch(API_ROOT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: urlParams.toString()
+                });
+
+                const data = await response.json();
+                if (data.error) throw new Error(data.message);
+
+                // Save config to local storage (DO NOT save password)
+                config = { user: user, key: key, secret: secret, sk: data.session.key };
+                localStorage.setItem('iarann-lfm-config', JSON.stringify(config));
+
+                cfgPass.value = ''; // Clear password field immediately
+                showNotif("Successfully authenticated!", "success");
+                toggleView(true);
+
+            } catch (err) {
+                showNotif(`Authentication failed: ${err.message}`, "error");
+            } finally {
+                btnAuth.disabled = false;
+                btnAuth.innerText = "Save & Authenticate";
+            }
+        });
+
+        // --- APP LOGIC ---
+        btnSearch.addEventListener('click', async () => {
+            const artist = inArtist.value.trim();
+            const album = inAlbum.value.trim();
+
+            if (!artist || !album) {
+                showNotif("Please enter both Artist and Album.", "error");
+                return;
+            }
+
+            btnSearch.disabled = true;
+            btnSearch.innerText = "Searching...";
+            resultsArea.style.display = 'none';
+
+            try {
+                const data = await apiCall('album.getInfo', { artist: artist, album: album });
+                renderAlbum(data.album);
+            } catch (err) {
+                showNotif(`Album not found: ${err.message}`, "error");
+            } finally {
+                btnSearch.disabled = false;
+                btnSearch.innerText = "🔍 Search Album";
+            }
+        });
+
+        function renderAlbum(albumData) {
+            resTitle.innerText = albumData.name;
+            resArtist.innerText = albumData.artist;
+
+            // Get highest quality image available
+            let imgUrl = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+            if (albumData.image && albumData.image.length > 0) {
+                const bestImg = albumData.image.find(i => i.size === 'extralarge') || albumData.image[albumData.image.length - 1];
+                if (bestImg && bestImg['#text']) imgUrl = bestImg['#text'];
+            }
+            resCover.src = imgUrl;
+
+            // Extract Tracks
+            trackList.innerHTML = '';
+            currentTracks = [];
+
+            let tracks = [];
+            if (albumData.tracks && albumData.tracks.track) {
+                tracks = Array.isArray(albumData.tracks.track) ? albumData.tracks.track : [albumData.tracks.track];
+            }
+
+            if (tracks.length === 0) {
+                showNotif("Album found, but it has no tracklist data in Last.fm.", "info");
+                return;
+            }
+
+            tracks.forEach((t, idx) => {
+                // Fallback duration to 3 minutes (180s) if API doesn't provide it
+                const durStr = t.duration || "180";
+                const durSecs = parseInt(durStr, 10);
+
+                currentTracks.push({
+                    title: t.name,
+                    artist: t.artist ? t.artist.name : albumData.artist,
+                    album: albumData.name,
+                    duration: durSecs
+                });
+
+                const li = document.createElement('li');
+                li.className = 'track-item';
+                li.innerHTML = `
+                    <input type="checkbox" class="track-checkbox" data-idx="${idx}" checked>
+                    <span class="track-title">${idx + 1}. ${t.name}</span>
+                    <span class="track-duration">${formatTime(durSecs)}</span>
+                `;
+                trackList.appendChild(li);
+            });
+
+            chkSelectAll.checked = true;
+            resultsArea.style.display = 'block';
+            notification.style.display = 'none';
+        }
+
+        chkSelectAll.addEventListener('change', (e) => {
+            const boxes = document.querySelectorAll('.track-checkbox');
+            boxes.forEach(b => b.checked = e.target.checked);
+        });
+
+        // Delegate checkbox changes to update "Select All" status
+        trackList.addEventListener('change', (e) => {
+            if (e.target.classList.contains('track-checkbox')) {
+                const allBoxes = document.querySelectorAll('.track-checkbox');
+                const checkedBoxes = document.querySelectorAll('.track-checkbox:checked');
+                chkSelectAll.checked = allBoxes.length === checkedBoxes.length;
+            }
+        });
+
+        btnScrobble.addEventListener('click', async () => {
+            const checkedBoxes = document.querySelectorAll('.track-checkbox:checked');
+            if (checkedBoxes.length === 0) {
+                showNotif("No tracks selected to scrobble.", "error");
+                return;
+            }
+
+            btnScrobble.disabled = true;
+            btnScrobble.innerText = "Scrobbling...";
+
+            // Gather selected tracks
+            const selectedTracks = [];
+            checkedBoxes.forEach(box => {
+                selectedTracks.push(currentTracks[box.dataset.idx]);
+            });
+
+            // Calculate historical timestamps based on total duration
+            const totalDuration = selectedTracks.reduce((acc, t) => acc + t.duration, 0);
+            let currentTimestamp = Math.floor(Date.now() / 1000) - totalDuration;
+
+            // Prepare batch params (Last.fm allows up to 50 tracks per request)
+            const params = {};
+            selectedTracks.forEach((t, i) => {
+                params[`artist[${i}]`] = t.artist;
+                params[`track[${i}]`] = t.title;
+                params[`album[${i}]`] = t.album;
+                params[`timestamp[${i}]`] = currentTimestamp;
+                currentTimestamp += t.duration; // advance time for next track
+            });
+
+            try {
+                await apiCall('track.scrobble', params, true, true);
+                showNotif(`Successfully scrobbled ${selectedTracks.length} tracks!`, "success");
+                // Uncheck all after success to prevent accidental double-scrobble
+                document.querySelectorAll('.track-checkbox').forEach(b => b.checked = false);
+                chkSelectAll.checked = false;
+            } catch (err) {
+                showNotif(`Scrobble error: ${err.message}`, "error");
+            } finally {
+                btnScrobble.disabled = false;
+                btnScrobble.innerText = "🚀 Scrobble Selected";
+            }
+        });
+
+        // --- INIT & NAVIGATION ---
+        function toggleView(appReady) {
+            if (appReady) {
+                settingsSection.classList.add('hidden');
+                appSection.classList.remove('hidden');
+                btnToggleSettings.style.display = 'block';
+            } else {
+                settingsSection.classList.remove('hidden');
+                appSection.classList.add('hidden');
+                btnToggleSettings.style.display = 'none';
+            }
+        }
+
+        btnToggleSettings.addEventListener('click', () => {
+            // Fill existing config (except password)
+            cfgUser.value = config.user;
+            cfgKey.value = config.key;
+            cfgSecret.value = config.secret;
+            cfgPass.value = '';
+            toggleView(false);
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Load Theme
+            const savedTheme = localStorage.getItem('iarann-theme') || 'dark';
+            changeTheme(savedTheme);
+
+            // Load Config
+            const savedConfig = localStorage.getItem('iarann-lfm-config');
+            if (savedConfig) {
+                try {
+                    config = JSON.parse(savedConfig);
+                    if (config.sk && config.key) {
+                        toggleView(true);
+                        return;
+                    }
+                } catch (e) { console.error("Error parsing config", e); }
+            }
+            // If no valid config, show settings
+            toggleView(false);
+        });
+    </script>
+</body>
+
+</html>
