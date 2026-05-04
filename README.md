@@ -217,8 +217,10 @@
                 <div class="app-icon">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2a10 10 0 0 1 10 10c0 1.1-.9 2-2 2h-2.15a1 1 0 0 0-.8.4 1 1 0 0 0-.2.83 1.5 1.5 0 0 1-1.45 1.77H12"></path>
+                        <circle cx="7.5" cy="10.5" r=".5" fill="currentColor"></circle>
+                        <circle cx="12" cy="7" r=".5" fill="currentColor"></circle>
+                        <circle cx="16.5" cy="10.5" r=".5" fill="currentColor"></circle>
                     </svg>
                 </div>
                 <div class="app-content">
