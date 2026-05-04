@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IARANN | Lastfm Collage Maker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@300;500;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-light: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #ef4444;
+            --accent-hover: #dc2626;
+            --border: rgba(255, 255, 255, 0.1);
+            --font-header: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius: 12px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        header {
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: var(--font-header);
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-weight: 600;
+        }
+
+        h1 span {
+            font-weight: 300;
+            color: var(--text-muted);
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-family: var(--font-header);
+            cursor: pointer;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            color: #fff;
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Panels */
+        .panel {
+            display: none;
+            background: var(--surface);
+            padding: clamp(1rem, 5vw, 2rem);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* Form Layouts */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        input,
+        select {
+            padding: 0.8rem;
+            background: var(--bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: var(--font-body);
+            outline: none;
+            width: 100%;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--accent);
+        }
+
+        /* Checkbox Style */
+        .checkbox-group {
+            flex-direction: row;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-group input {
+            width: auto;
+            margin-right: 0.5rem;
+            accent-color: var(--accent);
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        /* Grid results & selection */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .img-card {
+            cursor: pointer;
+            position: relative;
+            aspect-ratio: 1;
+            background: var(--bg);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+
+        .img-card:hover {
+            transform: scale(1.05);
+        }
+
+        .img-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .img-card .remove-tag {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 10px;
+        }
+
+        /* Roulette Game */
+        .roulette-container {
+            text-align: center;
+        }
+
+        .roulette-image {
+            width: 100%;
+            max-width: 350px;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: var(--radius);
+            border: 4px solid var(--border);
+            margin: 1.5rem auto;
+            display: block;
+            background: var(--bg);
+        }
+
+        .roulette-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Output Area */
+        #outputArea {
+            margin-top: 2rem;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        #collageResult {
+            max-width: 100%;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        /* Media Queries */
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>IARANN <span>| Collage Designer</span></h1>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-target="tab-settings">Settings</button>
+            <button class="tab-btn" data-target="tab-top">Top Albums</button>
+            <button class="tab-btn" data-target="tab-custom">Custom Composition</button>
+            <button class="tab-btn" data-target="tab-roulette">Smart Roulette</button>
+        </div>
+
+        <div id="notif" class="notification"></div>
+
+        <div id="tab-settings" class="panel active">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Last.fm Username</label>
+                    <input type="text" id="cfgUser" placeholder="Username">
+                </div>
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="text" id="cfgKey" placeholder="32-char key">
+                </div>
+            </div>
+            <button id="btnSaveConfig" class="btn">Save Configuration</button>
+        </div>
+
+        <div id="tab-top" class="panel">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Time Period</label>
+                    <select id="topPeriod">
+                        <option value="7day">7 Days</option>
+                        <option value="1month">30 Days</option>
+                        <option value="3month">3 Months</option>
+                        <option value="6month">6 Months</option>
+                        <option value="12month">1 Year</option>
+                        <option value="overall">Overall</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Columns</label>
+                    <input type="number" id="topCols" value="3" min="2" max="10">
+                </div>
+                <div class="form-group">
+                    <label>Rows</label>
+                    <input type="number" id="topRows" value="3" min="2" max="10">
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="chkSkipNoCover" checked>
+                    <label for="chkSkipNoCover" style="cursor: pointer;">Skip albums without cover</label>
+                </div>
+            </div>
+            <button id="btnGenTop" class="btn">Generate Top Collage</button>
+        </div>
+
+        <div id="tab-custom" class="panel">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Grid Size</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="number" id="custCols" value="3" min="2" max="10">
+                        <input type="number" id="custRows" value="3" min="2" max="10">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Search Album</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="custSearch" placeholder="Album title...">
+                        <button id="btnSearchCust" class="btn btn-outline">Search</button>
+                    </div>
+                </div>
+            </div>
+
+            <label>Search Results (Click to add)</label>
+            <div id="searchResults" class="image-grid"
+                style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border); padding: 10px; border-radius: 8px;">
+            </div>
+
+            <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <label>Your Selection (<span id="custCount">0</span> / <span id="custMax">9</span>)</label>
+                    <button id="btnGenCustom" class="btn" disabled>Generate Collage</button>
+                </div>
+                <div id="selectedContainer" class="image-grid"></div>
+            </div>
+        </div>
+
+        <div id="tab-roulette" class="panel">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Grid Columns</label>
+                    <input type="number" id="roulCols" value="4" min="2" max="8">
+                </div>
+                <div class="form-group">
+                    <label>Grid Rows</label>
+                    <input type="number" id="roulRows" value="4" min="2" max="8">
+                </div>
+                <div class="form-group">
+                    <label>Source</label>
+                    <select id="roulPeriod">
+                        <option value="1month">Active recently</option>
+                        <option value="overall">All time favorites</option>
+                    </select>
+                </div>
+            </div>
+            <div style="text-align: center;"><button id="btnStartRoulette" class="btn">Start Roulette Session</button>
+            </div>
+
+            <div id="rouletteGame" class="roulette-container" style="display: none; margin-top: 2rem;">
+                <div class="roulette-info">
+                    <h3 id="roulTitle" style="font-family: var(--font-header);">Album Name</h3>
+                    <p id="roulSub" style="color: var(--text-muted);">Artist Name</p>
+                </div>
+                <img id="roulImg" class="roulette-image" src="" alt="Album">
+                <div class="roulette-actions">
+                    <button id="btnRoulSkip" class="btn btn-outline">Discard</button>
+                    <button id="btnRoulAdd" class="btn">Add to Grid</button>
+                </div>
+                <p style="margin-top: 1rem; font-weight: 600;">Filled: <span id="roulProg">0</span> / <span
+                        id="roulTotal">16</span></p>
+            </div>
+        </div>
+
+        <div id="outputArea">
+            <img id="collageResult" src="" alt="Result">
+            <div style="display: flex; gap: 1rem; width: 100%; justify-content: center;">
+                <a id="btnDownload" class="btn" download="iarann_collage.png"
+                    style="flex: 1; max-width: 300px;">Download PNG</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_ROOT = 'https://ws.audioscrobbler.com/2.0/';
+        let config = { user: '', key: '' };
+
+        // State
+        let customItems = [];
+        let rouletteSelected = [];
+        let roulettePool = [];
+        let roulTargetCount = 16;
+
+        // --- UTILS ---
+        function notify(msg, type = 'success') {
+            const n = document.getElementById('notif');
+            n.innerText = msg;
+            n.style.background = type === 'success' ? '#10b981' : '#ef4444';
+            n.style.display = 'block';
+            setTimeout(() => n.style.display = 'none', 4000);
+        }
+
+        async function apiCall(method, params) {
+            if (!config.key) throw new Error("API Key not set");
+            params.method = method;
+            params.api_key = config.key;
+            params.format = 'json';
+            const url = `${API_ROOT}?${new URLSearchParams(params)}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.error) throw new Error(data.message);
+            return data;
+        }
+
+        // --- CANVAS ENGINE ---
+        async function buildCollage(urls, cols, rows) {
+            const TILE = 300;
+            const canvas = document.createElement('canvas');
+            canvas.width = cols * TILE;
+            canvas.height = rows * TILE;
+            const ctx = canvas.getContext('2d');
+
+            const load = (u) => new Promise(r => {
+                const i = new Image();
+                i.crossOrigin = 'anonymous';
+                i.onload = () => r(i);
+                i.onerror = () => r(null);
+                i.src = u;
+            });
+
+            for (let i = 0; i < (cols * rows); i++) {
+                const x = (i % cols) * TILE;
+                const y = Math.floor(i / cols) * TILE;
+                ctx.fillStyle = '#111';
+                ctx.fillRect(x, y, TILE, TILE);
+
+                if (urls[i]) {
+                    const img = await load(urls[i]);
+                    if (img) ctx.drawImage(img, 0, 0, img.width, img.height, x, y, TILE, TILE);
+                }
+            }
+            return canvas.toDataURL('image/png');
+        }
+
+        function displayResult(dataUrl) {
+            const area = document.getElementById('outputArea');
+            document.getElementById('collageResult').src = dataUrl;
+            document.getElementById('btnDownload').href = dataUrl;
+            area.style.display = 'flex';
+            area.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- TABS ---
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            b.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn, .panel').forEach(el => el.classList.remove('active'));
+                b.classList.add('active');
+                document.getElementById(b.dataset.target).classList.add('active');
+                document.getElementById('outputArea').style.display = 'none';
+            });
+        });
+
+        // --- INIT ---
+        window.onload = () => {
+            const saved = localStorage.getItem('iarann-collage-cfg');
+            if (saved) {
+                config = JSON.parse(saved);
+                document.getElementById('cfgUser').value = config.user;
+                document.getElementById('cfgKey').value = config.key;
+            }
+        };
+
+        document.getElementById('btnSaveConfig').addEventListener('click', () => {
+            config.user = document.getElementById('cfgUser').value.trim();
+            config.key = document.getElementById('cfgKey').value.trim();
+            localStorage.setItem('iarann-collage-cfg', JSON.stringify(config));
+            notify("Config saved!");
+        });
+
+        // --- TOP GRID LOGIC ---
+        document.getElementById('btnGenTop').addEventListener('click', async (e) => {
+            const btn = e.target;
+            const cols = parseInt(document.getElementById('topCols').value);
+            const rows = parseInt(document.getElementById('topRows').value);
+            const skip = document.getElementById('chkSkipNoCover').checked;
+            const target = cols * rows;
+
+            btn.disabled = true; btn.innerText = "Processing...";
+            try {
+                // Fetch more than needed if skipping blanks
+                const data = await apiCall('user.getTopAlbums', {
+                    user: config.user,
+                    period: document.getElementById('topPeriod').value,
+                    limit: skip ? 100 : target
+                });
+
+                let albums = data.topalbums.album;
+                let urls = [];
+
+                for (let al of albums) {
+                    const img = al.image.find(i => i.size === 'extralarge') || al.image[al.image.length - 1];
+                    const url = img ? img['#text'] : '';
+
+                    if (skip && (!url || url.includes('2a96ace'))) continue; // Lastfm default blank
+                    urls.push(url);
+                    if (urls.length === target) break;
+                }
+
+                const res = await buildCollage(urls, cols, rows);
+                displayResult(res);
+            } catch (err) { notify(err.message, 'error'); }
+            finally { btn.disabled = false; btn.innerText = "Generate Top Collage"; }
+        });
+
+        // --- CUSTOM LOGIC ---
+        const updateCustMax = () => {
+            const m = parseInt(document.getElementById('custCols').value) * parseInt(document.getElementById('custRows').value);
+            document.getElementById('custMax').innerText = m;
+            document.getElementById('btnGenCustom').disabled = customItems.length !== m;
+            return m;
+        };
+        document.getElementById('custCols').onchange = updateCustMax;
+        document.getElementById('custRows').onchange = updateCustMax;
+
+        document.getElementById('btnSearchCust').onclick = async () => {
+            const q = document.getElementById('custSearch').value;
+            const resDiv = document.getElementById('searchResults');
+            resDiv.innerHTML = 'Searching...';
+            try {
+                const data = await apiCall('album.search', { album: q, limit: 15 });
+                resDiv.innerHTML = '';
+                data.results.albummatches.album.forEach(al => {
+                    const img = al.image.find(i => i.size === 'extralarge')?.['#text'];
+                    if (!img) return;
+                    const d = document.createElement('div');
+                    d.className = 'img-card';
+                    d.innerHTML = `<img src="${img}">`;
+                    d.onclick = () => {
+                        if (customItems.length < updateCustMax()) {
+                            customItems.push(img);
+                            renderCustom();
+                        }
+                    };
+                    resDiv.appendChild(d);
+                });
+            } catch (e) { resDiv.innerHTML = 'Error.'; }
+        };
+
+        function renderCustom() {
+            const cont = document.getElementById('selectedContainer');
+            cont.innerHTML = '';
+            customItems.forEach((url, i) => {
+                const d = document.createElement('div');
+                d.className = 'img-card';
+                d.innerHTML = `<img src="${url}"><button class="remove-tag" onclick="event.stopPropagation(); customItems.splice(${i},1); renderCustom();">✕</button>`;
+                cont.appendChild(d);
+            });
+            document.getElementById('custCount').innerText = customItems.length;
+            updateCustMax();
+        }
+
+        document.getElementById('btnGenCustom').onclick = async () => {
+            const url = await buildCollage(customItems, parseInt(document.getElementById('custCols').value), parseInt(document.getElementById('custRows').value));
+            displayResult(url);
+        };
+
+        // --- ROULETTE LOGIC ---
+        document.getElementById('btnStartRoulette').onclick = async () => {
+            const c = parseInt(document.getElementById('roulCols').value);
+            const r = parseInt(document.getElementById('roulRows').value);
+            roulTargetCount = c * r;
+            document.getElementById('roulTotal').innerText = roulTargetCount;
+
+            try {
+                const data = await apiCall('user.getTopArtists', { user: config.user, period: document.getElementById('roulPeriod').value, limit: 100 });
+                roulettePool = data.topartists.artist.sort(() => Math.random() - 0.5);
+                rouletteSelected = [];
+                document.getElementById('rouletteGame').style.display = 'block';
+                document.getElementById('roulProg').innerText = '0';
+                nextRoulette();
+            } catch (e) { notify("Error starting roulette", 'error'); }
+        };
+
+        async function nextRoulette() {
+            if (roulettePool.length === 0) return notify("Pool empty!");
+            const artist = roulettePool.pop();
+            try {
+                const data = await apiCall('artist.getTopAlbums', { artist: artist.name, limit: 5 });
+                const albums = data.topalbums.album.filter(a => a.image[3]['#text'] !== '');
+                if (albums.length === 0) return nextRoulette();
+
+                const pick = albums[Math.floor(Math.random() * albums.length)];
+                document.getElementById('roulImg').src = pick.image[3]['#text'];
+                document.getElementById('roulTitle').innerText = pick.name;
+                document.getElementById('roulSub').innerText = artist.name;
+            } catch (e) { nextRoulette(); }
+        }
+
+        document.getElementById('btnRoulSkip').onclick = nextRoulette;
+        document.getElementById('btnRoulAdd').onclick = async () => {
+            rouletteSelected.push(document.getElementById('roulImg').src);
+            document.getElementById('roulProg').innerText = rouletteSelected.length;
+            if (rouletteSelected.length === roulTargetCount) {
+                document.getElementById('rouletteGame').style.display = 'none';
+                const url = await buildCollage(rouletteSelected, parseInt(document.getElementById('roulCols').value), parseInt(document.getElementById('roulRows').value));
+                displayResult(url);
+            } else {
+                nextRoulette();
+            }
+        };
+
+    </script>
+</body>
+
+</html>
