@@ -213,6 +213,25 @@
 
         <div class="section-title">Tools & Utilities</div>
         <div class="app-list">
+            <a href="./dathail/" target="_blank" class="app-item">
+                <div class="app-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                </div>
+                <div class="app-content">
+                    <h4>Dathail</h4>
+                    <p>Minimalist color palette generator for crafting harmonious and accessible design schemes.</p>
+                </div>
+                <div class="chevron">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6" />
+                    </svg>
+                </div>
+            </a>
+            
             <a href="./dictio/" target="_blank" class="app-item">
                 <div class="app-icon">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
@@ -223,7 +242,7 @@
                 </div>
                 <div class="app-content">
                     <h4>Dictio</h4>
-                    <p>Diccionario de inglés con sinónimos y herramientas de escritura.</p>
+                    <p>An English dictionary with synonyms and writing tools.</p>
                 </div>
                 <div class="chevron">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
