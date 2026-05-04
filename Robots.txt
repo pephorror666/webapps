@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://pephorror666.github.io/webapps/sitemap.xml
