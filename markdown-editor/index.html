@@ -1,59 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown Studio</title>
+    <title>Markdown Studio | IARANN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Silkscreen&display=swap" rel="stylesheet">
     <style>
         /* Base Variables & Reset */
         :root {
             --bg-color: #f5f5f5;
             --surface: #ffffff;
             --text: #333333;
+            --text-muted: #666666;
             --border: #cccccc;
             --primary: #0078d7;
             --primary-hover: #005a9e;
             --toolbar-bg: #e1e1e1;
-            --font-ui: system-ui, -apple-system, sans-serif;
+            --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
             --font-mono: 'Courier New', Courier, monospace;
+            --glass-blur: 0px;
+            --radius: 4px;
         }
 
-        /* Dark Theme Variables */
+        /* Dark Theme */
         body.theme-dark {
-            --bg-color: #1e1e1e;
-            --surface: #2d2d2d;
-            --text: #d4d4d4;
-            --border: #444444;
-            --primary: #0e639c;
-            --primary-hover: #1177bb;
-            --toolbar-bg: #333333;
+            --bg-color: #111827;
+            --surface: #1f2937;
+            --text: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #374151;
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --toolbar-bg: #111827;
         }
 
-        /* Mac OS Classic Theme Variables */
+        /* Mac OS Glass Theme */
         body.theme-macos {
-            --bg-color: #cccccc; /* pinstripe effect later */
+            --bg-color: #f5f5f7;
+            --surface: rgba(255, 255, 255, 0.7);
+            --text: #1d1d1f;
+            --text-muted: #86868b;
+            --border: rgba(0, 0, 0, 0.1);
+            --primary: #0071e3;
+            --primary-hover: #0077ed;
+            --toolbar-bg: rgba(245, 245, 247, 0.8);
+            --glass-blur: 20px;
+            --radius: 12px;
+            background-image: radial-gradient(circle at 20% 20%, #e3e3e3 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, #d2d2d2 0%, transparent 40%);
+        }
+
+        /* Pixel Art Theme */
+        body.theme-pixel {
+            --bg-color: #000;
+            --surface: #000;
+            --text: #00ff00;
+            --text-muted: #008f11;
+            --border: #00ff00;
+            --primary: #ffff00;
+            --primary-hover: #ffffff;
+            --toolbar-bg: #000;
+            --font-ui: 'Silkscreen', cursive;
+            --radius: 0px;
+        }
+
+        /* Nature Theme */
+        body.theme-nature {
+            --bg-color: #f1f8e9;
             --surface: #ffffff;
-            --text: #000000;
-            --border: #000000;
-            --primary: #666666;
-            --primary-hover: #333333;
-            --toolbar-bg: #ffffff;
-            --font-ui: "Geneva", "Chicago", sans-serif;
+            --text: #2e7d32;
+            --text-muted: #689f38;
+            --border: rgba(46, 125, 50, 0.2);
+            --primary: #1b5e20;
+            --primary-hover: #388e3c;
+            --toolbar-bg: #e8f5e9;
         }
 
-        body.theme-macos {
-            background-image: repeating-linear-gradient(0deg, transparent, transparent 1px, #fff 1px, #fff 2px);
-            background-size: 100% 2px;
-            background-color: #dfdfdf;
-        }
-        
-        body.theme-macos .app-container {
-            border: 2px solid #000;
-            box-shadow: 2px 2px 0px #000;
+        /* Pride Theme */
+        body.theme-pride {
+            --bg-color: #fff;
+            --surface: #fff;
+            --text: #2d3436;
+            --text-muted: #636e72;
+            --border: #dfe6e9;
+            --primary: #d63031;
+            --primary-hover: #e17055;
+            --toolbar-bg: #f5f5f5;
+            --rainbow-border: linear-gradient(90deg, #FF0018, #FFA52C, #FFFF41, #008018, #0000F9, #86007D);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: var(--font-ui);
             background-color: var(--bg-color);
@@ -62,7 +106,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background 0.3s, color 0.3s;
         }
 
         .app-container {
@@ -80,6 +124,13 @@
             display: flex;
             gap: 15px;
             font-size: 14px;
+            z-index: 1000;
+            backdrop-filter: blur(var(--glass-blur));
+        }
+
+        body.theme-pride .menubar {
+            border-bottom: 3px solid;
+            border-image: var(--rainbow-border) 1;
         }
 
         .menu-item {
@@ -87,10 +138,13 @@
             cursor: pointer;
             padding: 5px 8px;
             user-select: none;
+            border-radius: var(--radius);
         }
-        
-        .menu-item:hover { background-color: var(--toolbar-bg); border-radius: 4px; }
-        
+
+        .menu-item:hover {
+            background-color: var(--toolbar-bg);
+        }
+
         .dropdown {
             display: none;
             position: absolute;
@@ -98,20 +152,33 @@
             left: 0;
             background: var(--surface);
             border: 1px solid var(--border);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             min-width: 180px;
             z-index: 1000;
+            border-radius: var(--radius);
+            backdrop-filter: blur(var(--glass-blur));
         }
-        
-        .menu-item:hover .dropdown { display: block; }
-        
+
+        .menu-item:hover .dropdown {
+            display: block;
+        }
+
         .dropdown-item {
             padding: 8px 15px;
             display: flex;
             justify-content: space-between;
+            color: var(--text);
         }
-        .dropdown-item:hover { background-color: var(--toolbar-bg); }
-        .shortcut-hint { color: gray; font-size: 12px; }
+
+        .dropdown-item:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .shortcut-hint {
+            opacity: 0.6;
+            font-size: 12px;
+        }
 
         /* Toolbar */
         .toolbar {
@@ -122,6 +189,7 @@
             gap: 5px;
             flex-wrap: wrap;
             align-items: center;
+            backdrop-filter: blur(var(--glass-blur));
         }
 
         .tool-btn {
@@ -130,7 +198,7 @@
             color: var(--text);
             cursor: pointer;
             padding: 4px;
-            border-radius: 4px;
+            border-radius: var(--radius);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -139,9 +207,22 @@
             transition: background 0.2s;
         }
 
-        .tool-btn:hover { background-color: var(--border); }
-        .tool-btn svg { fill: currentColor; width: 18px; height: 18px; }
-        .separator { width: 1px; height: 24px; background: var(--border); margin: 0 5px; }
+        .tool-btn:hover {
+            background-color: var(--border);
+        }
+
+        .tool-btn svg {
+            fill: currentColor;
+            width: 18px;
+            height: 18px;
+        }
+
+        .separator {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+            margin: 0 5px;
+        }
 
         /* Main Workspace */
         .workspace {
@@ -151,7 +232,8 @@
             background: var(--bg-color);
         }
 
-        .editor-container, .preview-container {
+        .editor-container,
+        .preview-container {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -160,8 +242,14 @@
             border-right: 1px solid var(--border);
         }
 
-        .view-hidden { display: none !important; }
-        .view-full { width: 100% !important; flex: none; }
+        .view-hidden {
+            display: none !important;
+        }
+
+        .view-full {
+            width: 100% !important;
+            flex: none;
+        }
 
         textarea#editor {
             flex: 1;
@@ -192,14 +280,60 @@
             margin: 0 auto;
             width: 100%;
         }
-        #preview h1, #preview h2, #preview h3 { border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-top: 1em; margin-bottom: 0.5em;}
-        #preview pre { background: var(--toolbar-bg); padding: 10px; border-radius: 5px; overflow-x: auto; }
-        #preview code { font-family: var(--font-mono); background: var(--toolbar-bg); padding: 2px 4px; border-radius: 3px; }
-        #preview blockquote { border-left: 4px solid var(--primary); padding-left: 10px; color: gray; margin: 10px 0; }
-        #preview table { border-collapse: collapse; width: 100%; margin: 10px 0; }
-        #preview th, #preview td { border: 1px solid var(--border); padding: 8px; text-align: left; }
-        #preview img { max-width: 100%; height: auto; }
-        #preview ul, #preview ol { padding-left: 20px; margin-bottom: 10px; }
+
+        #preview h1,
+        #preview h2,
+        #preview h3 {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+        }
+
+        #preview pre {
+            background: var(--toolbar-bg);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        #preview code {
+            font-family: var(--font-mono);
+            background: var(--toolbar-bg);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        #preview blockquote {
+            border-left: 4px solid var(--primary);
+            padding-left: 10px;
+            color: var(--text-muted);
+            margin: 10px 0;
+        }
+
+        #preview table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        #preview th,
+        #preview td {
+            border: 1px solid var(--border);
+            padding: 8px;
+            text-align: left;
+        }
+
+        #preview img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        #preview ul,
+        #preview ol {
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
 
         /* Status Bar */
         .statusbar {
@@ -209,6 +343,7 @@
             font-size: 12px;
             display: flex;
             justify-content: space-between;
+            color: var(--text-muted);
         }
 
         /* Modals */
@@ -221,520 +356,654 @@
             padding: 20px;
             max-width: 600px;
             width: 90%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
-        dialog::backdrop { background: rgba(0,0,0,0.5); }
-        .dialog-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; }
-        .close-btn { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text); }
-        
+
+        dialog::backdrop {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text);
+        }
+
         /* Print Styles */
         @media print {
-            .menubar, .toolbar, .statusbar, .editor-container { display: none !important; }
-            .workspace, .preview-container { border: none; height: auto; overflow: visible; display: block; width: 100%; background: white; color: black; }
-            #preview { max-width: 100%; }
+
+            .menubar,
+            .toolbar,
+            .statusbar,
+            .editor-container {
+                display: none !important;
+            }
+
+            .workspace,
+            .preview-container {
+                border: none;
+                height: auto;
+                overflow: visible;
+                display: block;
+                width: 100%;
+                background: white;
+                color: black;
+            }
+
+            #preview {
+                max-width: 100%;
+            }
         }
 
         /* Utilities */
         .toast {
-            position: fixed; bottom: 40px; right: 20px; background: var(--primary); color: white;
-            padding: 10px 20px; border-radius: 4px; opacity: 0; transition: opacity 0.3s; pointer-events: none;
+            position: fixed;
+            bottom: 40px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
             z-index: 2000;
         }
-        .toast.show { opacity: 1; }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .menubar {
+                overflow-x: auto;
+                white-space: nowrap;
+                display: block;
+            }
+
+            .menu-item {
+                display: inline-block;
+            }
+
+            .toolbar {
+                padding: 10px;
+                gap: 8px;
+                justify-content: center;
+            }
+
+            .tool-btn {
+                width: 36px;
+                height: 36px;
+            }
+
+            .workspace {
+                flex-direction: column;
+            }
+
+            .editor-container,
+            .preview-container {
+                width: 100% !important;
+                border-right: none;
+            }
+
+            .menu-item .dropdown div[onclick*="setView('split')"] {
+                display: none;
+            }
+
+            .statusbar {
+                flex-direction: column;
+                gap: 4px;
+                padding: 10px;
+                height: auto;
+            }
+        }
     </style>
     <link id="win98-css" rel="stylesheet" href="" disabled>
 </head>
+
 <body>
 
-<div class="app-container" id="app">
-    <nav class="menubar">
-        <div class="menu-item">File
-            <div class="dropdown">
-                <div class="dropdown-item" onclick="app.file.openLocal()">Open File... <span class="shortcut-hint"></span></div>
-                <div class="dropdown-item" onclick="app.file.openUrl()">Open from URL... <span class="shortcut-hint"></span></div>
-                <hr style="border:0; border-top:1px solid var(--border); margin:5px 0;">
-                <div class="dropdown-item" onclick="app.file.saveMd()">Save (.md) <span class="shortcut-hint">Ctrl+S</span></div>
-                <div class="dropdown-item" onclick="app.file.saveHtml()">Export (.html) <span class="shortcut-hint"></span></div>
-                <div class="dropdown-item" onclick="app.file.exportPdf()">Print / PDF <span class="shortcut-hint">Ctrl+P</span></div>
-                <hr style="border:0; border-top:1px solid var(--border); margin:5px 0;">
-                <div class="dropdown-item" onclick="app.storage.clear()">Clear Autosave <span class="shortcut-hint"></span></div>
+    <div class="app-container" id="app">
+        <nav class="menubar">
+            <div class="menu-item">File
+                <div class="dropdown">
+                    <div class="dropdown-item" onclick="app.file.openLocal()">Open File... <span class="shortcut-hint"></span></div>
+                    <div class="dropdown-item" onclick="app.file.openUrl()">Open from URL... <span class="shortcut-hint"></span></div>
+                    <hr style="border:0; border-top:1px solid var(--border); margin:5px 0;">
+                    <div class="dropdown-item" onclick="app.file.saveMd()">Save (.md) <span class="shortcut-hint">Ctrl+S</span></div>
+                    <div class="dropdown-item" onclick="app.file.saveHtml()">Export (.html) <span class="shortcut-hint"></span></div>
+                    <div class="dropdown-item" onclick="app.file.exportPdf()">Print / PDF <span class="shortcut-hint">Ctrl+P</span></div>
+                    <hr style="border:0; border-top:1px solid var(--border); margin:5px 0;">
+                    <div class="dropdown-item" onclick="app.storage.clear()">Clear Autosave <span class="shortcut-hint"></span></div>
+                </div>
             </div>
-        </div>
-        <div class="menu-item">Edit
-            <div class="dropdown">
-                <div class="dropdown-item" onclick="app.editor.undo()">Undo <span class="shortcut-hint">Ctrl+Z</span></div>
-                <div class="dropdown-item" onclick="app.editor.redo()">Redo <span class="shortcut-hint">Ctrl+Y</span></div>
-                <div class="dropdown-item" onclick="app.editor.searchReplace()">Search & Replace <span class="shortcut-hint">Ctrl+F</span></div>
+            <div class="menu-item">Edit
+                <div class="dropdown">
+                    <div class="dropdown-item" onclick="app.editor.undo()">Undo <span class="shortcut-hint">Ctrl+Z</span></div>
+                    <div class="dropdown-item" onclick="app.editor.redo()">Redo <span class="shortcut-hint">Ctrl+Y</span></div>
+                    <div class="dropdown-item" onclick="app.editor.searchReplace()">Search & Replace <span class="shortcut-hint">Ctrl+F</span></div>
+                </div>
             </div>
-        </div>
-        <div class="menu-item">View
-            <div class="dropdown">
-                <div class="dropdown-item" onclick="app.ui.setView('split')">Split View</div>
-                <div class="dropdown-item" onclick="app.ui.setView('edit')">Editor Only</div>
-                <div class="dropdown-item" onclick="app.ui.setView('preview')">Preview Only</div>
+            <div class="menu-item">View
+                <div class="dropdown">
+                    <div class="dropdown-item" onclick="app.ui.setView('split')">Split View</div>
+                    <div class="dropdown-item" onclick="app.ui.setView('edit')">Editor Only</div>
+                    <div class="dropdown-item" onclick="app.ui.setView('preview')">Preview Only</div>
+                </div>
             </div>
-        </div>
-        <div class="menu-item">Theme
-            <div class="dropdown">
-                <div class="dropdown-item" onclick="app.theme.set('light')">Light</div>
-                <div class="dropdown-item" onclick="app.theme.set('dark')">Dark</div>
-                <div class="dropdown-item" onclick="app.theme.set('macos')">Classic Mac OS</div>
-                <div class="dropdown-item" onclick="app.theme.set('win98')">Windows 98</div>
+            <div class="menu-item">Theme
+                <div class="dropdown">
+                    <div class="dropdown-item" onclick="app.theme.set('light')">Light</div>
+                    <div class="dropdown-item" onclick="app.theme.set('dark')">Dark</div>
+                    <div class="dropdown-item" onclick="app.theme.set('macos')">macGlass</div>
+                    <div class="dropdown-item" onclick="app.theme.set('pixel')">Pixel Art</div>
+                    <div class="dropdown-item" onclick="app.theme.set('nature')">Nature</div>
+                    <div class="dropdown-item" onclick="app.theme.set('pride')">Pride</div>
+                    <div class="dropdown-item" onclick="app.theme.set('win98')">Windows 98</div>
+                </div>
             </div>
-        </div>
-        <div class="menu-item" onclick="document.getElementById('guideModal').showModal()">Help</div>
-    </nav>
+            <div class="menu-item" onclick="document.getElementById('guideModal').showModal()">Help</div>
+        </nav>
 
-    <div class="toolbar">
-        <button class="tool-btn" onclick="app.editor.insert('**', '**')" aria-label="Bold" title="Bold (Ctrl+B)">
-            <svg viewBox="0 0 24 24"><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/></svg>
-        </button>
-        <button class="tool-btn" onclick="app.editor.insert('*', '*')" aria-label="Italic" title="Italic (Ctrl+I)">
-            <svg viewBox="0 0 24 24"><path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z"/></svg>
-        </button>
-        <button class="tool-btn" onclick="app.editor.insert('~~', '~~')" aria-label="Strikethrough" title="Strikethrough">
-            <svg viewBox="0 0 24 24"><path d="M10 19h4v-3h-4v3zM5 4v3h5v3h4V7h5V4H5zM3 14h18v-2H3v2z"/></svg>
-        </button>
-        <div class="separator"></div>
-        <button class="tool-btn" onclick="app.editor.insert('# ', '')" aria-label="Heading" title="Heading">
-            <svg viewBox="0 0 24 24"><path d="M5 4v3h5.5v12h3V7H19V4z"/></svg>
-        </button>
-        <button class="tool-btn" onclick="app.editor.insert('- ', '')" aria-label="Bullet List" title="Bullet List">
-            <svg viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg>
-        </button>
-        <button class="tool-btn" onclick="app.editor.insert('1. ', '')" aria-label="Numbered List" title="Numbered List">
-            <svg viewBox="0 0 24 24"><path d="M2 17h2v.5H3v1h1v.5H2v1h3v-4H2v1zm1-9h1V4H2v1h1v3zm-1 3h1.8L2 13.1v.9h3v-1H3.2L5 10.9V10H2v1zm5-6v2h14V5H7zm0 14h14v-2H7v2zm0-6h14v-2H7v2z"/></svg>
-        </button>
-        <button class="tool-btn" onclick="app.editor.insert('- [ ] ', '')" aria-label="Checklist" title="Checklist">
-            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        </button>
-        <div class="separator"></div>
-        <button class="tool-btn" onclick="app.editor.insert('[', '](url)')" aria-label="Link" title="Link (Ctrl+K)">
-            <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
-        </button>
-        <button class="tool-btn" onclick="app.editor.insert('![alt]', '(url)')" aria-label="Image" title="Insert Image">
-            <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-        </button>
-        <button class="tool-btn" onclick="app.editor.insert('```\n', '\n```')" aria-label="Code Block" title="Code Block">
-            <svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
-        </button>
-        <button class="tool-btn" onclick="app.editor.insertTable()" aria-label="Table" title="Insert Table">
-            <svg viewBox="0 0 24 24"><path d="M20 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 2v3H5V5h15zm-5 14h-5v-9h5v9zM5 10h5v9H5v-9zm10 9v-9h5v9h-5z"/></svg>
-        </button>
-        <button class="tool-btn" onclick="app.editor.insert('> ', '')" aria-label="Quote" title="Blockquote">
-            <svg viewBox="0 0 24 24"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
-        </button>
-        <div class="separator"></div>
-        <button class="tool-btn" onclick="app.ui.toggleView()" aria-label="Toggle Preview" title="Toggle Preview">
-            <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-        </button>
+        <div class="toolbar">
+            <button class="tool-btn" onclick="app.editor.insert('**', '**')" aria-label="Bold" title="Bold (Ctrl+B)">
+                <svg viewBox="0 0 24 24"><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/></svg>
+            </button>
+            <button class="tool-btn" onclick="app.editor.insert('*', '*')" aria-label="Italic" title="Italic (Ctrl+I)">
+                <svg viewBox="0 0 24 24"><path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z"/></svg>
+            </button>
+            <button class="tool-btn" onclick="app.editor.insert('~~', '~~')" aria-label="Strikethrough" title="Strikethrough">
+                <svg viewBox="0 0 24 24"><path d="M10 19h4v-3h-4v3zM5 4v3h5v3h4V7h5V4H5zM3 14h18v-2H3v2z"/></svg>
+            </button>
+            <div class="separator"></div>
+            <button class="tool-btn" onclick="app.editor.insert('# ', '')" aria-label="Heading" title="Heading">
+                <svg viewBox="0 0 24 24"><path d="M5 4v3h5.5v12h3V7H19V4z"/></svg>
+            </button>
+            <button class="tool-btn" onclick="app.editor.insert('- ', '')" aria-label="Bullet List" title="Bullet List">
+                <svg viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg>
+            </button>
+            <button class="tool-btn" onclick="app.editor.insert('1. ', '')" aria-label="Numbered List" title="Numbered List">
+                <svg viewBox="0 0 24 24"><path d="M2 17h2v.5H3v1h1v.5H2v1h3v-4H2v1zm1-9h1V4H2v1h1v3zm-1 3h1.8L2 13.1v.9h3v-1H3.2L5 10.9V10H2v1zm5-6v2h14V5H7zm0 14h14v-2H7v2zm0-6h14v-2H7v2z"/></svg>
+            </button>
+            <button class="tool-btn" onclick="app.editor.insert('- [ ] ', '')" aria-label="Checklist" title="Checklist">
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            </button>
+            <div class="separator"></div>
+            <button class="tool-btn" onclick="app.editor.insert('[', '](url)')" aria-label="Link" title="Link (Ctrl+K)">
+                <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+            </button>
+            <button class="tool-btn" onclick="app.editor.insert('![alt]', '(url)')" aria-label="Image" title="Insert Image">
+                <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            </button>
+            <button class="tool-btn" onclick="app.editor.insert('```\n', '\n```')" aria-label="Code Block" title="Code Block">
+                <svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+            </button>
+            <button class="tool-btn" onclick="app.editor.insertTable()" aria-label="Table" title="Insert Table">
+                <svg viewBox="0 0 24 24"><path d="M20 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 2v3H5V5h15zm-5 14h-5v-9h5v9zM5 10h5v9H5v-9zm10 9v-9h5v9h-5z"/></svg>
+            </button>
+            <button class="tool-btn" onclick="app.editor.insert('> ', '')" aria-label="Quote" title="Blockquote">
+                <svg viewBox="0 0 24 24"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+            </button>
+            <div class="separator"></div>
+            <button class="tool-btn" onclick="app.ui.toggleView()" aria-label="Toggle Preview" title="Toggle Preview">
+                <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </button>
+        </div>
+
+        <main class="workspace">
+            <div class="editor-container" id="editorWrapper">
+                <textarea id="editor" placeholder="Start typing markdown here..."></textarea>
+            </div>
+            <div class="preview-container" id="previewWrapper">
+                <div id="preview"></div>
+            </div>
+        </main>
+
+        <footer class="statusbar">
+            <div>
+                <span id="wordCount">0</span> words | <span id="charCount">0</span> characters
+            </div>
+            <div>
+                <span id="saveStatus">All changes saved locally</span> | Markdown Parser: <span id="parserStatus">Fallback (Offline)</span>
+            </div>
+        </footer>
     </div>
 
-    <main class="workspace">
-        <div class="editor-container" id="editorWrapper">
-            <textarea id="editor" placeholder="Start typing markdown here..."></textarea>
+    <dialog id="guideModal">
+        <div class="dialog-header">
+            <h3>Markdown & Keyboard Shortcuts</h3>
+            <button class="close-btn" onclick="document.getElementById('guideModal').close()">&times;</button>
         </div>
-        <div class="preview-container" id="previewWrapper">
-            <div id="preview"></div>
+        <div style="line-height: 1.5; font-size: 14px; max-height: 60vh; overflow-y: auto;">
+            <h4>Keyboard Shortcuts</h4>
+            <ul>
+                <li><strong>Ctrl+B</strong>: Bold</li>
+                <li><strong>Ctrl+I</strong>: Italic</li>
+                <li><strong>Ctrl+K</strong>: Link</li>
+                <li><strong>Ctrl+S</strong>: Save file (.md)</li>
+                <li><strong>Ctrl+F</strong>: Search & Replace</li>
+                <li><strong>Ctrl+Z</strong> / <strong>Ctrl+Y</strong>: Undo / Redo</li>
+            </ul>
+            <br>
+            <h4>Basic Markdown Syntax</h4>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <th>Element</th>
+                    <th>Syntax</th>
+                </tr>
+                <tr>
+                    <td>Heading</td>
+                    <td># H1 <br>## H2</td>
+                </tr>
+                <tr>
+                    <td>Bold</td>
+                    <td>**text**</td>
+                </tr>
+                <tr>
+                    <td>Italic</td>
+                    <td>*text*</td>
+                </tr>
+                <tr>
+                    <td>Blockquote</td>
+                    <td>> quote</td>
+                </tr>
+                <tr>
+                    <td>Link</td>
+                    <td>[title](https://url.com)</td>
+                </tr>
+                <tr>
+                    <td>Image</td>
+                    <td>![alt](image.jpg)</td>
+                </tr>
+                <tr>
+                    <td>Code</td>
+                    <td>`code` or ```block```</td>
+                </tr>
+                <tr>
+                    <td>List</td>
+                    <td>- item 1<br>- item 2</td>
+                </tr>
+            </table>
         </div>
-    </main>
+    </dialog>
 
-    <footer class="statusbar">
-        <div>
-            <span id="wordCount">0</span> words | <span id="charCount">0</span> characters
-        </div>
-        <div>
-            <span id="saveStatus">All changes saved locally</span> | Markdown Parser: <span id="parserStatus">Fallback (Offline)</span>
-        </div>
-    </footer>
-</div>
+    <div id="toast" class="toast">Action completed</div>
 
-<dialog id="guideModal">
-    <div class="dialog-header">
-        <h3>Markdown & Keyboard Shortcuts</h3>
-        <button class="close-btn" onclick="document.getElementById('guideModal').close()">&times;</button>
-    </div>
-    <div style="line-height: 1.5; font-size: 14px; max-height: 60vh; overflow-y: auto;">
-        <h4>Keyboard Shortcuts</h4>
-        <ul>
-            <li><strong>Ctrl+B</strong>: Bold</li>
-            <li><strong>Ctrl+I</strong>: Italic</li>
-            <li><strong>Ctrl+K</strong>: Link</li>
-            <li><strong>Ctrl+S</strong>: Save file (.md)</li>
-            <li><strong>Ctrl+F</strong>: Search & Replace</li>
-            <li><strong>Ctrl+Z</strong> / <strong>Ctrl+Y</strong>: Undo / Redo</li>
-        </ul>
-        <br>
-        <h4>Basic Markdown Syntax</h4>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
-            <tr style="border-bottom: 1px solid var(--border);"><th>Element</th><th>Syntax</th></tr>
-            <tr><td>Heading</td><td># H1 <br>## H2</td></tr>
-            <tr><td>Bold</td><td>**text**</td></tr>
-            <tr><td>Italic</td><td>*text*</td></tr>
-            <tr><td>Blockquote</td><td>> quote</td></tr>
-            <tr><td>Link</td><td>[title](https://url.com)</td></tr>
-            <tr><td>Image</td><td>![alt](image.jpg)</td></tr>
-            <tr><td>Code</td><td>`code` or ```block```</td></tr>
-            <tr><td>List</td><td>- item 1<br>- item 2</td></tr>
-        </table>
-    </div>
-</dialog>
+    <input type="file" id="fileInput" accept=".md,.txt,.markdown" style="display: none;">
 
-<div id="toast" class="toast">Action completed</div>
+    <script>
+        /**
+         * Simple Markdown Parser Fallback
+         * Used if marked.js CDN fails or app is offline.
+         */
+        const fallbackParser = (text) => {
+            let html = text
+                .replace(/</g, '&lt;').replace(/>/g, '&gt;') // Escape HTML
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
+                .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+                .replace(/~~(.*?)~~/gim, '<del>$1</del>')
+                .replace(/!\[(.*?)\]\((.*?)\)/gim, "<img alt='$1' src='$2' />")
+                .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
+                .replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
+                .replace(/`([^`]+)`/gim, '<code>$1</code>')
+                .replace(/\n$/gim, '<br />')
+                // Basic list support
+                .replace(/^\s*\-\s(.*)$/gim, '<ul><li>$1</li></ul>')
+                .replace(/<\/ul>\n<ul>/gim, '');
 
-<input type="file" id="fileInput" accept=".md,.txt,.markdown" style="display: none;">
-
-<script>
-/**
- * Simple Markdown Parser Fallback
- * Used if marked.js CDN fails or app is offline.
- */
-const fallbackParser = (text) => {
-    let html = text
-        .replace(/</g, '&lt;').replace(/>/g, '&gt;') // Escape HTML
-        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-        .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
-        .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-        .replace(/~~(.*?)~~/gim, '<del>$1</del>')
-        .replace(/!\[(.*?)\]\((.*?)\)/gim, "<img alt='$1' src='$2' />")
-        .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
-        .replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
-        .replace(/`([^`]+)`/gim, '<code>$1</code>')
-        .replace(/\n$/gim, '<br />')
-        // Basic list support
-        .replace(/^\s*\-\s(.*)$/gim, '<ul><li>$1</li></ul>')
-        .replace(/<\/ul>\n<ul>/gim, '');
-    
-    // Line breaks for paragraphs
-    return html.split('\n').map(line => {
-        if (line.match(/^(<h|<ul|<pre|<blockquote|<img)/)) return line;
-        return line.trim() ? `<p>${line}</p>` : '';
-    }).join('\n');
-};
-
-const app = {
-    state: {
-        view: 'split', // split, edit, preview
-        history: [],
-        historyIndex: -1,
-        isTyping: false
-    },
-    
-    init() {
-        this.dom = {
-            editor: document.getElementById('editor'),
-            preview: document.getElementById('preview'),
-            editorWrapper: document.getElementById('editorWrapper'),
-            previewWrapper: document.getElementById('previewWrapper'),
-            wordCount: document.getElementById('wordCount'),
-            charCount: document.getElementById('charCount'),
-            saveStatus: document.getElementById('saveStatus'),
-            fileInput: document.getElementById('fileInput'),
-            win98css: document.getElementById('win98-css')
+            // Line breaks for paragraphs
+            return html.split('\n').map(line => {
+                if (line.match(/^(<h|<ul|<pre|<blockquote|<img)/)) return line;
+                return line.trim() ? `<p>${line}</p>` : '';
+            }).join('\n');
         };
 
-        // Load preferences and data
-        this.theme.init();
-        this.storage.load();
-        
-        // Event Listeners
-        this.dom.editor.addEventListener('input', () => {
-            this.updatePreview();
-            this.debouncedSave();
-            this.saveHistory();
-        });
-        
-        this.dom.editor.addEventListener('keydown', this.editor.handleShortcuts.bind(this.editor));
-        this.dom.fileInput.addEventListener('change', this.file.handleLocalFile.bind(this.file));
-        
-        // Attempt to load robust parser
-        this.loadMarkedLibrary();
-        
-        // Initial render
-        this.updatePreview();
-        this.saveHistory(true);
-    },
+        const app = {
+            state: {
+                view: 'split', // split, edit, preview
+                history: [],
+                historyIndex: -1,
+                isTyping: false
+            },
 
-    loadMarkedLibrary() {
-        const script = document.createElement('script');
-        script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
-        script.onload = () => {
-            document.getElementById('parserStatus').innerText = "Marked.js (Online)";
-            this.updatePreview(); // Re-render with robust parser
-        };
-        script.onerror = () => {
-            console.warn("Could not load marked.js. Using fallback parser.");
-        };
-        document.head.appendChild(script);
-    },
+            init() {
+                this.dom = {
+                    editor: document.getElementById('editor'),
+                    preview: document.getElementById('preview'),
+                    editorWrapper: document.getElementById('editorWrapper'),
+                    previewWrapper: document.getElementById('previewWrapper'),
+                    wordCount: document.getElementById('wordCount'),
+                    charCount: document.getElementById('charCount'),
+                    saveStatus: document.getElementById('saveStatus'),
+                    fileInput: document.getElementById('fileInput'),
+                    win98css: document.getElementById('win98-css')
+                };
 
-    parseMarkdown(text) {
-        if (window.marked) {
-            return marked.parse(text);
-        }
-        return fallbackParser(text);
-    },
+                // Load preferences and data
+                this.theme.init();
+                this.storage.load();
 
-    updatePreview() {
-        const text = this.dom.editor.value;
-        this.dom.preview.innerHTML = this.parseMarkdown(text);
-        
-        // Stats
-        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-        this.dom.wordCount.innerText = words;
-        this.dom.charCount.innerText = text.length;
-    },
+                // Mobile detection
+                if (window.innerWidth <= 768) {
+                    this.ui.setView('edit');
+                }
 
-    showToast(message) {
-        const toast = document.getElementById('toast');
-        toast.innerText = message;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    },
+                // Event Listeners
+                this.dom.editor.addEventListener('input', () => {
+                    this.updatePreview();
+                    this.debouncedSave();
+                    this.saveHistory();
+                });
 
-    debouncedSave: (() => {
-        let timer;
-        return function() {
-            clearTimeout(timer);
-            app.dom.saveStatus.innerText = "Saving...";
-            timer = setTimeout(() => {
-                app.storage.save();
-                app.dom.saveStatus.innerText = "All changes saved locally";
-            }, 1000);
-        };
-    })(),
+                this.dom.editor.addEventListener('keydown', this.editor.handleShortcuts.bind(this.editor));
+                this.dom.fileInput.addEventListener('change', this.file.handleLocalFile.bind(this.file));
 
-    saveHistory(initial = false) {
-        const val = this.dom.editor.value;
-        if (initial || this.state.history[this.state.historyIndex] !== val) {
-            this.state.history = this.state.history.slice(0, this.state.historyIndex + 1);
-            this.state.history.push(val);
-            if (this.state.history.length > 50) this.state.history.shift(); // Max 50 states
-            else this.state.historyIndex++;
-        }
-    },
+                // Attempt to load robust parser
+                this.loadMarkedLibrary();
 
-    // --- Module: UI ---
-    ui: {
-        setView(mode) {
-            app.state.view = mode;
-            app.dom.editorWrapper.classList.remove('view-hidden', 'view-full');
-            app.dom.previewWrapper.classList.remove('view-hidden', 'view-full');
+                // Initial render
+                this.updatePreview();
+                this.saveHistory(true);
+            },
 
-            if (mode === 'edit') {
-                app.dom.previewWrapper.classList.add('view-hidden');
-                app.dom.editorWrapper.classList.add('view-full');
-            } else if (mode === 'preview') {
-                app.dom.editorWrapper.classList.add('view-hidden');
-                app.dom.previewWrapper.classList.add('view-full');
-            }
-        },
-        toggleView() {
-            const views = ['split', 'preview', 'edit'];
-            let nextIndex = (views.indexOf(app.state.view) + 1) % views.length;
-            this.setView(views[nextIndex]);
-        }
-    },
+            loadMarkedLibrary() {
+                const script = document.createElement('script');
+                script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+                script.onload = () => {
+                    document.getElementById('parserStatus').innerText = "Marked.js (Online)";
+                    this.updatePreview(); // Re-render with robust parser
+                };
+                script.onerror = () => {
+                    console.warn("Could not load marked.js. Using fallback parser.");
+                };
+                document.head.appendChild(script);
+            },
 
-    // --- Module: Theme ---
-    theme: {
-        init() {
-            const savedTheme = localStorage.getItem('md_theme') || 'light';
-            this.set(savedTheme);
-        },
-        set(themeName) {
-            document.body.className = `theme-${themeName}`;
-            localStorage.setItem('md_theme', themeName);
-            
-            // Handle Win98 specific injection
-            if (themeName === 'win98') {
-                app.dom.win98css.href = "https://unpkg.com/98.css";
-                app.dom.win98css.removeAttribute('disabled');
-                document.getElementById('app').classList.add('window');
-                document.querySelector('.menubar').classList.add('window-body');
-                document.querySelector('.toolbar').classList.add('window-body');
-            } else {
-                app.dom.win98css.setAttribute('disabled', 'true');
-                document.getElementById('app').classList.remove('window');
-                document.querySelector('.menubar').classList.remove('window-body');
-                document.querySelector('.toolbar').classList.remove('window-body');
-            }
-        }
-    },
+            parseMarkdown(text) {
+                if (window.marked) {
+                    return marked.parse(text);
+                }
+                return fallbackParser(text);
+            },
 
-    // --- Module: Editor ---
-    editor: {
-        insert(prefix, suffix) {
-            const editor = app.dom.editor;
-            const start = editor.selectionStart;
-            const end = editor.selectionEnd;
-            const text = editor.value;
-            const selectedText = text.substring(start, end);
-            
-            const replacement = prefix + selectedText + suffix;
-            editor.value = text.substring(0, start) + replacement + text.substring(end);
-            
-            // Restore selection
-            editor.focus();
-            if (selectedText.length > 0) {
-                editor.selectionStart = start;
-                editor.selectionEnd = start + replacement.length;
-            } else {
-                editor.selectionStart = editor.selectionEnd = start + prefix.length;
-            }
-            
-            app.updatePreview();
-            app.saveHistory();
-            app.debouncedSave();
-        },
-        insertTable() {
-            const tableTpl = "\n| Header 1 | Header 2 |\n| -------- | -------- |\n| Cell 1   | Cell 2   |\n";
-            this.insert(tableTpl, "");
-        },
-        undo() {
-            if (app.state.historyIndex > 0) {
-                app.state.historyIndex--;
-                app.dom.editor.value = app.state.history[app.state.historyIndex];
-                app.updatePreview();
-                app.debouncedSave();
-            }
-        },
-        redo() {
-            if (app.state.historyIndex < app.state.history.length - 1) {
-                app.state.historyIndex++;
-                app.dom.editor.value = app.state.history[app.state.historyIndex];
-                app.updatePreview();
-                app.debouncedSave();
-            }
-        },
-        searchReplace() {
-            const searchStr = prompt("Enter text to search:");
-            if (!searchStr) return;
-            const replaceStr = prompt(`Replace "${searchStr}" with:`);
-            if (replaceStr === null) return;
-            
-            const editor = app.dom.editor;
-            const regex = new RegExp(searchStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-            editor.value = editor.value.replace(regex, replaceStr);
-            app.updatePreview();
-            app.saveHistory();
-            app.debouncedSave();
-        },
-        handleShortcuts(e) {
-            if (e.ctrlKey || e.metaKey) {
-                switch(e.key.toLowerCase()) {
-                    case 'b': e.preventDefault(); this.insert('**', '**'); break;
-                    case 'i': e.preventDefault(); this.insert('*', '*'); break;
-                    case 'k': e.preventDefault(); this.insert('[', '](url)'); break;
-                    case 's': e.preventDefault(); app.file.saveMd(); break;
-                    case 'f': e.preventDefault(); this.searchReplace(); break;
-                    case 'z': e.preventDefault(); this.undo(); break;
-                    case 'y': e.preventDefault(); this.redo(); break;
+            updatePreview() {
+                const text = this.dom.editor.value;
+                this.dom.preview.innerHTML = this.parseMarkdown(text);
+
+                // Stats
+                const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+                this.dom.wordCount.innerText = words;
+                this.dom.charCount.innerText = text.length;
+            },
+
+            showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.innerText = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            },
+
+            debouncedSave: (() => {
+                let timer;
+                return function () {
+                    clearTimeout(timer);
+                    app.dom.saveStatus.innerText = "Saving...";
+                    timer = setTimeout(() => {
+                        app.storage.save();
+                        app.dom.saveStatus.innerText = "All changes saved locally";
+                    }, 1000);
+                };
+            })(),
+
+            saveHistory(initial = false) {
+                const val = this.dom.editor.value;
+                if (initial || this.state.history[this.state.historyIndex] !== val) {
+                    this.state.history = this.state.history.slice(0, this.state.historyIndex + 1);
+                    this.state.history.push(val);
+                    if (this.state.history.length > 50) this.state.history.shift(); // Max 50 states
+                    else this.state.historyIndex++;
+                }
+            },
+
+            // --- Module: UI ---
+            ui: {
+                setView(mode) {
+                    app.state.view = mode;
+                    app.dom.editorWrapper.classList.remove('view-hidden', 'view-full');
+                    app.dom.previewWrapper.classList.remove('view-hidden', 'view-full');
+
+                    if (mode === 'edit') {
+                        app.dom.previewWrapper.classList.add('view-hidden');
+                        app.dom.editorWrapper.classList.add('view-full');
+                    } else if (mode === 'preview') {
+                        app.dom.editorWrapper.classList.add('view-hidden');
+                        app.dom.previewWrapper.classList.add('view-full');
+                    }
+                },
+                toggleView() {
+                    let views = ['split', 'preview', 'edit'];
+                    if (window.innerWidth <= 768) {
+                        views = ['preview', 'edit']; // Skip split on mobile
+                    }
+                    let currentIndex = views.indexOf(app.state.view);
+                    let nextIndex = (currentIndex + 1) % views.length;
+                    this.setView(views[nextIndex]);
+                }
+            },
+
+            // --- Module: Theme ---
+            theme: {
+                init() {
+                    const savedTheme = localStorage.getItem('md_theme') || 'light';
+                    this.set(savedTheme);
+                },
+                set(themeName) {
+                    document.body.className = `theme-${themeName}`;
+                    localStorage.setItem('md_theme', themeName);
+
+                    // Handle Win98 specific injection
+                    if (themeName === 'win98') {
+                        app.dom.win98css.href = "https://unpkg.com/98.css";
+                        app.dom.win98css.removeAttribute('disabled');
+                        document.getElementById('app').classList.add('window');
+                        document.querySelector('.menubar').classList.add('window-body');
+                        document.querySelector('.toolbar').classList.add('window-body');
+                    } else {
+                        app.dom.win98css.setAttribute('disabled', 'true');
+                        document.getElementById('app').classList.remove('window');
+                        document.querySelector('.menubar').classList.remove('window-body');
+                        document.querySelector('.toolbar').classList.remove('window-body');
+                    }
+                }
+            },
+
+            // --- Module: Editor ---
+            editor: {
+                insert(prefix, suffix) {
+                    const editor = app.dom.editor;
+                    const start = editor.selectionStart;
+                    const end = editor.selectionEnd;
+                    const text = editor.value;
+                    const selectedText = text.substring(start, end);
+
+                    const replacement = prefix + selectedText + suffix;
+                    editor.value = text.substring(0, start) + replacement + text.substring(end);
+
+                    // Restore selection
+                    editor.focus();
+                    if (selectedText.length > 0) {
+                        editor.selectionStart = start;
+                        editor.selectionEnd = start + replacement.length;
+                    } else {
+                        editor.selectionStart = editor.selectionEnd = start + prefix.length;
+                    }
+
+                    app.updatePreview();
+                    app.saveHistory();
+                    app.debouncedSave();
+                },
+                insertTable() {
+                    const tableTpl = "\n| Header 1 | Header 2 |\n| -------- | -------- |\n| Cell 1   | Cell 2   |\n";
+                    this.insert(tableTpl, "");
+                },
+                undo() {
+                    if (app.state.historyIndex > 0) {
+                        app.state.historyIndex--;
+                        app.dom.editor.value = app.state.history[app.state.historyIndex];
+                        app.updatePreview();
+                        app.debouncedSave();
+                    }
+                },
+                redo() {
+                    if (app.state.historyIndex < app.state.history.length - 1) {
+                        app.state.historyIndex++;
+                        app.dom.editor.value = app.state.history[app.state.historyIndex];
+                        app.updatePreview();
+                        app.debouncedSave();
+                    }
+                },
+                searchReplace() {
+                    const searchStr = prompt("Enter text to search:");
+                    if (!searchStr) return;
+                    const replaceStr = prompt(`Replace "${searchStr}" with:`);
+                    if (replaceStr === null) return;
+
+                    const editor = app.dom.editor;
+                    const regex = new RegExp(searchStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                    editor.value = editor.value.replace(regex, replaceStr);
+                    app.updatePreview();
+                    app.saveHistory();
+                    app.debouncedSave();
+                },
+                handleShortcuts(e) {
+                    if (e.ctrlKey || e.metaKey) {
+                        switch (e.key.toLowerCase()) {
+                            case 'b': e.preventDefault(); this.insert('**', '**'); break;
+                            case 'i': e.preventDefault(); this.insert('*', '*'); break;
+                            case 'k': e.preventDefault(); this.insert('[', '](url)'); break;
+                            case 's': e.preventDefault(); app.file.saveMd(); break;
+                            case 'f': e.preventDefault(); this.searchReplace(); break;
+                            case 'z': e.preventDefault(); this.undo(); break;
+                            case 'y': e.preventDefault(); this.redo(); break;
+                        }
+                    }
+                    // Tab handling
+                    if (e.key === 'Tab') {
+                        e.preventDefault();
+                        this.insert('    ', '');
+                    }
+                }
+            },
+
+            // --- Module: File Management ---
+            file: {
+                openLocal() {
+                    app.dom.fileInput.click();
+                },
+                handleLocalFile(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        app.dom.editor.value = ev.target.result;
+                        app.updatePreview();
+                        app.saveHistory(true);
+                        app.debouncedSave();
+                        app.showToast("File loaded successfully");
+                    };
+                    reader.readAsText(file);
+                    e.target.value = ''; // Reset
+                },
+                async openUrl() {
+                    const url = prompt("Enter raw Markdown URL (must support CORS):");
+                    if (!url) return;
+
+                    try {
+                        const response = await fetch(url);
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        const text = await response.text();
+                        app.dom.editor.value = text;
+                        app.updatePreview();
+                        app.saveHistory(true);
+                        app.debouncedSave();
+                        app.showToast("File loaded from URL");
+                    } catch (err) {
+                        alert("Failed to load from URL. Ensure the URL is valid and allows CORS.\nError: " + err.message);
+                    }
+                },
+                downloadBlob(content, filename, type) {
+                    const blob = new Blob([content], { type });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                },
+                saveMd() {
+                    const text = app.dom.editor.value;
+                    this.downloadBlob(text, 'document.md', 'text/markdown');
+                    app.showToast("Markdown saved");
+                },
+                saveHtml() {
+                    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Exported Document</title><style>body{font-family:system-ui,sans-serif;line-height:1.6;max-width:800px;margin:2em auto;padding:0 1em;} pre{background:#eee;padding:1em;} code{background:#eee;padding:.2em;}</style></head><body>${app.dom.preview.innerHTML}</body></html>`;
+                    this.downloadBlob(html, 'document.html', 'text/html');
+                    app.showToast("HTML exported");
+                },
+                exportPdf() {
+                    // Uses browser's native print-to-pdf mechanism
+                    app.ui.setView('preview');
+                    setTimeout(() => {
+                        window.print();
+                        app.ui.setView('split'); // restore
+                    }, 500);
+                }
+            },
+
+            // --- Module: Local Storage ---
+            storage: {
+                save() {
+                    localStorage.setItem('md_autosave', app.dom.editor.value);
+                },
+                load() {
+                    const saved = localStorage.getItem('md_autosave');
+                    if (saved) {
+                        app.dom.editor.value = saved;
+                    } else {
+                        app.dom.editor.value = "# Welcome to Markdown Studio\n\nA lightweight, autonomous markdown editor.\n\n- **Bold** and *Italic* support.\n- [Links](https://example.com) and images.\n- Auto-saving to LocalStorage.\n\n### Code Example\n```javascript\nconsole.log('Hello World!');\n```\n\n> Blockquotes are elegant.\n\nEnjoy writing!";
+                    }
+                },
+                clear() {
+                    if (confirm("Are you sure you want to clear the autosaved data?")) {
+                        localStorage.removeItem('md_autosave');
+                        app.dom.editor.value = "";
+                        app.updatePreview();
+                        app.showToast("Autosave cleared");
+                    }
                 }
             }
-            // Tab handling
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                this.insert('    ', '');
-            }
-        }
-    },
+        };
 
-    // --- Module: File Management ---
-    file: {
-        openLocal() {
-            app.dom.fileInput.click();
-        },
-        handleLocalFile(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                app.dom.editor.value = ev.target.result;
-                app.updatePreview();
-                app.saveHistory(true);
-                app.debouncedSave();
-                app.showToast("File loaded successfully");
-            };
-            reader.readAsText(file);
-            e.target.value = ''; // Reset
-        },
-        async openUrl() {
-            const url = prompt("Enter raw Markdown URL (must support CORS):");
-            if (!url) return;
-            
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const text = await response.text();
-                app.dom.editor.value = text;
-                app.updatePreview();
-                app.saveHistory(true);
-                app.debouncedSave();
-                app.showToast("File loaded from URL");
-            } catch (err) {
-                alert("Failed to load from URL. Ensure the URL is valid and allows CORS.\nError: " + err.message);
-            }
-        },
-        downloadBlob(content, filename, type) {
-            const blob = new Blob([content], { type });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
-        },
-        saveMd() {
-            const text = app.dom.editor.value;
-            this.downloadBlob(text, 'document.md', 'text/markdown');
-            app.showToast("Markdown saved");
-        },
-        saveHtml() {
-            const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Exported Document</title><style>body{font-family:system-ui,sans-serif;line-height:1.6;max-width:800px;margin:2em auto;padding:0 1em;} pre{background:#eee;padding:1em;} code{background:#eee;padding:.2em;}</style></head><body>${app.dom.preview.innerHTML}</body></html>`;
-            this.downloadBlob(html, 'document.html', 'text/html');
-            app.showToast("HTML exported");
-        },
-        exportPdf() {
-            // Uses browser's native print-to-pdf mechanism
-            app.ui.setView('preview');
-            setTimeout(() => {
-                window.print();
-                app.ui.setView('split'); // restore
-            }, 500);
-        }
-    },
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => app.init());
 
-    // --- Module: Local Storage ---
-    storage: {
-        save() {
-            localStorage.setItem('md_autosave', app.dom.editor.value);
-        },
-        load() {
-            const saved = localStorage.getItem('md_autosave');
-            if (saved) {
-                app.dom.editor.value = saved;
-            } else {
-                app.dom.editor.value = "# Welcome to Markdown Studio\n\nA lightweight, autonomous markdown editor.\n\n- **Bold** and *Italic* support.\n- [Links](https://example.com) and images.\n- Auto-saving to LocalStorage.\n\n### Code Example\n```javascript\nconsole.log('Hello World!');\n```\n\n> Blockquotes are elegant.\n\nEnjoy writing!";
-            }
-        },
-        clear() {
-            if(confirm("Are you sure you want to clear the autosaved data?")) {
-                localStorage.removeItem('md_autosave');
-                app.dom.editor.value = "";
-                app.updatePreview();
-                app.showToast("Autosave cleared");
-            }
-        }
-    }
-};
-
-// Initialize App
-document.addEventListener('DOMContentLoaded', () => app.init());
-
-</script>
+    </script>
 </body>
+
 </html>
