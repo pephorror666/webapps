@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startpage | IARANN</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Outfit:wght@300;600&family=Silkscreen&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- CONFIGURACIÓN DE TEMAS (Heredado de index_github.html) --- */
+        :root {
+            --bg: #ededed;
+            --text-main: #1a1a1a;
+            --text-muted: #64748b;
+            --accent: #2563eb;
+            --border: rgba(0, 0, 0, 0.1);
+            --card-bg: rgba(255, 255, 255, 0.5);
+            --font-header: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --emoji-filter: none;
+            --radius: 8px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #60a5fa;
+            --border: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(30, 41, 59, 0.5);
+            --emoji-filter: grayscale(1) brightness(2);
+        }
+
+        [data-theme="macos"] {
+            --bg: #f5f5f7;
+            --text-main: #1d1d1f;
+            --accent: #0071e3;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --border: rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+            background-image: radial-gradient(circle at 20% 20%, #e3e3e3 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, #d2d2d2 0%, transparent 40%);
+        }
+
+        [data-theme="pixel"] {
+            --bg: #000000;
+            --text-main: #00ff00;
+            --text-muted: #008f11;
+            --accent: #ffff00;
+            --border: 4px solid #00ff00;
+            --font-header: 'Silkscreen', cursive;
+            --font-body: 'Silkscreen', cursive;
+            --radius: 0px;
+        }
+
+        [data-theme="nature"] {
+            --bg: #f1f8e9;
+            --text-main: #2e7d32;
+            --text-muted: #689f38;
+            --accent: #1b5e20;
+            --border: rgba(46, 125, 50, 0.2);
+            --card-bg: rgba(255, 255, 255, 0.6);
+        }
+
+        [data-theme="lgbti"] {
+            --bg: #ffffff;
+            --text-main: #2d3436;
+            --accent: #d63031;
+            --border: linear-gradient(90deg, #FF0018, #FFA52C, #FFFF41, #008018, #0000F9, #86007D);
+        }
+
+        /* --- ESTILOS BASE --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 4rem 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+        }
+
+        /* Selector de Temas */
+        .theme-switcher {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            border-radius: var(--radius);
+            font-size: 0.8rem;
+            color: var(--text-main);
+            outline: none;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        header {
+            text-align: center;
+        }
+
+        h1 {
+            font-family: var(--font-header);
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 span {
+            font-weight: 300;
+            color: var(--text-muted);
+        }
+
+        /* --- BUSCADOR --- */
+        .search-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        #ddgSearch {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            gap: 10px;
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s;
+        }
+
+        #ddgSearch:focus-within {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        #ddgSearch input[type="text"] {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        #ddgSearch button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        #ddgSearch button:hover {
+            opacity: 0.9;
+        }
+
+        /* --- BOOKMARKS --- */
+        .bookmarks-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .section-header h3 {
+            font-family: var(--font-header);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-add {
+            background: transparent;
+            border: 1px dashed var(--border);
+            color: var(--text-muted);
+            padding: 4px 12px;
+            border-radius: var(--radius);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-add:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .tree-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .category-node {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .category-title:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .bookmark-list {
+            list-style: none;
+            padding-left: 1.5rem;
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .bookmark-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            group: hover;
+        }
+
+        .bookmark-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .bookmark-link:hover {
+            color: var(--accent);
+        }
+
+        .actions {
+            display: none;
+            gap: 5px;
+        }
+
+        .bookmark-item:hover .actions,
+        .category-title:hover .actions {
+            display: flex;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .btn-icon:hover {
+            opacity: 1;
+        }
+
+        /* --- MODAL --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg);
+            padding: 2rem;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content h2 {
+            margin-bottom: 1.5rem;
+            font-family: var(--font-header);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 500;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-muted);
+        }
+
+        .emoji-picker {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: var(--radius);
+        }
+
+        .emoji-option {
+            font-size: 1.5rem;
+            cursor: pointer;
+            text-align: center;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .emoji-option:hover,
+        .emoji-option.selected {
+            background: var(--accent);
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -350px;
+            width: 350px;
+            height: 100%;
+            background: var(--bg);
+            border-right: 1px solid var(--border);
+            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(20px);
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .sidebar-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            padding: 0.5rem;
+            gap: 5px;
+            background: rgba(0, 0, 0, 0.05);
+            margin: 1rem;
+            border-radius: var(--radius);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--bg);
+            color: var(--accent);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .tool-panel {
+            display: none;
+        }
+
+        .tool-panel.active {
+            display: block;
+        }
+
+        /* Tool specific UI */
+        .search-box {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            outline: none;
+        }
+
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        /* Contact Cards */
+        .contact-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .contact-header {
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .contact-name {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .contact-indicators {
+            display: flex;
+            gap: 4px;
+            font-size: 0.8rem;
+        }
+
+        .contact-details {
+            display: none;
+            padding: 15px;
+            border-top: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.02);
+            font-size: 0.9rem;
+        }
+
+        .contact-item.expanded .contact-details {
+            display: block;
+        }
+
+        .detail-row {
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        /* To-Do Items */
+        .todo-item {
+            padding: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            position: relative;
+        }
+
+        .todo-item.priority-high {
+            border-left: 4px solid #ef4444;
+        }
+
+        .todo-item.priority-medium {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .todo-item.priority-low {
+            border-left: 4px solid #10b981;
+        }
+
+        .todo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .todo-title {
+            font-weight: 600;
+        }
+
+        .todo-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Notification */
+        .notification-toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            z-index: 2000;
+            display: none;
+            max-width: 300px;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive Sidebar */
+        @media (max-width: 600px) {
+            .sidebar {
+                width: 100%;
+                left: -100%;
+            }
+
+            .tree-view {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="light">
+
+    <button class="sidebar-toggle" id="sidebarToggle" title="Open Tools">☰</button>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 style="font-family: var(--font-header); font-size: 1.2rem;">Tools</h2>
+            <button class="btn-icon" onclick="toggleSidebar()">✕</button>
+        </div>
+
+        <div class="sidebar-tabs">
+            <button class="tab-btn active" onclick="switchTab('contacts')">Contacts</button>
+            <button class="tab-btn" onclick="switchTab('todo')">To-Do</button>
+            <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
+        </div>
+
+        <div class="sidebar-content">
+            <!-- Panel Agenda -->
+            <div id="contactsPanel" class="tool-panel active">
+                <input type="text" class="search-box" id="contactSearch" placeholder="Search contact..."
+                    oninput="filterContacts()">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <select id="contactCategoryFilter" class="search-box" onchange="filterContacts()"
+                        style="margin-bottom: 0;">
+                        <option value="All">All Categories</option>
+                        <option value="General">General</option>
+                        <option value="Family">Family</option>
+                        <option value="Work">Work</option>
+                        <option value="Friends">Friends</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;" onclick="showContactModal()">+
+                    New Contact</button>
+                <div id="contactList" class="list-container">
+                    <!-- Contactos inyectados aquí -->
+                </div>
+            </div>
+
+            <!-- Panel To-Do -->
+            <div id="todoPanel" class="tool-panel">
+                <input type="text" class="search-box" id="todoSearch" placeholder="Search task..."
+                    oninput="filterTodos()">
+                <button class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;" onclick="showTodoModal()">+
+                    New Task</button>
+                <div id="todoList" class="list-container">
+                    <!-- Tareas inyectadas aquí -->
+                </div>
+            </div>
+
+            <!-- Panel Settings -->
+            <div id="settingsPanel" class="tool-panel">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                        Manage your local data. You can export everything to a JSON file and import it back later.
+                    </p>
+                    <button class="btn btn-primary" onclick="exportData()" style="width: 100%;">📤 Export Data
+                        (JSON)</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('importInput').click()"
+                        style="width: 100%; border: 1px solid var(--border);">📥 Import Data (JSON)</button>
+                    <input type="file" id="importInput" style="display: none;" accept=".json"
+                        onchange="importData(event)">
+
+                    <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+                            IARANN v1.0 | Local Storage Management
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div id="notificationToast" class="notification-toast">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <strong id="notifTitle">Reminder</strong>
+            <button class="btn-icon" onclick="hideNotification()">✕</button>
+        </div>
+        <div id="notifBody" style="font-size: 0.9rem;"></div>
+    </div>
+
+    <select class="theme-switcher" id="themeSelector">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="macos">macGlass</option>
+        <option value="pixel">Pixel Art</option>
+        <option value="nature">Green Leaf</option>
+        <option value="lgbti">Pride</option>
+    </select>
+
+    <div class="container">
+        <header>
+            <h1>IARANN <span>| startpage</span></h1>
+        </header>
+
+        <section class="search-container">
+            <form method="get" id="ddgSearch" action="https://duckduckgo.com/" target="_blank">
+                <input type="hidden" name="k7" value="#ffffff" />
+                <input type="hidden" name="k8" value="#222222" />
+                <input type="hidden" name="k9" value="#00278e" />
+                <input type="hidden" name="kx" value="#20692b" />
+                <input type="hidden" name="kj" value="#fafafa" />
+                <input type="hidden" name="kt" value="p" />
+                <input type="text" name="q" placeholder="Explore with DuckDuckGo..." aria-label="Search on DuckDuckGo"
+                    autofocus />
+                <button type="submit">Search</button>
+            </form>
+        </section>
+
+        <section class="bookmarks-section">
+            <div class="section-header">
+                <h3><span class="emoji">🔖</span> Bookmarks</h3>
+                <button class="btn-add" onclick="showSectionModal()">+ Add Section</button>
+            </div>
+
+            <div id="treeview" class="tree-view">
+                <!-- Bookmarks will be injected here -->
+            </div>
+        </section>
+
+        <footer style="margin-top: 5rem; text-align: center; opacity: 0.5; font-size: 0.8rem;">
+            <p>© 2026 IARANN | Forge your own paths</p>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div id="sectionModal" class="modal">
+        <div class="modal-content">
+            <h2 id="sectionModalTitle">New Section</h2>
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" id="sectionName" placeholder="e.g. Work, Social, Dev">
+            </div>
+            <div class="form-group">
+                <label>Icon</label>
+                <div id="emojiPicker" class="emoji-picker">
+                    <!-- Emojis injected here -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="hideModal('sectionModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSection()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bookmarkModal" class="modal">
+        <div class="modal-content">
+            <h2 id="bookmarkModalTitle">New Bookmark</h2>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="bookmarkTitle" placeholder="e.g. Gmail">
+            </div>
+            <div class="form-group">
+                <label>URL</label>
+                <input type="text" id="bookmarkUrl" placeholder="https://...">
+            </div>
+            <input type="hidden" id="currentSectionId">
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="hideModal('bookmarkModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveBookmark()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Contactos -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <h2 id="contactModalTitle">New Contact</h2>
+            <div class="form-group">
+                <label>First Name *</label>
+                <input type="text" id="contactFirstName">
+            </div>
+            <div class="form-group">
+                <label>Last Name *</label>
+                <input type="text" id="contactLastName">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="contactCategory">
+                    <option value="General">General</option>
+                    <option value="Family">Family</option>
+                    <option value="Work">Work</option>
+                    <option value="Friends">Friends</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Phone Numbers</label>
+                <div id="phoneList"></div>
+                <button class="btn-add" onclick="addDynamicField('phoneList')">+ Add Phone Number</button>
+            </div>
+
+            <div class="form-group">
+                <label>Emails</label>
+                <div id="emailList"></div>
+                <button class="btn-add" onclick="addDynamicField('emailList')">+ Add Email</button>
+            </div>
+
+            <div class="form-group">
+                <label>Social Media (URLs)</label>
+                <div id="socialList"></div>
+                <button class="btn-add" onclick="addDynamicField('socialList')">+ Add Social Media</button>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="hideModal('contactModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveContact()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal To-Do -->
+    <div id="todoModal" class="modal">
+        <div class="modal-content">
+            <h2 id="todoModalTitle">New Task</h2>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="todoTitle">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" id="todoDesc">
+            </div>
+            <div class="form-group">
+                <label>Date & Time</label>
+                <input type="datetime-local" id="todoDate">
+            </div>
+            <div class="form-group">
+                <label>Priority</label>
+                <select id="todoPriority">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="hideModal('todoModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTodo()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- THEME ENGINE ---
+        const themeSelector = document.getElementById('themeSelector');
+        const body = document.body;
+
+        function changeTheme(theme) {
+            body.setAttribute('data-theme', theme);
+            localStorage.setItem('selected-theme', theme);
+            themeSelector.value = theme;
+        }
+
+        themeSelector.addEventListener('change', (e) => changeTheme(e.target.value));
+
+        // --- BOOKMARK ENGINE ---
+        let data = JSON.parse(localStorage.getItem('iarann-bookmarks')) || [
+            {
+                id: 'default-1',
+                name: 'Mail',
+                icon: '📧',
+                bookmarks: [
+                    { title: 'Gmail', url: 'https://gmail.com' },
+                    { title: 'Outlook', url: 'https://outlook.com' }
+                ]
+            },
+            {
+                id: 'default-2',
+                name: 'Dev',
+                icon: '💻',
+                bookmarks: [
+                    { title: 'GitHub', url: 'https://github.com' },
+                    { title: 'StackOverflow', url: 'https://stackoverflow.com' }
+                ]
+            }
+        ];
+
+        const emojis = ['📁', '📧', '💻', '🎮', '📚', '🎵', '🖼️', '🛠️', '🌍', '📝', '🎬', '🛍️', '💰', '🔥', '☁️', '⚡', '🌈', '🛸', '🚀', '🧠', '💼', '☕', '🧪', '🔭'];
+        let selectedEmoji = '📁';
+        let editingSectionId = null;
+        let editingBookmarkIndex = null;
+
+        function init() {
+            const savedTheme = localStorage.getItem('selected-theme') || 'light';
+            changeTheme(savedTheme);
+            renderEmojis();
+            renderTree();
+
+            // Sidebar inits
+            renderContacts();
+            renderTodos();
+            checkUpcomingTasks();
+        }
+
+        // --- SIDEBAR LOGIC ---
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            sidebarToggle.style.display = sidebar.classList.contains('open') ? 'none' : 'flex';
+        }
+
+        sidebarToggle.addEventListener('click', toggleSidebar);
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tool-panel').forEach(panel => panel.classList.remove('active'));
+
+            if (tab === 'contacts') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('contactsPanel').classList.add('active');
+            } else if (tab === 'todo') {
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('todoPanel').classList.add('active');
+            } else if (tab === 'settings') {
+                document.querySelector('.tab-btn:nth-child(3)').classList.add('active');
+                document.getElementById('settingsPanel').classList.add('active');
+            }
+        }
+
+        // --- DATA MANAGEMENT (IMPORT/EXPORT) ---
+        function exportData() {
+            const exportObj = {
+                bookmarks: data,
+                contacts: contacts,
+                todos: todos,
+                theme: localStorage.getItem('selected-theme') || 'light',
+                exportDate: new Date().toISOString()
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            const date = new Date().toISOString().split('T')[0];
+            downloadAnchorNode.setAttribute("download", `iarann_backup_${date}.json`);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+
+                    // Validation
+                    if (!importedData.bookmarks || !importedData.contacts || !importedData.todos) {
+                        throw new Error("Invalid format: Missing required data fields.");
+                    }
+
+                    if (confirm("This will overwrite all your current bookmarks, contacts, and tasks. Do you want to proceed?")) {
+                        // Update variables
+                        data = importedData.bookmarks;
+                        contacts = importedData.contacts;
+                        todos = importedData.todos;
+
+                        // Save to Local Storage
+                        localStorage.setItem('iarann-bookmarks', JSON.stringify(data));
+                        localStorage.setItem('iarann-contacts', JSON.stringify(contacts));
+                        localStorage.setItem('iarann-todos', JSON.stringify(todos));
+
+                        if (importedData.theme) {
+                            changeTheme(importedData.theme);
+                        }
+
+                        // Re-render everything
+                        init();
+                        alert("Data imported successfully!");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Error importing data: " + err.message);
+                }
+            };
+            reader.readAsText(file);
+            // Reset input so the same file can be selected again
+            event.target.value = '';
+        }
+
+        // --- CONTACTS LOGIC ---
+        let contacts = JSON.parse(localStorage.getItem('iarann-contacts')) || [];
+        let editingContactId = null;
+
+        function renderContacts() {
+            const list = document.getElementById('contactList');
+            const query = document.getElementById('contactSearch').value.toLowerCase();
+            const categoryFilter = document.getElementById('contactCategoryFilter').value;
+
+            const filtered = contacts.filter(c => {
+                const matchesSearch = (c.firstName + ' ' + c.lastName).toLowerCase().includes(query);
+                const matchesCategory = categoryFilter === 'All' || c.category === categoryFilter;
+                return matchesSearch && matchesCategory;
+            });
+
+            list.innerHTML = filtered.map(c => {
+                const indicators = [];
+                if (c.emails?.length) indicators.push('📧');
+                if (c.phones?.length) indicators.push('📞');
+                if (c.socials?.length) indicators.push('🔗');
+
+                return `
+                    <div class="contact-item" id="contact-${c.id}">
+                        <div class="contact-header" onclick="toggleContact('${c.id}')">
+                            <div class="contact-name">${c.firstName} ${c.lastName}</div>
+                            <div class="contact-indicators">${indicators.join(' ')}</div>
+                        </div>
+                        <div class="contact-details">
+                            <div class="detail-row"><span class="detail-label">Category</span>${c.category}</div>
+                            ${c.phones.map(p => `<div class="detail-row"><span class="detail-label">Phone</span><a href="tel:${p}" style="color: var(--accent); text-decoration: none;">${p}</a></div>`).join('')}
+                            ${c.emails.map(e => `<div class="detail-row"><span class="detail-label">Email</span><a href="mailto:${e}" style="color: var(--accent); text-decoration: none;">${e}</a></div>`).join('')}
+                            ${c.socials.map(s => `<div class="detail-row"><span class="detail-label">Social</span><a href="${s}" target="_blank" style="color: var(--accent);">${s}</a></div>`).join('')}
+                            <div class="modal-actions" style="margin-top: 10px;">
+                                <button class="btn-icon" onclick="showContactModal('${c.id}')">✏️</button>
+                                <button class="btn-icon" onclick="deleteContact('${c.id}')">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            localStorage.setItem('iarann-contacts', JSON.stringify(contacts));
+        }
+
+        function toggleContact(id) {
+            const el = document.getElementById(`contact-${id}`);
+            el.classList.toggle('expanded');
+        }
+
+        function filterContacts() { renderContacts(); }
+
+        function showContactModal(id = null) {
+            editingContactId = id;
+            const modal = document.getElementById('contactModal');
+            document.getElementById('contactModalTitle').innerText = id ? 'Edit Contact' : 'New Contact';
+
+            // Clear inputs
+            document.getElementById('contactFirstName').value = '';
+            document.getElementById('contactLastName').value = '';
+            document.getElementById('contactCategory').value = 'General';
+            document.getElementById('phoneList').innerHTML = '';
+            document.getElementById('emailList').innerHTML = '';
+            document.getElementById('socialList').innerHTML = '';
+
+            if (id) {
+                const c = contacts.find(contact => contact.id === id);
+                document.getElementById('contactFirstName').value = c.firstName;
+                document.getElementById('contactLastName').value = c.lastName;
+                document.getElementById('contactCategory').value = c.category;
+                c.phones.forEach(p => addDynamicField('phoneList', p));
+                c.emails.forEach(e => addDynamicField('emailList', e));
+                c.socials.forEach(s => addDynamicField('socialList', s));
+            } else {
+                // Add one empty field by default? Or keep empty.
+            }
+            modal.style.display = 'flex';
+        }
+
+        function addDynamicField(containerId, value = '') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.style.display = 'flex';
+            div.style.gap = '5px';
+            div.style.marginBottom = '5px';
+            div.innerHTML = `
+                <input type="text" value="${value}" style="flex: 1;">
+                <button class="btn-icon" onclick="this.parentElement.remove()">✕</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function saveContact() {
+            const firstName = document.getElementById('contactFirstName').value.trim();
+            const lastName = document.getElementById('contactLastName').value.trim();
+            if (!firstName && !lastName) {
+                alert('You must fill at least the first or last name.');
+                return;
+            }
+
+            const getValues = (id) => Array.from(document.getElementById(id).querySelectorAll('input')).map(i => i.value.trim()).filter(v => v);
+
+            const contactData = {
+                id: editingContactId || 'c-' + Date.now(),
+                firstName,
+                lastName,
+                category: document.getElementById('contactCategory').value,
+                phones: getValues('phoneList'),
+                emails: getValues('emailList'),
+                socials: getValues('socialList')
+            };
+
+            if (editingContactId) {
+                const index = contacts.findIndex(c => c.id === editingContactId);
+                contacts[index] = contactData;
+            } else {
+                contacts.push(contactData);
+            }
+
+            hideModal('contactModal');
+            renderContacts();
+        }
+
+        function deleteContact(id) {
+            if (confirm('Delete contact?')) {
+                contacts = contacts.filter(c => c.id !== id);
+                renderContacts();
+            }
+        }
+
+        // --- TODO LOGIC ---
+        let todos = JSON.parse(localStorage.getItem('iarann-todos')) || [];
+        let editingTodoId = null;
+
+        function renderTodos() {
+            const list = document.getElementById('todoList');
+            const query = document.getElementById('todoSearch').value.toLowerCase();
+
+            let filtered = todos.filter(t => t.title.toLowerCase().includes(query) || t.desc.toLowerCase().includes(query));
+
+            // Sort by date (closest first)
+            filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            list.innerHTML = filtered.map(t => {
+                const date = new Date(t.date);
+                const isOverdue = date < new Date();
+                return `
+                    <div class="todo-item priority-${t.priority}">
+                        <div class="todo-header">
+                            <span class="todo-title">${t.title}</span>
+                            <span class="todo-date" style="${isOverdue ? 'color: #ef4444;' : ''}">${date.toLocaleString()}</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">${t.desc}</div>
+                        <div class="modal-actions" style="margin-top: 5px;">
+                            <button class="btn-icon" onclick="showTodoModal('${t.id}')">✏️</button>
+                            <button class="btn-icon" onclick="deleteTodo('${t.id}')">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            localStorage.setItem('iarann-todos', JSON.stringify(todos));
+        }
+
+        function filterTodos() { renderTodos(); }
+
+        function showTodoModal(id = null) {
+            editingTodoId = id;
+            const modal = document.getElementById('todoModal');
+            document.getElementById('todoModalTitle').innerText = id ? 'Edit Task' : 'New Task';
+
+            document.getElementById('todoTitle').value = '';
+            document.getElementById('todoDesc').value = '';
+            document.getElementById('todoDate').value = '';
+            document.getElementById('todoPriority').value = 'medium';
+
+            if (id) {
+                const t = todos.find(todo => todo.id === id);
+                document.getElementById('todoTitle').value = t.title;
+                document.getElementById('todoDesc').value = t.desc;
+                document.getElementById('todoDate').value = t.date;
+                document.getElementById('todoPriority').value = t.priority;
+            }
+            modal.style.display = 'flex';
+        }
+
+        function saveTodo() {
+            const title = document.getElementById('todoTitle').value.trim();
+            const date = document.getElementById('todoDate').value;
+            if (!title || !date) {
+                alert('Title and date are mandatory.');
+                return;
+            }
+
+            const todoData = {
+                id: editingTodoId || 't-' + Date.now(),
+                title,
+                desc: document.getElementById('todoDesc').value,
+                date,
+                priority: document.getElementById('todoPriority').value
+            };
+
+            if (editingTodoId) {
+                const index = todos.findIndex(t => t.id === editingTodoId);
+                todos[index] = todoData;
+            } else {
+                todos.push(todoData);
+            }
+
+            hideModal('todoModal');
+            renderTodos();
+        }
+
+        function deleteTodo(id) {
+            if (confirm('Delete task?')) {
+                todos = todos.filter(t => t.id !== id);
+                renderTodos();
+            }
+        }
+
+        // --- NOTIFICATION LOGIC ---
+        function checkUpcomingTasks() {
+            const now = new Date();
+            const next24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+            const upcoming = todos.filter(t => {
+                const d = new Date(t.date);
+                return d > now && d <= next24h;
+            });
+
+            if (upcoming.length > 0) {
+                const list = upcoming.map(t => `• ${t.title} (${new Date(t.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`).join('<br>');
+                showNotification('Tasks for the next 24h:', list);
+            }
+        }
+
+        function showNotification(title, body) {
+            document.getElementById('notifTitle').innerText = title;
+            document.getElementById('notifBody').innerHTML = body;
+            document.getElementById('notificationToast').style.display = 'block';
+        }
+
+        function hideNotification() {
+            document.getElementById('notificationToast').style.display = 'none';
+        }
+
+
+
+        function renderEmojis() {
+            const picker = document.getElementById('emojiPicker');
+            picker.innerHTML = emojis.map(e => `
+                <div class="emoji-option ${e === selectedEmoji ? 'selected' : ''}" onclick="selectEmoji('${e}')">${e}</div>
+            `).join('');
+        }
+
+        function selectEmoji(e) {
+            selectedEmoji = e;
+            renderEmojis();
+        }
+
+        function renderTree() {
+            const tree = document.getElementById('treeview');
+            tree.innerHTML = data.map((section, sIndex) => `
+                <div class="category-node">
+                    <div class="category-title">
+                        <span>${section.icon} ${section.name}</span>
+                        <div class="actions">
+                            <button class="btn-icon" onclick="showSectionModal('${section.id}')">✏️</button>
+                            <button class="btn-icon" onclick="deleteSection('${section.id}')">🗑️</button>
+                            <button class="btn-icon" onclick="showBookmarkModal('${section.id}')">➕</button>
+                        </div>
+                    </div>
+                    <ul class="bookmark-list">
+                        ${section.bookmarks.map((bm, bIndex) => `
+                            <li class="bookmark-item">
+                                <a href="${bm.url}" class="bookmark-link" target="_blank">
+                                    <img src="https://www.google.com/s2/favicons?domain=${bm.url}&sz=16" alt="">
+                                    ${bm.title}
+                                </a>
+                                <div class="actions">
+                                    <button class="btn-icon" onclick="showBookmarkModal('${section.id}', ${bIndex})">✏️</button>
+                                    <button class="btn-icon" onclick="deleteBookmark('${section.id}', ${bIndex})">🗑️</button>
+                                </div>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `).join('');
+            localStorage.setItem('iarann-bookmarks', JSON.stringify(data));
+        }
+
+        // Section Actions
+        function showSectionModal(id = null) {
+            editingSectionId = id;
+            const modal = document.getElementById('sectionModal');
+            const title = document.getElementById('sectionModalTitle');
+            const nameInput = document.getElementById('sectionName');
+
+            if (id) {
+                const section = data.find(s => s.id === id);
+                title.innerText = 'Edit Section';
+                nameInput.value = section.name;
+                selectedEmoji = section.icon;
+            } else {
+                title.innerText = 'New Section';
+                nameInput.value = '';
+                selectedEmoji = '📁';
+            }
+            renderEmojis();
+            modal.style.display = 'flex';
+        }
+
+        function saveSection() {
+            const name = document.getElementById('sectionName').value;
+            if (!name) return;
+
+            if (editingSectionId) {
+                const section = data.find(s => s.id === editingSectionId);
+                section.name = name;
+                section.icon = selectedEmoji;
+            } else {
+                data.push({
+                    id: 's-' + Date.now(),
+                    name: name,
+                    icon: selectedEmoji,
+                    bookmarks: []
+                });
+            }
+            hideModal('sectionModal');
+            renderTree();
+        }
+
+        function deleteSection(id) {
+            if (confirm('Delete this section and all its bookmarks?')) {
+                data = data.filter(s => s.id !== id);
+                renderTree();
+            }
+        }
+
+        // Bookmark Actions
+        function showBookmarkModal(sectionId, bIndex = null) {
+            editingSectionId = sectionId;
+            editingBookmarkIndex = bIndex;
+            const modal = document.getElementById('bookmarkModal');
+            const title = document.getElementById('bookmarkModalTitle');
+            const bTitleInput = document.getElementById('bookmarkTitle');
+            const bUrlInput = document.getElementById('bookmarkUrl');
+
+            if (bIndex !== null) {
+                const bm = data.find(s => s.id === sectionId).bookmarks[bIndex];
+                title.innerText = 'Edit Bookmark';
+                bTitleInput.value = bm.title;
+                bUrlInput.value = bm.url;
+            } else {
+                title.innerText = 'New Bookmark';
+                bTitleInput.value = '';
+                bUrlInput.value = '';
+            }
+            modal.style.display = 'flex';
+        }
+
+        function saveBookmark() {
+            const title = document.getElementById('bookmarkTitle').value;
+            let url = document.getElementById('bookmarkUrl').value;
+            if (!title || !url) return;
+
+            if (!url.startsWith('http')) url = 'https://' + url;
+
+            const section = data.find(s => s.id === editingSectionId);
+
+            if (editingBookmarkIndex !== null) {
+                section.bookmarks[editingBookmarkIndex] = { title, url };
+            } else {
+                section.bookmarks.push({ title, url });
+            }
+            hideModal('bookmarkModal');
+            renderTree();
+        }
+
+        function deleteBookmark(sectionId, bIndex) {
+            const section = data.find(s => s.id === sectionId);
+            section.bookmarks.splice(bIndex, 1);
+            renderTree();
+        }
+
+        function hideModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
