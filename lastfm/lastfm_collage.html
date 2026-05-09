@@ -4,6 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lastfm colalge maker Create colalges with your favorite albums.">
+    <meta name="keywords" content="Last.fm, collage maker, music chart, top albums, music visualizer, iarann">
+    <meta name="author" content="IARANN">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pephorror666.github.io/webapps/lastfm/lastfm_collage.html">
+    <meta property="og:title" content="Last.fm Collage Designer | IARANN">
+    <meta property="og:description" content="Generate beautiful collages with your favorite records using lastfm data.">
+    <meta property="og:image" content="https://e.pcloud.link/publink/show?code=XZz0OiZPgScD22y8N5QR5aJTRIBOHwQlbhk">
     <title>IARANN | Lastfm Collage Maker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -339,7 +348,23 @@
                     <input type="text" id="cfgKey" placeholder="32-char key">
                 </div>
             </div>
-            <button id="btnSaveConfig" class="btn">Save Configuration</button>
+
+            <div class="form-grid" style="margin-top: 1rem;">
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="chkBorder">
+                    <label for="chkBorder" style="cursor: pointer;">Black border on each tile</label>
+                </div>
+                <div class="form-group">
+                    <label for="borderSize">Border width (px)</label>
+                    <input type="number" id="borderSize" value="6" min="1" max="40">
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="chkLabels">
+                    <label for="chkLabels" style="cursor: pointer;">Show artist &amp; album name</label>
+                </div>
+            </div>
+
+            <button id="btnSaveConfig" class="btn" style="margin-top: 0.5rem;">Save Configuration</button>
         </div>
 
         <div id="tab-top" class="panel">
@@ -441,9 +466,11 @@
 
         <div id="outputArea">
             <img id="collageResult" src="" alt="Result">
-            <div style="display: flex; gap: 1rem; width: 100%; justify-content: center;">
-                <a id="btnDownload" class="btn" download="iarann_collage.png"
-                    style="flex: 1; max-width: 300px;">Download PNG</a>
+            <div style="display: flex; gap: 1rem; width: 100%; justify-content: center; flex-wrap: wrap;">
+                <a id="btnDownload" class="btn" download="iarann_collage.png" style="flex: 1; max-width: 260px;">⬇
+                    Download PNG</a>
+                <button id="btnCopy" class="btn btn-outline" style="flex: 1; max-width: 260px;">📋 Copy to
+                    Clipboard</button>
             </div>
         </div>
     </div>
@@ -480,8 +507,13 @@
         }
 
         // --- CANVAS ENGINE ---
-        async function buildCollage(urls, cols, rows) {
+        // items: array of { url, artist, album } or plain strings (legacy)
+        async function buildCollage(items, cols, rows) {
             const TILE = 300;
+            const useBorder = document.getElementById('chkBorder').checked;
+            const borderW = Math.max(1, parseInt(document.getElementById('borderSize').value) || 6);
+            const useLabels = document.getElementById('chkLabels').checked;
+
             const canvas = document.createElement('canvas');
             canvas.width = cols * TILE;
             canvas.height = rows * TILE;
@@ -495,27 +527,113 @@
                 i.src = u;
             });
 
+            // Label layout constants
+            const FONT_ARTIST = 'bold 15px Inter, sans-serif';
+            const FONT_ALBUM = '13px Inter, sans-serif';
+            const LINE_H = 18;
+            const PAD = 8;  // padding inside label area
+            const LABEL_H = PAD + LINE_H + LINE_H + PAD; // total label area height
+
             for (let i = 0; i < (cols * rows); i++) {
+                const item = items[i] || null;
+                const url = item ? (typeof item === 'string' ? item : item.url) : null;
+                const artist = item ? (typeof item === 'string' ? '' : (item.artist || '')) : '';
+                const album = item ? (typeof item === 'string' ? '' : (item.album || '')) : '';
+
                 const x = (i % cols) * TILE;
                 const y = Math.floor(i / cols) * TILE;
+
+                // Background
                 ctx.fillStyle = '#111';
                 ctx.fillRect(x, y, TILE, TILE);
 
-                if (urls[i]) {
-                    const img = await load(urls[i]);
-                    if (img) ctx.drawImage(img, 0, 0, img.width, img.height, x, y, TILE, TILE);
+                if (url) {
+                    const img = await load(url);
+                    if (img) {
+                        if (useBorder) {
+                            // Draw image inset by borderW on all sides
+                            ctx.drawImage(
+                                img, 0, 0, img.width, img.height,
+                                x + borderW, y + borderW,
+                                TILE - borderW * 2, TILE - borderW * 2
+                            );
+                            // Draw black border (stroke over edges)
+                            ctx.strokeStyle = '#000';
+                            ctx.lineWidth = borderW * 2; // stroke is centered, half inside
+                            ctx.strokeRect(x, y, TILE, TILE);
+                        } else {
+                            ctx.drawImage(img, 0, 0, img.width, img.height, x, y, TILE, TILE);
+                        }
+                    }
+                }
+
+                // --- LABELS ---
+                if (useLabels && (artist || album)) {
+                    const innerX = useBorder ? x + borderW : x;
+                    const innerW = useBorder ? TILE - borderW * 2 : TILE;
+                    const innerBottom = useBorder ? y + TILE - borderW : y + TILE;
+
+                    // Semi-transparent dark bar (or opaque black if inside border)
+                    if (useBorder) {
+                        ctx.fillStyle = '#000';
+                    } else {
+                        ctx.fillStyle = 'rgba(0,0,0,0.62)';
+                    }
+                    ctx.fillRect(innerX, innerBottom - LABEL_H, innerW, LABEL_H);
+
+                    // Artist text
+                    ctx.fillStyle = '#fff';
+                    ctx.font = FONT_ARTIST;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'top';
+
+                    const textX = innerX + innerW / 2;
+                    const artistY = innerBottom - LABEL_H + PAD;
+                    const albumY = artistY + LINE_H;
+
+                    // Truncate if too wide
+                    const maxW = innerW - 8;
+                    ctx.fillText(truncate(ctx, artist, maxW), textX, artistY);
+
+                    ctx.font = FONT_ALBUM;
+                    ctx.fillStyle = '#ccc';
+                    ctx.fillText(truncate(ctx, album, maxW), textX, albumY);
                 }
             }
             return canvas.toDataURL('image/png');
         }
 
+        function truncate(ctx, text, maxW) {
+            if (!text) return '';
+            if (ctx.measureText(text).width <= maxW) return text;
+            let t = text;
+            while (t.length > 0 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+            return t + '…';
+        }
+
+        let _lastDataUrl = null;
+
         function displayResult(dataUrl) {
+            _lastDataUrl = dataUrl;
             const area = document.getElementById('outputArea');
             document.getElementById('collageResult').src = dataUrl;
             document.getElementById('btnDownload').href = dataUrl;
             area.style.display = 'flex';
             area.scrollIntoView({ behavior: 'smooth' });
         }
+
+        document.getElementById('btnCopy').addEventListener('click', async () => {
+            if (!_lastDataUrl) return;
+            try {
+                const blob = await (await fetch(_lastDataUrl)).blob();
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                notify('Collage copied to clipboard! 🎉');
+            } catch (err) {
+                notify('Could not copy: ' + (err.message || 'clipboard not supported'), 'error');
+            }
+        });
 
         // --- TABS ---
         document.querySelectorAll('.tab-btn').forEach(b => {
@@ -562,24 +680,25 @@
                 });
 
                 let albums = data.topalbums.album;
-                let urls = [];
+                let items = [];
 
                 for (let al of albums) {
                     const img = al.image.find(i => i.size === 'extralarge') || al.image[al.image.length - 1];
                     const url = img ? img['#text'] : '';
 
                     if (skip && (!url || url.includes('2a96ace'))) continue; // Lastfm default blank
-                    urls.push(url);
-                    if (urls.length === target) break;
+                    items.push({ url, artist: al.artist.name, album: al.name });
+                    if (items.length === target) break;
                 }
 
-                const res = await buildCollage(urls, cols, rows);
+                const res = await buildCollage(items, cols, rows);
                 displayResult(res);
             } catch (err) { notify(err.message, 'error'); }
             finally { btn.disabled = false; btn.innerText = "Generate Top Collage"; }
         });
 
         // --- CUSTOM LOGIC ---
+        // customItems: array of { url, artist, album }
         const updateCustMax = () => {
             const m = parseInt(document.getElementById('custCols').value) * parseInt(document.getElementById('custRows').value);
             document.getElementById('custMax').innerText = m;
@@ -602,9 +721,10 @@
                     const d = document.createElement('div');
                     d.className = 'img-card';
                     d.innerHTML = `<img src="${img}">`;
+                    d.title = `${al.artist} — ${al.name}`;
                     d.onclick = () => {
                         if (customItems.length < updateCustMax()) {
-                            customItems.push(img);
+                            customItems.push({ url: img, artist: al.artist, album: al.name });
                             renderCustom();
                         }
                     };
@@ -616,10 +736,11 @@
         function renderCustom() {
             const cont = document.getElementById('selectedContainer');
             cont.innerHTML = '';
-            customItems.forEach((url, i) => {
+            customItems.forEach((item, i) => {
                 const d = document.createElement('div');
                 d.className = 'img-card';
-                d.innerHTML = `<img src="${url}"><button class="remove-tag" onclick="event.stopPropagation(); customItems.splice(${i},1); renderCustom();">✕</button>`;
+                d.title = `${item.artist} — ${item.album}`;
+                d.innerHTML = `<img src="${item.url}"><button class="remove-tag" onclick="event.stopPropagation(); customItems.splice(${i},1); renderCustom();">✕</button>`;
                 cont.appendChild(d);
             });
             document.getElementById('custCount').innerText = customItems.length;
@@ -627,11 +748,13 @@
         }
 
         document.getElementById('btnGenCustom').onclick = async () => {
-            const url = await buildCollage(customItems, parseInt(document.getElementById('custCols').value), parseInt(document.getElementById('custRows').value));
-            displayResult(url);
+            const result = await buildCollage(customItems, parseInt(document.getElementById('custCols').value), parseInt(document.getElementById('custRows').value));
+            displayResult(result);
         };
 
         // --- ROULETTE LOGIC ---
+        let rouletteCurrent = null; // { url, artist, album }
+
         document.getElementById('btnStartRoulette').onclick = async () => {
             const c = parseInt(document.getElementById('roulCols').value);
             const r = parseInt(document.getElementById('roulRows').value);
@@ -657,20 +780,21 @@
                 if (albums.length === 0) return nextRoulette();
 
                 const pick = albums[Math.floor(Math.random() * albums.length)];
-                document.getElementById('roulImg').src = pick.image[3]['#text'];
-                document.getElementById('roulTitle').innerText = pick.name;
-                document.getElementById('roulSub').innerText = artist.name;
+                rouletteCurrent = { url: pick.image[3]['#text'], artist: artist.name, album: pick.name };
+                document.getElementById('roulImg').src = rouletteCurrent.url;
+                document.getElementById('roulTitle').innerText = rouletteCurrent.album;
+                document.getElementById('roulSub').innerText = rouletteCurrent.artist;
             } catch (e) { nextRoulette(); }
         }
 
         document.getElementById('btnRoulSkip').onclick = nextRoulette;
         document.getElementById('btnRoulAdd').onclick = async () => {
-            rouletteSelected.push(document.getElementById('roulImg').src);
+            if (rouletteCurrent) rouletteSelected.push({ ...rouletteCurrent });
             document.getElementById('roulProg').innerText = rouletteSelected.length;
             if (rouletteSelected.length === roulTargetCount) {
                 document.getElementById('rouletteGame').style.display = 'none';
-                const url = await buildCollage(rouletteSelected, parseInt(document.getElementById('roulCols').value), parseInt(document.getElementById('roulRows').value));
-                displayResult(url);
+                const result = await buildCollage(rouletteSelected, parseInt(document.getElementById('roulCols').value), parseInt(document.getElementById('roulRows').value));
+                displayResult(result);
             } else {
                 nextRoulette();
             }
@@ -678,5 +802,6 @@
 
     </script>
 </body>
+
 
 </html>
