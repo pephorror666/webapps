@@ -4,6 +4,8 @@
 
 📗 [Dictio](https://pephorror666.github.io/webapps/dictio/) an english dictionary with synonyms and writing tools
 
+📷 [Imgedit](https://pephorror666.github.io/webapps/imgedit/) filters and other tools to edit images
+
 📓 [Markdown Studio](https://pephorror666.github.io/webapps/markdown-editor/) markdown editor with real-time preview
 
 ➗ [Mathjs](https://pephorror666.github.io/webapps/maths/) numerical computing and matrix operations.
