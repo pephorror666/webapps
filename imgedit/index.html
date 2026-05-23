@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Imgedit | IARANN Image Editor</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Imgedit is a powerful, free online photo editor. Apply filters, adjust brightness and contrast, crop images, and add custom text with cool fonts.">
+    <meta name="keywords" content="photo editor, image editing, online filters, crop image, add text to photo, free image editor">
+    <meta name="author" content="Imgedits">
+    
+    <!-- Open Graph / Social Meta Tags -->
+    <meta property="og:title" content="Imgedit | IARANN Image Editor">
+    <meta property="og:description" content="Edit your photos with filters, adjustments, and custom typography all directly in your browser.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@500&family=Pacifico&family=Caveat:wght@600&family=Playfair+Display:ital,wght@0,700;1,700&family=Lobster&family=Anton&family=Bebas+Neue&family=Dancing+Script:wght@600&family=Righteous&family=Cinzel:wght@600&family=Permanent+Marker&family=Fredoka+One&family=Amatic+SC:wght@700&family=Bangers&family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #09090b;
+            --panel: #18181b;
+            --panel2: #27272a;
+            --border: #3f3f46;
+            --text: #f4f4f5;
+            --muted: #a1a1aa;
+            --accent: #8b5cf6;
+            --accent2: #7c3aed;
+            --accent-hover: #6d28d9;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --font-main: 'Inter', system-ui, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--panel);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #52525b;
+        }
+
+        #app {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 340px;
+            background: var(--panel);
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+            box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.right {
+            border-right: none;
+            border-left: 1px solid var(--border);
+            box-shadow: -4px 0 15px rgba(0,0,0,0.2);
+        }
+
+        .panel {
+            padding: 20px;
+            flex: 1;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .tabs {
+            display: flex;
+            position: sticky;
+            top: 0;
+            background: rgba(24, 24, 27, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px 10px;
+            background: none;
+            color: var(--muted);
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .tab:hover {
+            color: var(--text);
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+            background: rgba(139, 92, 246, 0.05);
+        }
+
+        .tabcontent {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tabcontent.active {
+            display: block;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background-image:
+                linear-gradient(45deg, #121214 25%, transparent 25%),
+                linear-gradient(-45deg, #121214 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #121214 75%),
+                linear-gradient(-45deg, transparent 75%, #121214 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            box-shadow: 0 0 40px rgba(0, 0, 0, .4);
+        }
+
+        .controls {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-size: .85rem;
+            margin-bottom: 8px;
+            color: #d4d4d8;
+            font-weight: 500;
+        }
+
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        input[type=text],
+        textarea,
+        select {
+            width: 100%;
+            background: #09090b;
+            border: 1px solid var(--border);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type=text]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        input[type=color] {
+            width: 100%;
+            height: 44px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #09090b;
+            padding: 2px;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+            font-family: var(--font-main);
+            box-shadow: 0 2px 10px rgba(139, 92, 246, 0.2);
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button.secondary {
+            background: var(--panel2);
+            box-shadow: none;
+            border: 1px solid var(--border);
+        }
+
+        button.secondary:hover {
+            background: #3f3f46;
+        }
+
+        button.danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            box-shadow: none;
+        }
+
+        button.danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .filter-btn {
+            background: var(--panel2);
+            font-size: .85rem;
+            padding: 10px;
+            margin-bottom: 0;
+            border: 1px solid transparent;
+            box-shadow: none;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--border);
+            background: #3f3f46;
+        }
+        
+        .filter-btn.active-filter {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .intensity-wrap {
+            background: rgba(0,0,0,0.2);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .crop-toolbar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .upload {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(9, 9, 11, 0.95);
+            backdrop-filter: blur(5px);
+            z-index: 50;
+            transition: opacity 0.3s;
+        }
+
+        .upload.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .upload h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #a855f7, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: .86rem;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        .crop-overlay {
+            position: absolute;
+            pointer-events: none;
+            border: 2px dashed #fff;
+            box-shadow: 0 0 0 99999px rgba(0, 0, 0, .6);
+            display: none;
+        }
+
+        .crop-overlay.active {
+            display: block;
+        }
+
+        /* Text Preview Area */
+        .text-preview-wrap {
+            margin-bottom: 16px;
+            padding: 16px;
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+            background-image:
+                linear-gradient(45deg, #121214 25%, transparent 25%),
+                linear-gradient(-45deg, #121214 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #121214 75%),
+                linear-gradient(-45deg, transparent 75%, #121214 75%);
+            background-size: 10px 10px;
+            background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+        }
+
+        #textPreview {
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .flex-row > * {
+            margin-bottom: 0;
+        }
+
+        @media(max-width:900px) {
+            #app {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+
+            .sidebar,
+            .sidebar.right {
+                width: 100%;
+                height: auto;
+                border: none;
+                overflow: visible;
+            }
+            
+            .sidebar.right {
+                border-top: 1px solid var(--border);
+            }
+
+            .main {
+                height: 50vh;
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+
+        <div class="sidebar">
+            <div class="tabs">
+                <button class="tab active" data-tab="filters">Filters</button>
+                <button class="tab" data-tab="adjust">Adjust</button>
+                <button class="tab" data-tab="crop">Crop</button>
+                <button class="tab" data-tab="text">Text</button>
+            </div>
+
+            <div class="panel">
+
+                <div class="tabcontent active" id="filters">
+                    <h2>Premium Filters</h2>
+                    <div class="intensity-wrap">
+                        <label>Filter Intensity <span id="intensityVal">100%</span></label>
+                        <input type="range" id="filterIntensity" min="0" max="100" value="100">
+                    </div>
+                    <div class="filters-grid" id="filtersGrid"></div>
+                </div>
+
+                <div class="tabcontent" id="adjust">
+                    <h2>Adjustments</h2>
+                    <div class="flex-row">
+                        <button class="secondary" id="undoBtn">↩ Undo</button>
+                        <button class="secondary" id="redoBtn">↪ Redo</button>
+                    </div>
+                    <div class="controls">
+                        <label>Brightness <span id="brightnessVal">100%</span></label>
+                        <input type="range" id="brightness" min="0" max="200" value="100">
+                    </div>
+                    <div class="controls">
+                        <label>Contrast <span id="contrastVal">100%</span></label>
+                        <input type="range" id="contrast" min="0" max="200" value="100">
+                    </div>
+                    <div class="controls">
+                        <label>Saturation <span id="saturationVal">100%</span></label>
+                        <input type="range" id="saturation" min="0" max="200" value="100">
+                    </div>
+                    <div class="controls">
+                        <label>Temperature <span id="temperatureVal">0</span></label>
+                        <input type="range" id="temperature" min="-100" max="100" value="0">
+                    </div>
+                    <div class="controls">
+                        <label>Fade <span id="fadeVal">0</span></label>
+                        <input type="range" id="fade" min="0" max="100" value="0">
+                    </div>
+                    <div class="controls">
+                        <label>Grain <span id="grainVal">0</span></label>
+                        <input type="range" id="grain" min="0" max="100" value="0">
+                    </div>
+                    <div class="controls">
+                        <label>Vignette <span id="vignetteVal">0</span></label>
+                        <input type="range" id="vignette" min="0" max="100" value="0">
+                    </div>
+                    <button class="secondary" id="resetAdjustBtn" style="margin-top: 10px;">Reset Adjustments</button>
+                </div>
+
+                <div class="tabcontent" id="crop">
+                    <h2>Crop Area</h2>
+                    <label>Aspect Ratio</label>
+                    <select id="cropRatio">
+                        <option value="free">Free Form</option>
+                        <option value="1:1">1:1 (Square)</option>
+                        <option value="4:5">4:5 (Portrait)</option>
+                        <option value="16:9">16:9 (Landscape)</option>
+                        <option value="9:16">9:16 (Story/Reel)</option>
+                        <option value="3:2">3:2 (Classic Film)</option>
+                    </select>
+                    <div class="crop-toolbar">
+                        <button id="startCrop">Select Area</button>
+                        <button class="secondary" id="applyCrop">Apply Crop</button>
+                    </div>
+                    <button class="danger" id="cancelCrop">Cancel Crop</button>
+                    <p style="color:var(--muted);font-size:.85rem;line-height:1.5;margin-top:12px;text-align:center;">
+                        Click "Select Area", then drag over the image to define the crop region.
+                    </p>
+                </div>
+
+                <div class="tabcontent" id="text">
+                    <h2>Add Text</h2>
+                    
+                    <label>Text Content</label>
+                    <input type="text" id="textInput" placeholder="Type something cool...">
+                    
+                    <div class="flex-row">
+                        <div style="flex: 2">
+                            <label>Font Family</label>
+                            <select id="textFont">
+                                <option value="Inter, sans-serif">Inter</option>
+                                <option value="Arial, sans-serif">Arial</option>
+                                <option value="Oswald, sans-serif">Oswald</option>
+                                <option value="Impact, sans-serif">Impact</option>
+                                <option value="Pacifico, cursive">Pacifico</option>
+                                <option value="'Caveat', cursive">Caveat</option>
+                                <option value="'Playfair Display', serif">Playfair Display</option>
+                                <option value="'Lobster', cursive">Lobster</option>
+                                <option value="'Anton', sans-serif">Anton</option>
+                                <option value="'Bebas Neue', sans-serif">Bebas Neue</option>
+                                <option value="'Dancing Script', cursive">Dancing Script</option>
+                                <option value="'Righteous', cursive">Righteous</option>
+                                <option value="'Cinzel', serif">Cinzel</option>
+                                <option value="'Permanent Marker', cursive">Permanent Marker</option>
+                                <option value="'Fredoka One', cursive">Fredoka One</option>
+                                <option value="'Amatic SC', cursive">Amatic SC</option>
+                                <option value="'Bangers', cursive">Bangers</option>
+                                <option value="'Press Start 2P', cursive">Press Start 2P</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1">
+                            <label>Color</label>
+                            <input type="color" id="textColor" value="#ffffff">
+                        </div>
+                    </div>
+                    
+                    <label>Size <span id="textSizeVal">60px</span></label>
+                    <input type="range" id="textSize" min="20" max="300" value="60">
+
+                    <label style="margin-top: 10px;">Preview</label>
+                    <div class="text-preview-wrap">
+                        <div id="textPreview">Type something...</div>
+                    </div>
+
+                    <button id="addText">Add to Image</button>
+                    <button class="danger" id="clearText">Clear All Text</button>
+                    
+                    <p style="color:var(--muted);font-size:.85rem;margin-top:12px;text-align:center;">
+                        Tip: Drag text to move it around the canvas.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="upload" id="uploadOverlay">
+                <h1>Imgedit</h1>
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <button style="width:280px; padding: 16px; font-size: 1.1rem; border-radius: 50px;" onclick="fileInput.click()">
+                    <svg style="width:20px;height:20px;vertical-align:middle;margin-right:8px;fill:currentColor" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    Select Image to Edit
+                </button>
+                <p style="margin-top:20px;color:var(--muted);font-size:1.1rem">or drag and drop an image here</p>
+            </div>
+            <div class="canvas-wrap" id="canvasWrap">
+                <canvas id="canvas"></canvas>
+                <div id="cropOverlay" class="crop-overlay"></div>
+            </div>
+        </div>
+
+        <div class="sidebar right">
+            <div class="panel">
+                <h2>Export & Actions</h2>
+                <div class="flex-row">
+                    <button class="secondary" id="loadFileBtn">Load New</button>
+                    <button class="danger" id="siteResetBtn">Reset All</button>
+                </div>
+                <button id="downloadBtn" style="background: var(--success);">
+                    <svg style="width:18px;height:18px;vertical-align:middle;margin-right:6px;fill:currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    Download PNG
+                </button>
+                <button class="secondary" id="copyBtn">Copy to Clipboard</button>
+                <div class="status" id="status"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const fileInput = document.getElementById('fileInput');
+        const uploadOverlay = document.getElementById('uploadOverlay');
+        const cropOverlay = document.getElementById('cropOverlay');
+
+        // Defaults mapping
+        const defaultFilters = {
+            brightness: 100,
+            contrast: 100,
+            saturation: 100,
+            temperature: 0,
+            fade: 0,
+            grain: 0,
+            vignette: 0
+        };
+
+        const state = {
+            image: null,
+            loaded: false,
+            preset: 'normal',
+            filterIntensity: 100,
+            texts: [],
+            filters: { ...defaultFilters },
+            cropMode: false,
+            crop: null,
+            draggingText: -1,
+            history: [],
+            historyIndex: -1,
+            isSelectingCrop: false
+        };
+
+        // Improved presets with better realism
+        const presets = {
+            normal: {},
+            clarendon: { contrast: 120, saturation: 125, vignette: 15 },
+            gingham: { fade: 20, temperature: 10, saturation: 90 },
+            lark: { brightness: 110, saturation: 115 },
+            reyes: { fade: 25, saturation: 70, temperature: 15 },
+            juno: { contrast: 115, saturation: 145, temperature: 10 },
+            slumber: { fade: 30, saturation: 65, temperature: 20 },
+            valencia: { temperature: 20, saturation: 120, fade: 15 },
+            aden: { fade: 35, saturation: 80, temperature: 25 },
+            perpetua: { brightness: 108, temperature: -10, contrast: 105 },
+            rise: { fade: 20, temperature: 15, contrast: 95 },
+            hudson: { temperature: -20, contrast: 125 },
+            inkwell: { saturation: 0, contrast: 130 },
+            moon: { saturation: 5, fade: 15, contrast: 110 },
+            stinson: { brightness: 115, saturation: 85, fade: 5 },
+            ashby: { temperature: 20, fade: 18, contrast: 105 },
+            film400: { grain: 40, fade: 12, saturation: 110 },
+            kodakGold: { temperature: 30, saturation: 130, fade: 10, contrast: 110 },
+            fujiSuperia: { temperature: -15, saturation: 145, contrast: 120, grain: 15 },
+            polaroid: { fade: 40, saturation: 80, temperature: 25, vignette: 20 },
+            cinestill: { temperature: 22, contrast: 125, grain: 30, saturation: 115 },
+            leica: { contrast: 140, saturation: 90, vignette: 10 },
+            expiredFilm: { fade: 45, grain: 60, temperature: 35, saturation: 70 },
+            nightcity: { contrast: 150, saturation: 140, vignette: 30, temperature: -10 },
+            blackgold: { saturation: 0, contrast: 160, fade: 5, vignette: 15 }
+        };
+
+        function saveHistory() {
+            if (state.historyIndex < state.history.length - 1) {
+                state.history = state.history.slice(0, state.historyIndex + 1);
+            }
+
+            const snapshot = {
+                filters: { ...state.filters },
+                preset: state.preset,
+                filterIntensity: state.filterIntensity,
+                texts: JSON.parse(JSON.stringify(state.texts)),
+                imageSrc: state.image ? state.image.src : null
+            };
+
+            state.history.push(snapshot);
+            state.historyIndex++;
+
+            if (state.history.length > 20) {
+                state.history.shift();
+                state.historyIndex--;
+            }
+        }
+
+        function undo() {
+            if (state.historyIndex > 0) {
+                state.historyIndex--;
+                applyHistoryState(state.history[state.historyIndex]);
+            }
+        }
+
+        function redo() {
+            if (state.historyIndex < state.history.length - 1) {
+                state.historyIndex++;
+                applyHistoryState(state.history[state.historyIndex]);
+            }
+        }
+
+        function applyHistoryState(snapshot) {
+            state.filters = { ...snapshot.filters };
+            state.preset = snapshot.preset;
+            state.filterIntensity = snapshot.filterIntensity;
+            state.texts = JSON.parse(JSON.stringify(snapshot.texts));
+
+            if (snapshot.imageSrc && (!state.image || state.image.src !== snapshot.imageSrc)) {
+                const img = new Image();
+                img.onload = () => {
+                    state.image = img;
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    syncUI();
+                    render();
+                };
+                img.src = snapshot.imageSrc;
+            } else {
+                syncUI();
+                render();
+            }
+        }
+
+        function syncUI() {
+            Object.keys(state.filters).forEach(k => {
+                const el = document.getElementById(k);
+                if (el) el.value = state.filters[k];
+            });
+            document.getElementById('filterIntensity').value = state.filterIntensity;
+            updateLabels();
+            updateActiveFilterButton();
+        }
+
+        function createFilterButtons() {
+            const grid = document.getElementById('filtersGrid');
+            Object.keys(presets).forEach(name => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn';
+                btn.innerText = name.charAt(0).toUpperCase() + name.slice(1);
+                btn.dataset.preset = name;
+                btn.onclick = () => selectPreset(name);
+                grid.appendChild(btn);
+            });
+            updateActiveFilterButton();
+        }
+        createFilterButtons();
+
+        function updateActiveFilterButton() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.preset === state.preset) {
+                    btn.classList.add('active-filter');
+                } else {
+                    btn.classList.remove('active-filter');
+                }
+            });
+        }
+
+        function selectPreset(name) {
+            state.preset = name;
+            state.filterIntensity = 100;
+            document.getElementById('filterIntensity').value = 100;
+            updateActiveFilterButton();
+            applyCurrentPresetValues();
+            saveHistory();
+        }
+
+        function applyCurrentPresetValues() {
+            const targetPreset = presets[state.preset];
+            const intensity = state.filterIntensity / 100;
+
+            Object.keys(defaultFilters).forEach(k => {
+                const normalVal = defaultFilters[k];
+                const presetVal = targetPreset[k] !== undefined ? targetPreset[k] : normalVal;
+                
+                // Interpolate
+                state.filters[k] = Math.round(normalVal + (presetVal - normalVal) * intensity);
+                
+                const el = document.getElementById(k);
+                if (el) el.value = state.filters[k];
+            });
+            
+            updateLabels();
+            render();
+        }
+
+        // Handle intensity slider
+        document.getElementById('filterIntensity').addEventListener('input', (e) => {
+            state.filterIntensity = parseInt(e.target.value);
+            document.getElementById('intensityVal').innerText = state.filterIntensity + '%';
+            applyCurrentPresetValues();
+        });
+        document.getElementById('filterIntensity').addEventListener('change', saveHistory);
+
+        function updateLabels() {
+            Object.keys(state.filters).forEach(k => {
+                const el = document.getElementById(k + 'Val');
+                if (el) el.innerText = state.filters[k] + (k.includes('brightness') || k.includes('contrast') || k.includes('saturation') ? '%' : '');
+            });
+            document.getElementById('intensityVal').innerText = state.filterIntensity + '%';
+        }
+
+        function render() {
+            if (!state.loaded || !state.image) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.filter = `brightness(${state.filters.brightness}%) contrast(${state.filters.contrast}%) saturate(${state.filters.saturation}%)`;
+            ctx.drawImage(state.image, 0, 0, canvas.width, canvas.height);
+            ctx.filter = 'none';
+
+            applyTemperature();
+            applyFade();
+            applyVignette();
+            applyGrain();
+
+            state.texts.forEach(t => {
+                ctx.font = `bold ${t.size}px ${t.font}`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // Text stroke for better visibility
+                ctx.lineWidth = Math.max(t.size * 0.08, 2);
+                ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+                ctx.strokeText(t.text, t.x, t.y);
+                
+                ctx.fillStyle = t.color;
+                ctx.fillText(t.text, t.x, t.y);
+            });
+        }
+
+        function applyTemperature() {
+            const temp = state.filters.temperature;
+            if (temp === 0) return;
+            ctx.fillStyle = temp > 0
+                ? `rgba(255,140,0,${Math.abs(temp) / 400})`
+                : `rgba(0,120,255,${Math.abs(temp) / 400})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function applyFade() {
+            const fade = state.filters.fade;
+            if (fade <= 0) return;
+            ctx.fillStyle = `rgba(255,245,230,${fade / 250})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function applyVignette() {
+            const v = state.filters.vignette;
+            if (v <= 0) return;
+            const g = ctx.createRadialGradient(
+                canvas.width / 2,
+                canvas.height / 2,
+                canvas.width * .2,
+                canvas.width / 2,
+                canvas.height / 2,
+                canvas.width * .7
+            );
+
+            g.addColorStop(0, 'rgba(0,0,0,0)');
+            g.addColorStop(1, `rgba(0,0,0,${v / 100})`);
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function applyGrain() {
+            const amount = state.filters.grain;
+            if (amount <= 0) return;
+            const density = amount * 120;
+            for (let i = 0; i < density; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const alpha = Math.random() * 0.15;
+                ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+                ctx.fillRect(x, y, 1, 1);
+            }
+        }
+
+        function loadImage(src) {
+            const img = new Image();
+            img.onload = () => {
+                let w = img.width;
+                let h = img.height;
+                const max = 2200;
+                if (w > max || h > max) {
+                    const r = Math.min(max / w, max / h);
+                    w *= r;
+                    h *= r;
+                }
+                canvas.width = w;
+                canvas.height = h;
+                state.image = img;
+                state.loaded = true;
+                uploadOverlay.classList.add('hidden');
+                
+                // Clear state
+                state.texts = [];
+                state.preset = 'normal';
+                state.filterIntensity = 100;
+                state.filters = { ...defaultFilters };
+                syncUI();
+                
+                render();
+                saveHistory(); // Save initial state after load
+            };
+            img.src = src;
+        }
+
+        fileInput.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => loadImage(ev.target.result);
+            reader.readAsDataURL(file);
+        });
+
+        document.body.addEventListener('dragover', e => e.preventDefault());
+        document.body.addEventListener('drop', e => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => loadImage(ev.target.result);
+            reader.readAsDataURL(file);
+        });
+
+        // Setup Adjustment Sliders
+        Object.keys(defaultFilters).forEach(k => {
+            const el = document.getElementById(k);
+            if (!el) return;
+            el.addEventListener('input', () => {
+                state.filters[k] = parseInt(el.value);
+                // If user manually adjusts, we should probably reset preset selection visually
+                state.preset = 'custom';
+                updateActiveFilterButton();
+                updateLabels();
+                render();
+            });
+            el.addEventListener('change', saveHistory);
+        });
+
+        updateLabels();
+
+        // Tabs
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tabcontent').forEach(t => t.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            };
+        });
+
+        document.getElementById('resetAdjustBtn').onclick = () => selectPreset('normal');
+
+        document.getElementById('siteResetBtn').onclick = () => {
+            if (confirm('Are you sure you want to reset the whole site? All progress will be lost.')) {
+                window.location.reload();
+            }
+        };
+
+        document.getElementById('loadFileBtn').onclick = () => fileInput.click();
+
+        // Text Tool Logic
+        const textInput = document.getElementById('textInput');
+        const textColor = document.getElementById('textColor');
+        const textSize = document.getElementById('textSize');
+        const textFont = document.getElementById('textFont');
+        const textPreview = document.getElementById('textPreview');
+        const textSizeVal = document.getElementById('textSizeVal');
+
+        function updateTextPreview() {
+            const txt = textInput.value.trim() || 'Type something...';
+            const size = textSize.value;
+            
+            textPreview.innerText = txt;
+            textPreview.style.color = textColor.value;
+            textPreview.style.fontFamily = textFont.value;
+            // Scale down size for preview if too large, but give an idea
+            textPreview.style.fontSize = Math.min(size, 48) + 'px'; 
+            
+            textSizeVal.innerText = size + 'px';
+        }
+
+        textInput.addEventListener('input', updateTextPreview);
+        textColor.addEventListener('input', updateTextPreview);
+        textSize.addEventListener('input', updateTextPreview);
+        textFont.addEventListener('change', updateTextPreview);
+
+        document.getElementById('addText').onclick = () => {
+            if (!state.loaded) return;
+            const txt = textInput.value.trim();
+            if (!txt) {
+                alert("Please type some text first.");
+                return;
+            }
+            state.texts.push({
+                text: txt,
+                color: textColor.value,
+                size: parseInt(textSize.value),
+                font: textFont.value,
+                x: canvas.width / 2,
+                y: canvas.height / 2
+            });
+            render();
+            saveHistory();
+            
+            // Clear input for next text
+            textInput.value = '';
+            updateTextPreview();
+        };
+
+        document.getElementById('clearText').onclick = () => {
+            if(state.texts.length === 0) return;
+            state.texts = [];
+            render();
+            saveHistory();
+        };
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            // Handle touch or mouse
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        function handleDragStart(e) {
+            if (!state.loaded) return;
+            if (state.cropMode) {
+                const p = getPos(e);
+                if (!state.isSelectingCrop) {
+                    state.crop = { x: p.x, y: p.y, w: 0, h: 0 };
+                    state.isSelectingCrop = true;
+                } else {
+                    state.isSelectingCrop = false;
+                }
+                updateCropOverlay();
+                return;
+            }
+            const p = getPos(e);
+            for (let i = state.texts.length - 1; i >= 0; i--) {
+                const t = state.texts[i];
+                ctx.font = `bold ${t.size}px ${t.font}`;
+                const w = ctx.measureText(t.text).width;
+                if (p.x > t.x - w / 2 && p.x < t.x + w / 2 && p.y > t.y - t.size / 2 && p.y < t.y + t.size / 2) {
+                    state.draggingText = i;
+                    break;
+                }
+            }
+        }
+
+        function handleDragMove(e) {
+            if (state.cropMode && state.crop && state.isSelectingCrop) {
+                const p = getPos(e);
+                let w = p.x - state.crop.x;
+                let h = p.y - state.crop.y;
+
+                const ratio = document.getElementById('cropRatio').value;
+                if (ratio !== 'free') {
+                    const parts = ratio.split(':');
+                    const r = parseFloat(parts[0]) / parseFloat(parts[1]);
+                    if (Math.abs(w) / r < Math.abs(h)) {
+                        h = (Math.abs(w) / r) * (h < 0 ? -1 : 1);
+                    } else {
+                        w = (Math.abs(h) * r) * (w < 0 ? -1 : 1);
+                    }
+                }
+
+                state.crop.w = w;
+                state.crop.h = h;
+                updateCropOverlay();
+                return;
+            }
+
+            if (state.draggingText > -1) {
+                const p = getPos(e);
+                state.texts[state.draggingText].x = p.x;
+                state.texts[state.draggingText].y = p.y;
+                render();
+            }
+        }
+
+        function handleDragEnd() {
+            if (state.draggingText > -1) {
+                state.draggingText = -1;
+                saveHistory(); // Save after dragging completes
+            }
+        }
+
+        canvas.addEventListener('mousedown', handleDragStart);
+        canvas.addEventListener('mousemove', handleDragMove);
+        window.addEventListener('mouseup', handleDragEnd);
+
+        // Touch support for mobile
+        canvas.addEventListener('touchstart', e => { e.preventDefault(); handleDragStart(e); }, {passive: false});
+        canvas.addEventListener('touchmove', e => { e.preventDefault(); handleDragMove(e); }, {passive: false});
+        window.addEventListener('touchend', handleDragEnd);
+
+        function updateCropOverlay() {
+            if (!state.crop) return;
+            const rect = canvas.getBoundingClientRect();
+            const wrapRect = document.getElementById('canvasWrap').getBoundingClientRect();
+            const scaleX = rect.width / canvas.width;
+            const scaleY = rect.height / canvas.height;
+
+            cropOverlay.classList.add('active');
+
+            const x = Math.min(state.crop.x, state.crop.x + state.crop.w);
+            const y = Math.min(state.crop.y, state.crop.y + state.crop.h);
+            const w = Math.abs(state.crop.w);
+            const h = Math.abs(state.crop.h);
+
+            cropOverlay.style.left = (rect.left - wrapRect.left + x * scaleX) + 'px';
+            cropOverlay.style.top = (rect.top - wrapRect.top + y * scaleY) + 'px';
+            cropOverlay.style.width = (w * scaleX) + 'px';
+            cropOverlay.style.height = (h * scaleY) + 'px';
+        }
+
+        document.getElementById('startCrop').onclick = () => {
+            state.cropMode = true;
+            state.isSelectingCrop = false;
+        };
+
+        document.getElementById('cancelCrop').onclick = () => {
+            state.cropMode = false;
+            state.crop = null;
+            state.isSelectingCrop = false;
+            cropOverlay.classList.remove('active');
+        };
+
+        document.getElementById('applyCrop').onclick = () => {
+            if (!state.crop || !state.loaded) return;
+
+            const sx = Math.min(state.crop.x, state.crop.x + state.crop.w);
+            const sy = Math.min(state.crop.y, state.crop.y + state.crop.h);
+            const sw = Math.abs(state.crop.w);
+            const sh = Math.abs(state.crop.h);
+
+            if (sw < 10 || sh < 10) return;
+
+            const temp = document.createElement('canvas');
+            temp.width = sw;
+            temp.height = sh;
+            const t = temp.getContext('2d');
+            t.drawImage(state.image, sx, sy, sw, sh, 0, 0, sw, sh);
+
+            const croppedImg = new Image();
+            croppedImg.onload = () => {
+                state.image = croppedImg;
+                canvas.width = sw;
+                canvas.height = sh;
+                state.crop = null;
+                state.cropMode = false;
+                state.isSelectingCrop = false;
+                cropOverlay.classList.remove('active');
+                
+                // Adjust text positions relative to crop
+                state.texts.forEach(txt => {
+                    txt.x -= sx;
+                    txt.y -= sy;
+                });
+                
+                saveHistory();
+                render();
+            };
+            croppedImg.src = temp.toDataURL('image/png');
+        };
+
+        document.getElementById('undoBtn').onclick = undo;
+        document.getElementById('redoBtn').onclick = redo;
+
+        document.getElementById('downloadBtn').onclick = () => {
+            if (!state.loaded) return;
+            const a = document.createElement('a');
+            a.href = canvas.toDataURL('image/png', 1);
+            a.download = 'imgedit-' + Date.now() + '.png';
+            a.click();
+        };
+
+        function updateStatus(msg, color = 'var(--muted)') {
+            const s = document.getElementById('status');
+            if (s) {
+                s.innerText = msg;
+                s.style.color = color;
+            }
+        }
+
+        document.getElementById('copyBtn').onclick = async () => {
+            if (!state.loaded) return;
+            try {
+                updateStatus('Copying to clipboard...', '#fcd34d');
+                const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                updateStatus('Image copied to clipboard!', 'var(--success)');
+                setTimeout(() => updateStatus(''), 3000);
+            } catch (err) {
+                updateStatus('Error copying: ' + err.message, 'var(--danger)');
+                console.error(err);
+            }
+        };
+
+        // Initialize preview
+        updateTextPreview();
+
+    </script>
+</body>
+
+</html>
