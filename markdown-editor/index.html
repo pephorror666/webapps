@@ -4,11 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Markdown Studio by IARANN - A lightweight, autonomous, and modern Markdown editor and processor. Features syntax highlighting, sync scrolling, and local autosave.">
+    <meta name="keywords"
+        content="Markdown, Editor, Markdown Studio, IARANN, text editor, markdown processor, offline markdown, syntax highlighting">
+    <meta name="author" content="IARANN">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Markdown Studio | IARANN">
+    <meta property="og:description" content="A simple, lightweight, autonomous, and modern Markdown editor.">
+    <meta property="og:type" content="website">
     <title>Markdown Studio | IARANN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Silkscreen&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Silkscreen&family=Fira+Code:wght@400;500&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+        id="hljs-theme">
     <style>
         /* Base Variables & Reset */
         :root {
@@ -21,7 +33,7 @@
             --primary-hover: #005a9e;
             --toolbar-bg: #e1e1e1;
             --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
-            --font-mono: 'Courier New', Courier, monospace;
+            --font-mono: 'Fira Code', 'Courier New', Courier, monospace;
             --glass-blur: 0px;
             --radius: 4px;
         }
@@ -241,12 +253,29 @@
 
         .editor-container,
         .preview-container {
-            flex: 1;
             display: flex;
             flex-direction: column;
             width: 50%;
             height: 100%;
+        }
+
+        .editor-container {
             border-right: 1px solid var(--border);
+        }
+
+        .resizer {
+            width: 6px;
+            background: var(--border);
+            cursor: col-resize;
+            transition: background 0.2s;
+            z-index: 10;
+            margin-left: -3px;
+            margin-right: -3px;
+        }
+
+        .resizer:hover,
+        .resizer.dragging {
+            background: var(--primary);
         }
 
         .view-hidden {
@@ -256,6 +285,25 @@
         .view-full {
             width: 100% !important;
             flex: none;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
         }
 
         textarea#editor {
@@ -272,11 +320,15 @@
             line-height: 1.5;
         }
 
+        textarea#editor.dragover {
+            background: rgba(0, 120, 215, 0.1);
+            border: 2px dashed var(--primary);
+        }
+
         .preview-container {
             background: var(--surface);
             padding: 15px;
             overflow-y: auto;
-            border-right: none;
         }
 
         /* Markdown Preview Styles */
@@ -625,8 +677,10 @@
 
         <main class="workspace">
             <div class="editor-container" id="editorWrapper">
-                <textarea id="editor" placeholder="Start typing markdown here..."></textarea>
+                <textarea id="editor"
+                    placeholder="Start typing markdown here... (You can also drag & drop .md files)"></textarea>
             </div>
+            <div class="resizer" id="resizer"></div>
             <div class="preview-container" id="previewWrapper">
                 <div id="preview"></div>
             </div>
@@ -634,7 +688,8 @@
 
         <footer class="statusbar">
             <div>
-                <span id="wordCount">0</span> words | <span id="charCount">0</span> characters
+                <span id="wordCount">0</span> words | <span id="charCount">0</span> chars | <span
+                    id="readingTime">0</span> min read
             </div>
             <div>
                 <span id="saveStatus">All changes saved locally</span> | Markdown Parser: <span
@@ -642,6 +697,22 @@
             </div>
         </footer>
     </div>
+
+    <dialog id="searchReplaceModal">
+        <div class="dialog-header">
+            <h3>Search & Replace</h3>
+            <button class="close-btn" onclick="document.getElementById('searchReplaceModal').close()">&times;</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <input type="text" id="searchInput" placeholder="Search for..."
+                style="padding:8px; border:1px solid var(--border); border-radius:4px; background:var(--bg-color); color:var(--text);">
+            <input type="text" id="replaceInput" placeholder="Replace with..."
+                style="padding:8px; border:1px solid var(--border); border-radius:4px; background:var(--bg-color); color:var(--text);">
+            <button onclick="app.editor.executeSearchReplace()"
+                style="padding:8px; background:var(--primary); color:white; border:none; border-radius:4px; cursor:pointer;">Replace
+                All</button>
+        </div>
+    </dialog>
 
     <dialog id="guideModal">
         <div class="dialog-header">
@@ -750,8 +821,10 @@
                     preview: document.getElementById('preview'),
                     editorWrapper: document.getElementById('editorWrapper'),
                     previewWrapper: document.getElementById('previewWrapper'),
+                    resizer: document.getElementById('resizer'),
                     wordCount: document.getElementById('wordCount'),
                     charCount: document.getElementById('charCount'),
+                    readingTime: document.getElementById('readingTime'),
                     saveStatus: document.getElementById('saveStatus'),
                     fileInput: document.getElementById('fileInput'),
                     win98css: document.getElementById('win98-css')
@@ -797,6 +870,67 @@
                 this.dom.editor.addEventListener('keydown', this.editor.handleShortcuts.bind(this.editor));
                 this.dom.fileInput.addEventListener('change', this.file.handleLocalFile.bind(this.file));
 
+                // Sync Scrolling
+                let isSyncingLeft = false;
+                let isSyncingRight = false;
+                this.dom.editor.addEventListener('scroll', () => {
+                    if (!isSyncingLeft) {
+                        isSyncingRight = true;
+                        const percentage = this.dom.editor.scrollTop / (this.dom.editor.scrollHeight - this.dom.editor.clientHeight);
+                        this.dom.previewWrapper.scrollTop = percentage * (this.dom.previewWrapper.scrollHeight - this.dom.previewWrapper.clientHeight);
+                    }
+                    isSyncingLeft = false;
+                });
+                this.dom.previewWrapper.addEventListener('scroll', () => {
+                    if (!isSyncingRight) {
+                        isSyncingLeft = true;
+                        const percentage = this.dom.previewWrapper.scrollTop / (this.dom.previewWrapper.scrollHeight - this.dom.previewWrapper.clientHeight);
+                        this.dom.editor.scrollTop = percentage * (this.dom.editor.scrollHeight - this.dom.editor.clientHeight);
+                    }
+                    isSyncingRight = false;
+                });
+
+                // Resizer Drag Logic
+                let isResizing = false;
+                this.dom.resizer.addEventListener('mousedown', (e) => {
+                    isResizing = true;
+                    this.dom.resizer.classList.add('dragging');
+                    document.body.style.cursor = 'col-resize';
+                    e.preventDefault();
+                });
+                document.addEventListener('mousemove', (e) => {
+                    if (!isResizing) return;
+                    const container = document.querySelector('.workspace');
+                    const leftWidth = e.clientX - container.offsetLeft;
+                    const rightWidth = container.clientWidth - leftWidth - this.dom.resizer.offsetWidth;
+
+                    if (leftWidth > 150 && rightWidth > 150) {
+                        this.dom.editorWrapper.style.width = `${leftWidth}px`;
+                        this.dom.editorWrapper.style.flex = 'none';
+                        this.dom.previewWrapper.style.width = `${rightWidth}px`;
+                        this.dom.previewWrapper.style.flex = 'none';
+                    }
+                });
+                document.addEventListener('mouseup', () => {
+                    if (isResizing) {
+                        isResizing = false;
+                        this.dom.resizer.classList.remove('dragging');
+                        document.body.style.cursor = 'default';
+                    }
+                });
+
+                // Drag & Drop for .md files
+                const ed = this.dom.editor;
+                ed.addEventListener('dragover', (e) => { e.preventDefault(); ed.classList.add('dragover'); });
+                ed.addEventListener('dragleave', () => ed.classList.remove('dragover'));
+                ed.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    ed.classList.remove('dragover');
+                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                        this.file.handleLocalFile({ target: { files: e.dataTransfer.files } });
+                    }
+                });
+
                 // Attempt to load robust parser
                 this.loadMarkedLibrary();
 
@@ -805,22 +939,43 @@
                 this.saveHistory(true);
             },
 
+            loadScript(src) {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = src;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            },
+
             loadMarkedLibrary() {
-                const script = document.createElement('script');
-                script.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
-                script.onload = () => {
+                Promise.all([
+                    this.loadScript("https://cdn.jsdelivr.net/npm/marked/marked.min.js"),
+                    this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"),
+                    this.loadScript("https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js")
+                ]).then(() => {
                     document.getElementById('parserStatus').innerText = "Marked.js (Online)";
-                    this.updatePreview(); // Re-render with robust parser
-                };
-                script.onerror = () => {
-                    console.warn("Could not load marked.js. Using fallback parser.");
-                };
-                document.head.appendChild(script);
+                    if (window.marked && window.hljs) {
+                        marked.setOptions({
+                            highlight: function (code, lang) {
+                                if (lang && hljs.getLanguage(lang)) {
+                                    return hljs.highlight(code, { language: lang }).value;
+                                }
+                                return hljs.highlightAuto(code).value;
+                            }
+                        });
+                    }
+                    this.updatePreview();
+                }).catch(err => {
+                    console.warn("Could not load external libraries. Using fallback parser.", err);
+                });
             },
 
             parseMarkdown(text) {
-                if (window.marked) {
-                    return marked.parse(text);
+                if (window.marked && window.DOMPurify) {
+                    const rawHtml = marked.parse(text);
+                    return DOMPurify.sanitize(rawHtml);
                 }
                 return fallbackParser(text);
             },
@@ -833,6 +988,7 @@
                 const words = text.trim() ? text.trim().split(/\s+/).length : 0;
                 this.dom.wordCount.innerText = words;
                 this.dom.charCount.innerText = text.length;
+                this.dom.readingTime.innerText = Math.ceil(words / 200);
             },
 
             showToast(message) {
@@ -924,21 +1080,28 @@
                     const end = editor.selectionEnd;
                     const text = editor.value;
                     const selectedText = text.substring(start, end);
-
                     const replacement = prefix + selectedText + suffix;
-                    editor.value = text.substring(0, start) + replacement + text.substring(end);
+
+                    editor.focus();
+                    let success = false;
+                    try {
+                        success = document.execCommand('insertText', false, replacement);
+                    } catch (e) { }
+
+                    if (!success) {
+                        editor.value = text.substring(0, start) + replacement + text.substring(end);
+                    }
 
                     // Restore selection
-                    editor.focus();
                     if (selectedText.length > 0) {
-                        editor.selectionStart = start;
-                        editor.selectionEnd = start + replacement.length;
+                        editor.selectionStart = start + prefix.length;
+                        editor.selectionEnd = start + prefix.length + selectedText.length;
                     } else {
                         editor.selectionStart = editor.selectionEnd = start + prefix.length;
                     }
 
                     app.updatePreview();
-                    app.saveHistory();
+                    if (!success) app.saveHistory();
                     app.debouncedSave();
                 },
                 insertTable() {
@@ -962,17 +1125,35 @@
                     }
                 },
                 searchReplace() {
-                    const searchStr = prompt("Enter text to search:");
+                    document.getElementById('searchReplaceModal').showModal();
+                },
+                executeSearchReplace() {
+                    const searchStr = document.getElementById('searchInput').value;
+                    const replaceStr = document.getElementById('replaceInput').value;
                     if (!searchStr) return;
-                    const replaceStr = prompt(`Replace "${searchStr}" with:`);
-                    if (replaceStr === null) return;
 
                     const editor = app.dom.editor;
                     const regex = new RegExp(searchStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-                    editor.value = editor.value.replace(regex, replaceStr);
+                    const originalText = editor.value;
+                    const newText = originalText.replace(regex, replaceStr);
+
+                    if (originalText !== newText) {
+                        editor.focus();
+                        editor.select();
+                        let success = false;
+                        try {
+                            success = document.execCommand('insertText', false, newText);
+                        } catch (e) { }
+                        if (!success) {
+                            editor.value = newText;
+                            app.saveHistory();
+                        }
+                    }
+
                     app.updatePreview();
-                    app.saveHistory();
                     app.debouncedSave();
+                    document.getElementById('searchReplaceModal').close();
+                    app.showToast("Replace complete");
                 },
                 handleShortcuts(e) {
                     if (e.ctrlKey || e.metaKey) {
@@ -1045,7 +1226,7 @@
                     app.showToast("Markdown saved");
                 },
                 saveHtml() {
-                    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Exported Document</title><style>body{font-family:system-ui,sans-serif;line-height:1.6;max-width:800px;margin:2em auto;padding:0 1em;} pre{background:#eee;padding:1em;} code{background:#eee;padding:.2em;}</style></head><body>${app.dom.preview.innerHTML}</body></html>`;
+                    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Exported Document</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><style>body{font-family:system-ui,sans-serif;line-height:1.6;max-width:800px;margin:2em auto;padding:0 1em;} pre{background:#f6f8fa;padding:1em;border-radius:6px;overflow:auto;} code{font-family:'Fira Code', monospace;}</style></head><body>${app.dom.preview.innerHTML}</body></html>`;
                     this.downloadBlob(html, 'document.html', 'text/html');
                     app.showToast("HTML exported");
                 },
