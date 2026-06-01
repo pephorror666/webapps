@@ -6,7 +6,7 @@
     <title>RawRottenRadio | Live Stream</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rajdhani:wght=500;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -110,7 +110,7 @@
             border-radius: 10px;
             padding: 5px;
             overflow: hidden;
-            min-height: 300px; /* Evita saltos visuales mientras carga el script */
+            min-height: 300px;
         }
 
         /* Footer */
@@ -128,7 +128,6 @@
             100% { opacity: 1; box-shadow: 0 0 5px var(--primary-red); }
         }
 
-        /* Ajustes para móviles */
         @media (max-width: 480px) {
             .glass-panel {
                 padding: 1.5rem 1rem;
@@ -142,7 +141,6 @@
 <body>
 
     <header>
-        <!-- Logo referenciado según tus archivos -->
         <img src="rawrottenradio_weelogo.jpg" alt="RawRottenRadio" class="main-logo">
     </header>
 
@@ -153,7 +151,7 @@
             <h1 class="station-name">Raw Rotten Radio</h1>
 
             <div class="player-wrapper">
-                <!-- BLOQUE DE CASTER.FM ACTUALIZADO -->
+                <!-- BLOQUE DE CASTER.FM -->
                 <div class="cstrEmbed" 
                      data-type="newStreamPlayer" 
                      data-publicToken="5583d08f-6a93-4b13-9c2d-eb9b59416a58" 
@@ -174,7 +172,37 @@
         <p>STAY ROTTEN, STAY LOUD</p>
     </footer>
 
-    <!-- Script de Caster.fm al final para optimizar carga -->
+    <!-- Elemento de audio nativo y silencioso para forzar el Wake Lock del navegador -->
+    <audio id="silentWakeLock" loop>
+        <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAAAD" type="audio/wav">
+    </audio>
+
+    <script>
+        /**
+         * Solución al Throttling de Pestaña en Segundo Plano
+         * Crea un "Ancla de Audio" nativa para engañar a los hilos de ahorro de energía del navegador.
+         */
+        const wakeLockAudio = document.getElementById('silentWakeLock');
+
+        function activateAudioWakeLock() {
+            if (wakeLockAudio.paused) {
+                wakeLockAudio.play().then(() => {
+                    console.log('Audio Wake Lock activo de manera silenciosa.');
+                    // Limpieza de eventos una vez activado exitosamente
+                    window.removeEventListener('click', activateAudioWakeLock);
+                    window.removeEventListener('touchstart', activateAudioWakeLock);
+                }).catch(err => {
+                    console.log('Esperando interacción del usuario para el Wake Lock...');
+                });
+            }
+        }
+
+        // Activación inmediata cuando el usuario hace clic o interactúa con el reproductor
+        window.addEventListener('click', activateAudioWakeLock);
+        window.addEventListener('touchstart', activateAudioWakeLock);
+    </script>
+
+    <!-- Script oficial de Caster.fm -->
     <script src="//cdn.cloud.caster.fm//widgets/embed.js"></script>
 
 </body>
