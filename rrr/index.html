@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RawRottenRadio | Live Stream</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #080808;
+            --panel-color: #121212;
+            --primary-red: #df2020;
+            --accent-white: #f5f5f5;
+            --glow: rgba(223, 32, 32, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            color: var(--accent-white);
+            font-family: 'Rajdhani', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Header con el logo oficial */
+        header {
+            width: 100%;
+            max-width: 500px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+        }
+
+        .main-logo {
+            width: 100%;
+            height: auto;
+            max-width: 400px;
+            filter: drop-shadow(0 0 10px var(--glow));
+            transition: transform 0.3s ease;
+        }
+
+        .main-logo:hover {
+            transform: scale(1.03) rotate(-1deg);
+        }
+
+        /* Contenedor del Reproductor */
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .glass-panel {
+            background: var(--panel-color);
+            width: 100%;
+            max-width: 420px;
+            border-radius: 15px;
+            border: 1px solid #222;
+            border-top: 5px solid var(--primary-red);
+            padding: 2rem;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+        }
+
+        /* Luz de estado "Live" */
+        .live-indicator {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-red);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px var(--primary-red);
+            animation: pulse 2s infinite;
+        }
+
+        .station-name {
+            font-family: 'Permanent Marker', cursive;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary-red);
+            font-size: 1.4rem;
+            text-transform: uppercase;
+        }
+
+        /* Estilización del Widget de Caster */
+        .player-wrapper {
+            background: #000;
+            border-radius: 10px;
+            padding: 5px;
+            overflow: hidden;
+            min-height: 300px; /* Evita saltos visuales mientras carga el script */
+        }
+
+        /* Footer */
+        footer {
+            padding: 2rem;
+            text-align: center;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            letter-spacing: 1px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; box-shadow: 0 0 5px var(--primary-red); }
+            50% { opacity: 0.7; box-shadow: 0 0 20px var(--primary-red); }
+            100% { opacity: 1; box-shadow: 0 0 5px var(--primary-red); }
+        }
+
+        /* Ajustes para móviles */
+        @media (max-width: 480px) {
+            .glass-panel {
+                padding: 1.5rem 1rem;
+            }
+            .main-logo {
+                max-width: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <!-- Logo referenciado según tus archivos -->
+        <img src="rawrottenradio_weelogo.jpg" alt="RawRottenRadio" class="main-logo">
+    </header>
+
+    <main>
+        <div class="glass-panel">
+            <div class="live-indicator">LIVE ON AIR</div>
+            
+            <h1 class="station-name">Raw Rotten Radio</h1>
+
+            <div class="player-wrapper">
+                <!-- BLOQUE DE CASTER.FM ACTUALIZADO -->
+                <div class="cstrEmbed" 
+                     data-type="newStreamPlayer" 
+                     data-publicToken="5583d08f-6a93-4b13-9c2d-eb9b59416a58" 
+                     data-theme="dark" 
+                     data-color="502A1C" 
+                     data-channelId="" 
+                     data-rendered="false">
+                    <a href="https://www.caster.fm">Shoutcast Hosting</a> 
+                    <a href="https://www.caster.fm">Stream Hosting</a> 
+                    <a href="https://www.caster.fm">Radio Server Hosting</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>RAW ROTTEN RADIO &copy; 2026</p>
+        <p>STAY ROTTEN, STAY LOUD</p>
+    </footer>
+
+    <!-- Script de Caster.fm al final para optimizar carga -->
+    <script src="//cdn.cloud.caster.fm//widgets/embed.js"></script>
+
+</body>
+</html>
