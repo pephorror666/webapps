@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IARANN Studio Metronome | Precision Rhythm Engine</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        studio: {
+                            bg: '#121212',
+                            panel: '#1e1e1e',
+                            card: '#262626',
+                            border: '#333333',
+                            cyan: '#00f2ff',
+                            danger: '#ff4b2b',
+                            amber: '#ffb703',
+                            muted: '#666666'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #121212;
+            color: #e5e5e5;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Custom Range Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #2e2e2e;
+            height: 6px;
+            border-radius: 999px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00f2ff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00f2ff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+        }
+
+        /* Number input arrows removal */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Beat LED Glow Animations */
+        .led-active-primary {
+            background-color: #ff4b2b !important;
+            border-color: #ff4b2b !important;
+            box-shadow: 0 0 22px rgba(255, 75, 43, 0.85), inset 0 0 8px rgba(255, 255, 255, 0.6);
+            transform: scale(1.06);
+        }
+        .led-active-secondary {
+            background-color: #ffb703 !important;
+            border-color: #ffb703 !important;
+            box-shadow: 0 0 20px rgba(255, 183, 3, 0.8), inset 0 0 8px rgba(255, 255, 255, 0.6);
+            transform: scale(1.05);
+        }
+        .led-active-normal {
+            background-color: #00f2ff !important;
+            border-color: #00f2ff !important;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.8), inset 0 0 8px rgba(255, 255, 255, 0.6);
+            transform: scale(1.04);
+        }
+        .led-active-mute {
+            border-color: #777777 !important;
+            background-color: #2a2a2a !important;
+            transform: scale(1.02);
+        }
+
+        /* Smooth Accordion */
+        .accordion-content {
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-3 sm:p-6">
+
+    <!-- Contenedor Principal -->
+    <main class="w-full max-w-4xl bg-studio-panel border border-studio-border rounded-2xl shadow-2xl overflow-hidden">
+        
+        <!-- Header / Barra Superior -->
+        <header class="bg-[#181818] border-b border-studio-border px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full bg-studio-cyan shadow-[0_0_10px_#00f2ff]"></div>
+                <div>
+                    <h1 class="text-sm sm:text-base font-bold tracking-widest uppercase text-white">
+                        IARANN <span class="text-studio-cyan font-normal">Studio Metronome</span>
+                    </h1>
+                    <p class="text-[11px] text-neutral-400 tracking-wide">Motor de Precisión Web Audio API</p>
+                </div>
+            </div>
+
+            <!-- Contador de Compases y Estado -->
+            <div class="flex items-center gap-4">
+                <div class="bg-studio-bg border border-studio-border rounded-xl px-3.5 py-1.5 flex items-center gap-3">
+                    <div class="text-right">
+                        <span class="block text-[10px] uppercase tracking-wider text-neutral-400">Compás</span>
+                        <span id="bar-counter" class="font-mono text-lg font-bold text-white leading-none">1</span>
+                    </div>
+                    <div id="trainer-status-badge" class="hidden px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-studio-cyan/20 text-studio-cyan border border-studio-cyan/30">
+                        Activo
+                    </div>
+                </div>
+
+                <!-- Selector de Timbre -->
+                <div class="flex flex-col">
+                    <label for="sound-timbre" class="text-[10px] uppercase tracking-wider text-neutral-400 mb-0.5">Timbre</label>
+                    <select id="sound-timbre" class="bg-studio-card text-white text-xs sm:text-sm font-medium rounded-lg px-2.5 py-1.5 border border-studio-border focus:outline-none focus:border-studio-cyan cursor-pointer">
+                        <option value="digital">Clásico Digital</option>
+                        <option value="woodblock">Bloque Madera / Clave</option>
+                        <option value="mechanical">Mecánico / Mälzel</option>
+                        <option value="rimshot">Aro de Caja / Rimshot</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <!-- Cuerpo Principal -->
+        <div class="p-5 sm:p-7 space-y-6">
+
+            <!-- SECCIÓN 1: VISUALIZADOR DE PULSOS INTERACTIVO -->
+            <section class="bg-studio-bg/80 border border-studio-border rounded-2xl p-4 sm:p-5">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                        Acentuación de Pulsos <span class="text-neutral-500 font-normal hidden sm:inline">(Haz clic en cada bloque para cambiar acento)</span>
+                    </span>
+                    <div class="flex items-center gap-3 text-[11px] text-neutral-400">
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-studio-danger inline-block"></span> Fuerte</span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-studio-amber inline-block"></span> Semi</span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-studio-cyan inline-block"></span> Normal</span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm border border-neutral-600 inline-block"></span> Mute</span>
+                    </div>
+                </div>
+
+                <!-- Contenedor Dinámico de LEDs/Bloques de Pulso -->
+                <div id="beats-container" class="grid grid-cols-4 gap-2.5 sm:gap-3 min-h-[68px]">
+                    <!-- Generado dinámicamente por JS -->
+                </div>
+            </section>
+
+            <!-- SECCIÓN 2: CONTROL DE TEMPO (BPM) Y COMPÁS -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                
+                <!-- Panel de BPM (7 columnas en desktop) -->
+                <section class="lg:col-span-7 bg-studio-card/60 border border-studio-border rounded-2xl p-5 flex flex-col justify-between">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Tempo</span>
+                            <div id="italian-tempo" class="text-studio-cyan font-semibold text-sm sm:text-base italic mt-0.5">
+                                Allegro moderato
+                            </div>
+                        </div>
+                        <button id="tap-tempo-btn" class="bg-studio-panel hover:bg-neutral-700 active:bg-studio-cyan active:text-black border border-studio-border text-white text-xs font-bold tracking-wider uppercase px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-studio-cyan"></span>
+                            TAP TEMPO <span class="text-[10px] text-neutral-400 font-normal hidden sm:inline">[T]</span>
+                        </button>
+                    </div>
+
+                    <!-- Display Central BPM + Botones Finos -->
+                    <div class="my-4 flex items-center justify-center gap-2 sm:gap-4">
+                        <button onclick="adjustBpm(-5)" class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-studio-panel hover:bg-neutral-700 active:scale-95 border border-studio-border font-mono text-sm font-bold text-neutral-300 transition">-5</button>
+                        <button onclick="adjustBpm(-1)" class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-studio-panel hover:bg-neutral-700 active:scale-95 border border-studio-border font-mono text-lg font-bold text-white transition">-1</button>
+                        
+                        <div class="relative flex flex-col items-center mx-1 sm:mx-3">
+                            <input type="number" id="bpm-input" min="20" max="300" value="120" aria-label="BPM"
+                                class="w-28 sm:w-36 bg-transparent text-center font-mono text-5xl sm:text-6xl font-extrabold text-white focus:outline-none focus:text-studio-cyan transition-colors">
+                            <span class="text-[11px] font-bold tracking-widest uppercase text-neutral-500 -mt-1">BPM</span>
+                        </div>
+
+                        <button onclick="adjustBpm(1)" class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-studio-panel hover:bg-neutral-700 active:scale-95 border border-studio-border font-mono text-lg font-bold text-white transition">+1</button>
+                        <button onclick="adjustBpm(5)" class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-studio-panel hover:bg-neutral-700 active:scale-95 border border-studio-border font-mono text-sm font-bold text-neutral-300 transition">+5</button>
+                    </div>
+
+                    <!-- Slider BPM -->
+                    <div class="space-y-1.5">
+                        <input type="range" id="bpm-slider" min="20" max="300" value="120" class="w-full">
+                        <div class="flex justify-between text-[10px] font-mono text-neutral-500">
+                            <span>20 (Larghissimo)</span>
+                            <span>120</span>
+                            <span>300 (Prestissimo)</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Panel de Compás, Agrupación y Subdivisiones (5 columnas en desktop) -->
+                <section class="lg:col-span-5 bg-studio-card/60 border border-studio-border rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    
+                    <!-- Selector de Compás y Agrupación -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="time-signature" class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Compás</label>
+                            <select id="time-signature" class="w-full bg-studio-panel text-white font-mono text-base font-bold rounded-xl px-3 py-2.5 border border-studio-border focus:outline-none focus:border-studio-cyan cursor-pointer">
+                                <optgroup label="Simples">
+                                    <option value="2/4">2/4</option>
+                                    <option value="3/4">3/4</option>
+                                    <option value="4/4" selected>4/4</option>
+                                    <option value="5/4">5/4</option>
+                                    <option value="6/4">6/4</option>
+                                    <option value="7/4">7/4</option>
+                                </optgroup>
+                                <optgroup label="Compuestos">
+                                    <option value="3/8">3/8</option>
+                                    <option value="6/8">6/8</option>
+                                    <option value="9/8">9/8</option>
+                                    <option value="12/8">12/8</option>
+                                </optgroup>
+                                <optgroup label="Amalgama / Irregulares">
+                                    <option value="5/8">5/8</option>
+                                    <option value="7/8">7/8</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <!-- Selector de Agrupación (dinámico según compás) -->
+                        <div id="grouping-wrapper">
+                            <label for="beat-grouping" class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">Agrupación</label>
+                            <select id="beat-grouping" class="w-full bg-studio-panel text-studio-cyan font-mono text-sm font-bold rounded-xl px-3 py-2.5 border border-studio-border focus:outline-none focus:border-studio-cyan cursor-pointer">
+                                <!-- Se rellena dinámicamente -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Subdivisiones Rítmicas -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-2">Subdivisión Rítmica</label>
+                        <div class="grid grid-cols-3 gap-2" id="subdivision-grid">
+                            <!-- Negras -->
+                            <button type="button" data-sub="quarter" class="sub-btn active bg-studio-cyan text-black font-semibold rounded-xl py-2 px-2 flex flex-col items-center justify-center border border-studio-cyan transition">
+                                <svg class="w-5 h-5 mb-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                                <span class="text-[11px]">Negras</span>
+                            </button>
+                            <!-- Corcheas -->
+                            <button type="button" data-sub="eighth" class="sub-btn bg-studio-panel hover:bg-neutral-700 text-neutral-300 font-medium rounded-xl py-2 px-2 flex flex-col items-center justify-center border border-studio-border transition">
+                                <svg class="w-5 h-5 mb-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6zm6 0v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V3h-2z" opacity="0.85"/><rect x="12" y="3" width="8" height="2.5"/></svg>
+                                <span class="text-[11px]">Corcheas</span>
+                            </button>
+                            <!-- Tresillos -->
+                            <button type="button" data-sub="triplet" class="sub-btn bg-studio-panel hover:bg-neutral-700 text-neutral-300 font-medium rounded-xl py-2 px-2 flex flex-col items-center justify-center border border-studio-border transition">
+                                <span class="font-mono text-xs font-extrabold leading-5">3</span>
+                                <span class="text-[11px]">Tresillos</span>
+                            </button>
+                            <!-- Semicorcheas -->
+                            <button type="button" data-sub="sixteenth" class="sub-btn bg-studio-panel hover:bg-neutral-700 text-neutral-300 font-medium rounded-xl py-2 px-2 flex flex-col items-center justify-center border border-studio-border transition">
+                                <span class="font-mono text-xs font-extrabold leading-5">♬</span>
+                                <span class="text-[11px]">Semicorch.</span>
+                            </button>
+                            <!-- Swing / Saltillo -->
+                            <button type="button" data-sub="swing" class="sub-btn bg-studio-panel hover:bg-neutral-700 text-neutral-300 font-medium rounded-xl py-2 px-2 flex flex-col items-center justify-center border border-studio-border transition">
+                                <span class="font-mono text-xs font-extrabold leading-5">♩.♪</span>
+                                <span class="text-[11px]">Swing</span>
+                            </button>
+                            <!-- Contratiempo / Off-beat -->
+                            <button type="button" data-sub="offbeat" class="sub-btn bg-studio-panel hover:bg-neutral-700 text-neutral-300 font-medium rounded-xl py-2 px-2 flex flex-col items-center justify-center border border-studio-border transition">
+                                <span class="font-mono text-xs font-extrabold leading-5">𝄾♪</span>
+                                <span class="text-[11px]">Contratiempo</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Volumen Independiente de Subdivisión -->
+                    <div class="pt-1">
+                        <div class="flex justify-between items-center text-xs mb-1">
+                            <span class="text-neutral-400 font-medium">Volumen Subdivisión</span>
+                            <span id="sub-vol-label" class="font-mono text-studio-cyan font-bold">65%</span>
+                        </div>
+                        <input type="range" id="sub-volume" min="0" max="1" step="0.05" value="0.65" class="w-full">
+                    </div>
+
+                </section>
+            </div>
+
+            <!-- SECCIÓN 3: HERRAMIENTAS DE ESTUDIO DE CONSERVATORIO (Colapsable) -->
+            <section class="border border-studio-border rounded-2xl bg-studio-bg/60 overflow-hidden">
+                <button type="button" id="toggle-tools-btn" class="w-full px-5 py-3.5 flex items-center justify-between text-left hover:bg-studio-card/50 transition">
+                    <div class="flex items-center gap-2.5">
+                        <svg class="w-4 h-4 text-studio-cyan" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                        </svg>
+                        <span class="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">Herramientas de Estudio de Conservatorio</span>
+                        <span id="tools-active-pill" class="hidden text-[10px] bg-studio-amber/20 text-studio-amber border border-studio-amber/40 px-2 py-0.5 rounded-full font-bold">EN USO</span>
+                    </div>
+                    <svg id="tools-chevron" class="w-4 h-4 text-neutral-400 transform transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+
+                <div id="tools-panel" class="accordion-content max-h-0 opacity-0 px-5">
+                    <div class="pb-5 pt-2 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-studio-border/60">
+                        
+                        <!-- Herramienta A: Speed Trainer (Accelerando) -->
+                        <div class="bg-studio-panel border border-studio-border rounded-xl p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-studio-cyan">Speed Trainer (Accelerando)</h3>
+                                    <p class="text-[11px] text-neutral-400">Incremento progresivo de velocidad</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="speed-trainer-enable" class="sr-only peer">
+                                    <div class="w-10 h-5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-studio-cyan"></div>
+                                </label>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 pt-1 text-xs">
+                                <div>
+                                    <label class="block text-[10px] text-neutral-400 mb-1">Subir (BPM)</label>
+                                    <input type="number" id="st-step" value="5" min="1" max="50" class="w-full bg-studio-bg border border-studio-border rounded-lg px-2 py-1.5 font-mono text-white text-center focus:border-studio-cyan focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-neutral-400 mb-1">Cada (Compases)</label>
+                                    <input type="number" id="st-bars" value="4" min="1" max="64" class="w-full bg-studio-bg border border-studio-border rounded-lg px-2 py-1.5 font-mono text-white text-center focus:border-studio-cyan focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-neutral-400 mb-1">BPM Objetivo</label>
+                                    <input type="number" id="st-target" value="160" min="25" max="300" class="w-full bg-studio-bg border border-studio-border rounded-lg px-2 py-1.5 font-mono text-white text-center focus:border-studio-cyan focus:outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Herramienta B: Entrenador de Pulso Interno (Silent Bars) -->
+                        <div class="bg-studio-panel border border-studio-border rounded-xl p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-studio-amber">Pulso Interno (Silent Bars)</h3>
+                                    <p class="text-[11px] text-neutral-400">Alterna compases con sonido y silencio</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="mute-trainer-enable" class="sr-only peer">
+                                    <div class="w-10 h-5 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-studio-amber"></div>
+                                </label>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 pt-1 text-xs">
+                                <div>
+                                    <label class="block text-[10px] text-neutral-400 mb-1">Compases Sonando</label>
+                                    <input type="number" id="mt-play-bars" value="3" min="1" max="32" class="w-full bg-studio-bg border border-studio-border rounded-lg px-2 py-1.5 font-mono text-white text-center focus:border-studio-amber focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-neutral-400 mb-1">Compases en Silencio</label>
+                                    <input type="number" id="mt-mute-bars" value="1" min="1" max="32" class="w-full bg-studio-bg border border-studio-border rounded-lg px-2 py-1.5 font-mono text-white text-center focus:border-studio-amber focus:outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 4: BOTÓN MAESTRO START / STOP -->
+            <div class="pt-1">
+                <button id="master-play-btn" class="w-full py-4 sm:py-5 rounded-2xl font-extrabold text-lg sm:text-xl tracking-widest uppercase transition-all duration-150 bg-studio-cyan text-black hover:brightness-110 active:scale-[0.99] shadow-[0_0_25px_rgba(0,242,255,0.3)] flex items-center justify-center gap-3">
+                    <svg id="play-icon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <span id="play-btn-text">INICIAR METRÓNOMO</span>
+                    <span class="text-xs font-mono font-normal opacity-75 hidden sm:inline">[ESPACIO]</span>
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer discreto con atajos -->
+    <footer class="mt-4 text-center text-[11px] text-neutral-500 flex flex-wrap justify-center gap-x-5 gap-y-1">
+        <span><strong class="text-neutral-400">Espacio:</strong> Start / Stop</span>
+        <span><strong class="text-neutral-400">T:</strong> Tap Tempo</span>
+        <span><strong class="text-neutral-400">↑ / ↓:</strong> ±1 BPM</span>
+        <span><strong class="text-neutral-400">Shift + ↑ / ↓:</strong> ±5 BPM</span>
+    </footer>
+
+    <script>
+        /**
+         * IARANN STUDIO METRONOME
+         * Motor de Audio de Precisión con Lookahead Scheduling (Chris Wilson pattern)
+         * + Síntesis Web Audio API sin dependencias externas.
+         */
+
+        // --- CONFIGURACIÓN DE COMPASES Y AGRUPACIONES ---
+        const TIME_SIGNATURES = {
+            '2/4':  { beats: 2, denom: 4, compound: false, groupings: ['2'] },
+            '3/4':  { beats: 3, denom: 4, compound: false, groupings: ['3'] },
+            '4/4':  { beats: 4, denom: 4, compound: false, groupings: ['4', '2+2'] },
+            '5/4':  { beats: 5, denom: 4, compound: false, groupings: ['3+2', '2+3', '5'] },
+            '6/4':  { beats: 6, denom: 4, compound: false, groupings: ['3+3', '2+2+2', '4+2'] },
+            '7/4':  { beats: 7, denom: 4, compound: false, groupings: ['4+3', '3+4', '2+2+3', '3+2+2'] },
+            '3/8':  { beats: 3, denom: 8, compound: true,  groupings: ['3'] },
+            '6/8':  { beats: 6, denom: 8, compound: true,  groupings: ['3+3', '2+2+2'] },
+            '9/8':  { beats: 9, denom: 8, compound: true,  groupings: ['3+3+3', '2+2+2+3'] },
+            '12/8': { beats: 12, denom: 8, compound: true, groupings: ['3+3+3+3'] },
+            '5/8':  { beats: 5, denom: 8, compound: true,  groupings: ['3+2', '2+3'] },
+            '7/8':  { beats: 7, denom: 8, compound: true,  groupings: ['2+2+3', '3+2+2', '2+3+2'] }
+        };
+
+        // Niveles de acento por pulso:
+        // 3 = Fuerte (Primario - Rojo), 2 = Semi-acento (Secundario - Ámbar), 1 = Normal (Cyan), 0 = Silencio (Mute)
+        const ACCENT_LEVELS = {
+            PRIMARY: 3,
+            SECONDARY: 2,
+            NORMAL: 1,
+            MUTE: 0
+        };
+
+        // --- ESTADO GLOBAL ---
+        const state = {
+            isPlaying: false,
+            bpm: 120,
+            timeSigKey: '4/4',
+            grouping: '4',
+            beatAccents: [3, 1, 1, 1], // Array dinámico con el nivel de acento de cada pulso
+            subdivision: 'quarter',     // quarter, eighth, triplet, sixteenth, swing, offbeat
+            subVolume: 0.65,
+            timbre: 'digital',          // digital, woodblock, mechanical, rimshot
+
+            // Web Audio & Scheduler
+            audioCtx: null,
+            noiseBuffer: null,
+            lookahead: 25.0,            // ms entre llamadas del scheduler
+            scheduleAheadTime: 0.1,     // segundos hacia adelante a programar
+            timerID: null,
+            nextBeatTime: 0.0,
+            currentBeatInBar: 0,
+            currentBar: 1,
+
+            // Cola visual sincronizada con audioCtx.currentTime
+            visualQueue: [],
+
+            // Tap Tempo
+            tapTimes: [],
+
+            // Herramientas de Conservatorio
+            speedTrainer: {
+                enabled: false,
+                step: 5,
+                barsInterval: 4,
+                targetBpm: 160,
+                barsCounted: 0
+            },
+            muteTrainer: {
+                enabled: false,
+                playBars: 3,
+                muteBars: 1
+            }
+        };
+
+        // --- REFERENCIAS DOM ---
+        const dom = {
+            bpmInput: document.getElementById('bpm-input'),
+            bpmSlider: document.getElementById('bpm-slider'),
+            italianTempo: document.getElementById('italian-tempo'),
+            tapBtn: document.getElementById('tap-tempo-btn'),
+            timeSigSelect: document.getElementById('time-signature'),
+            groupingSelect: document.getElementById('beat-grouping'),
+            beatsContainer: document.getElementById('beats-container'),
+            subBtns: document.querySelectorAll('.sub-btn'),
+            subVolume: document.getElementById('sub-volume'),
+            subVolLabel: document.getElementById('sub-vol-label'),
+            timbreSelect: document.getElementById('sound-timbre'),
+            playBtn: document.getElementById('master-play-btn'),
+            playBtnText: document.getElementById('play-btn-text'),
+            playIcon: document.getElementById('play-icon'),
+            barCounter: document.getElementById('bar-counter'),
+            trainerBadge: document.getElementById('trainer-status-badge'),
+            // Acordeón herramientas
+            toggleToolsBtn: document.getElementById('toggle-tools-btn'),
+            toolsPanel: document.getElementById('tools-panel'),
+            toolsChevron: document.getElementById('tools-chevron'),
+            toolsActivePill: document.getElementById('tools-active-pill'),
+            // Speed trainer
+            stEnable: document.getElementById('speed-trainer-enable'),
+            stStep: document.getElementById('st-step'),
+            stBars: document.getElementById('st-bars'),
+            stTarget: document.getElementById('st-target'),
+            // Mute trainer
+            mtEnable: document.getElementById('mute-trainer-enable'),
+            mtPlayBars: document.getElementById('mt-play-bars'),
+            mtMuteBars: document.getElementById('mt-mute-bars')
+        };
+
+        // --- TÉRMINOS ITALIANOS TRADICIONALES ---
+        function getItalianTempoMarking(bpm) {
+            if (bpm < 25) return 'Larghissimo';
+            if (bpm < 45) return 'Grave';
+            if (bpm < 60) return 'Largo / Lento';
+            if (bpm < 66) return 'Larghetto';
+            if (bpm < 76) return 'Adagio';
+            if (bpm < 92) return 'Andante';
+            if (bpm < 108) return 'Andantino / Moderato';
+            if (bpm < 120) return 'Allegretto';
+            if (bpm < 132) return 'Allegro moderato';
+            if (bpm < 156) return 'Allegro';
+            if (bpm < 176) return 'Vivace';
+            if (bpm < 200) return 'Presto';
+            return 'Prestissimo';
+        }
+
+        // --- INICIALIZACIÓN DE AUDIO Y BUFFER DE RUIDO ---
+        function initAudioContext() {
+            if (!state.audioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                state.audioCtx = new AudioCtx();
+                
+                // Crear buffer de ruido blanco reutilizable (para Aro de caja / Mecánico)
+                const bufferSize = state.audioCtx.sampleRate * 0.2;
+                state.noiseBuffer = state.audioCtx.createBuffer(1, bufferSize, state.audioCtx.sampleRate);
+                const output = state.noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+            }
+            if (state.audioCtx.state === 'suspended') {
+                state.audioCtx.resume();
+            }
+        }
+
+        // --- MOTOR DE SÍNTESIS DE SONIDO (4 TIMBRES PROFESIONALES) ---
+        function triggerClickSound(time, accentLevel, isSubdivision = false) {
+            if (!state.audioCtx || accentLevel === ACCENT_LEVELS.MUTE) return;
+
+            const ctx = state.audioCtx;
+            // Calcular ganancia según nivel de acento o subdivisión
+            let gainVal = 0.7;
+            if (isSubdivision) {
+                gainVal = 0.55 * state.subVolume;
+                if (gainVal <= 0.01) return;
+            } else {
+                if (accentLevel === ACCENT_LEVELS.PRIMARY) gainVal = 1.0;
+                else if (accentLevel === ACCENT_LEVELS.SECONDARY) gainVal = 0.78;
+                else gainVal = 0.55;
+            }
+
+            switch (state.timbre) {
+                case 'digital':
+                    synthDigital(ctx, time, accentLevel, isSubdivision, gainVal);
+                    break;
+                case 'woodblock':
+                    synthWoodblock(ctx, time, accentLevel, isSubdivision, gainVal);
+                    break;
+                case 'mechanical':
+                    synthMechanical(ctx, time, accentLevel, isSubdivision, gainVal);
+                    break;
+                case 'rimshot':
+                    synthRimshot(ctx, time, accentLevel, isSubdivision, gainVal);
+                    break;
+            }
+        }
+
+        // 1. Clásico Digital (Preciso y cristalino)
+        function synthDigital(ctx, time, accent, isSub, gainVal) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            let freq = 880;
+            if (isSub) freq = 660;
+            else if (accent === ACCENT_LEVELS.PRIMARY) freq = 1567.98; // Sol6
+            else if (accent === ACCENT_LEVELS.SECONDARY) freq = 1174.66; // Re6
+
+            osc.type = isSub ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(freq, time);
+
+            gain.gain.setValueAtTime(0.001, time);
+            gain.gain.linearRampToValueAtTime(gainVal, time + 0.003);
+            gain.gain.exponentialRampToValueAtTime(0.0001, time + (isSub ? 0.045 : 0.075));
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(time);
+            osc.stop(time + 0.08);
+        }
+
+        // 2. Bloque de Madera / Clave (Síntesis FM / Resonante percusiva)
+        function synthWoodblock(ctx, time, accent, isSub, gainVal) {
+            const osc1 = ctx.createOscillator();
+            const osc2 = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            let baseFreq = 780;
+            if (isSub) baseFreq = 620;
+            else if (accent === ACCENT_LEVELS.PRIMARY) baseFreq = 1150;
+            else if (accent === ACCENT_LEVELS.SECONDARY) baseFreq = 950;
+
+            osc1.type = 'sine';
+            osc2.type = 'sine';
+
+            // Pitch drop ultrarrápido típico de la madera golpeada
+            osc1.frequency.setValueAtTime(baseFreq * 1.35, time);
+            osc1.frequency.exponentialRampToValueAtTime(baseFreq, time + 0.012);
+
+            osc2.frequency.setValueAtTime(baseFreq * 2.52, time);
+            osc2.frequency.exponentialRampToValueAtTime(baseFreq * 1.8, time + 0.01);
+
+            const osc2Gain = ctx.createGain();
+            osc2Gain.gain.setValueAtTime(0.35, time);
+
+            gain.gain.setValueAtTime(0.001, time);
+            gain.gain.linearRampToValueAtTime(gainVal * 1.1, time + 0.002);
+            gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.065);
+
+            osc1.connect(gain);
+            osc2.connect(osc2Gain);
+            osc2Gain.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc1.start(time);
+            osc2.start(time);
+            osc1.stop(time + 0.07);
+            osc2.stop(time + 0.07);
+        }
+
+        // 3. Mecánico / Péndulo Wittner-Mälzel (Impulso filtrado + campana opcional en acento 1)
+        function synthMechanical(ctx, time, accent, isSub, gainVal) {
+            // Impulso de ruido filtrado (el "tock" de madera del escape mecánico)
+            const noise = ctx.createBufferSource();
+            noise.buffer = state.noiseBuffer;
+
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(isSub ? 1400 : (accent === ACCENT_LEVELS.PRIMARY ? 2200 : 1800), time);
+            filter.Q.setValueAtTime(4.5, time);
+
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.001, time);
+            gain.gain.linearRampToValueAtTime(gainVal * 1.6, time + 0.0015);
+            gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.035);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+
+            noise.start(time);
+            noise.stop(time + 0.04);
+
+            // Campanilla metálica sutil en el acento primario (como el metrónomo Mälzel)
+            if (!isSub && accent === ACCENT_LEVELS.PRIMARY) {
+                const bell = ctx.createOscillator();
+                const bellGain = ctx.createGain();
+                bell.type = 'sine';
+                bell.frequency.setValueAtTime(2637, time); // Mi7
+                bellGain.gain.setValueAtTime(0.001, time);
+                bellGain.gain.linearRampToValueAtTime(gainVal * 0.35, time + 0.003);
+                bellGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.18);
+
+                bell.connect(bellGain);
+                bellGain.connect(ctx.destination);
+                bell.start(time);
+                bell.stop(time + 0.19);
+            }
+        }
+
+        // 4. Aro de Caja / Rimshot (Cuerpo tonal + chasquido de ruido)
+        function synthRimshot(ctx, time, accent, isSub, gainVal) {
+            // Componente tonal (casco de caja)
+            const osc = ctx.createOscillator();
+            const oscGain = ctx.createGain();
+            const baseFreq = isSub ? 320 : (accent === ACCENT_LEVELS.PRIMARY ? 440 : 380);
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(baseFreq * 1.5, time);
+            osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.65, time + 0.035);
+
+            oscGain.gain.setValueAtTime(0.001, time);
+            oscGain.gain.linearRampToValueAtTime(gainVal * 0.9, time + 0.002);
+            oscGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.055);
+
+            osc.connect(oscGain);
+            oscGain.connect(ctx.destination);
+            osc.start(time);
+            osc.stop(time + 0.06);
+
+            // Componente de ruido (golpe de baqueta en el aro)
+            const noise = ctx.createBufferSource();
+            noise.buffer = state.noiseBuffer;
+            const hpFilter = ctx.createBiquadFilter();
+            hpFilter.type = 'highpass';
+            hpFilter.frequency.setValueAtTime(1600, time);
+
+            const nGain = ctx.createGain();
+            nGain.gain.setValueAtTime(0.001, time);
+            nGain.gain.linearRampToValueAtTime(gainVal * 0.85, time + 0.001);
+            nGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.045);
+
+            noise.connect(hpFilter);
+            hpFilter.connect(nGain);
+            nGain.connect(ctx.destination);
+            noise.start(time);
+            noise.stop(time + 0.05);
+        }
+
+        // --- PROGRAMACIÓN DE PULSO Y SUBDIVISIONES ---
+        function scheduleBeatAndSubdivisions(beatIndex, beatTime, beatDuration, isBarMuted) {
+            const accentLevel = state.beatAccents[beatIndex] ?? ACCENT_LEVELS.NORMAL;
+
+            // Encolar evento visual (siempre se muestra aunque el compás esté silenciado por el Silent Trainer)
+            state.visualQueue.push({
+                beat: beatIndex,
+                bar: state.currentBar,
+                accent: accentLevel,
+                time: beatTime,
+                isBarMuted: isBarMuted
+            });
+
+            if (isBarMuted) return;
+
+            // 1. Sonido del pulso principal (excepto en modo 'offbeat' donde el pulso va en silencio)
+            if (state.subdivision !== 'offbeat') {
+                triggerClickSound(beatTime, accentLevel, false);
+            }
+
+            // 2. Sonido de las subdivisiones dentro de este pulso
+            if (accentLevel === ACCENT_LEVELS.MUTE && state.subdivision !== 'offbeat') {
+                // Si el usuario silenció manualmente ese pulso, respetamos el silencio
+                return;
+            }
+
+            switch (state.subdivision) {
+                case 'quarter':
+                    // Solo pulso principal
+                    break;
+                case 'eighth':
+                    triggerClickSound(beatTime + beatDuration * 0.5, ACCENT_LEVELS.NORMAL, true);
+                    break;
+                case 'triplet':
+                    triggerClickSound(beatTime + beatDuration * (1 / 3), ACCENT_LEVELS.NORMAL, true);
+                    triggerClickSound(beatTime + beatDuration * (2 / 3), ACCENT_LEVELS.NORMAL, true);
+                    break;
+                case 'sixteenth':
+                    triggerClickSound(beatTime + beatDuration * 0.25, ACCENT_LEVELS.NORMAL, true);
+                    triggerClickSound(beatTime + beatDuration * 0.50, ACCENT_LEVELS.NORMAL, true);
+                    triggerClickSound(beatTime + beatDuration * 0.75, ACCENT_LEVELS.NORMAL, true);
+                    break;
+                case 'swing':
+                    // Tresillo de corchea con la segunda ligada (2/3 del pulso)
+                    triggerClickSound(beatTime + beatDuration * (2 / 3), ACCENT_LEVELS.NORMAL, true);
+                    break;
+                case 'offbeat':
+                    // Silencio en el tiempo, golpe en la corchea débil (contratiempo)
+                    triggerClickSound(beatTime + beatDuration * 0.5, accentLevel === ACCENT_LEVELS.MUTE ? ACCENT_LEVELS.NORMAL : accentLevel, false);
+                    break;
+            }
+        }
+
+        // --- LÓGICA DEL SCHEDULER DE PRECISIÓN ---
+        function scheduler() {
+            const sigConfig = TIME_SIGNATURES[state.timeSigKey];
+            const totalBeats = sigConfig.beats;
+
+            while (state.nextBeatTime < state.audioCtx.currentTime + state.scheduleAheadTime) {
+                // Al iniciar el primer pulso de un nuevo compás (a partir del compás 2)
+                if (state.currentBeatInBar === 0 && state.currentBar > 1) {
+                    handleNewBarTrainers();
+                }
+
+                // Determinar si este compás debe sonar o estar en silencio (Mute Trainer)
+                let isBarMuted = false;
+                if (state.muteTrainer.enabled) {
+                    const playB = Math.max(1, parseInt(dom.mtPlayBars.value) || 3);
+                    const muteB = Math.max(1, parseInt(dom.mtMuteBars.value) || 1);
+                    const cycleLength = playB + muteB;
+                    const posInCycle = (state.currentBar - 1) % cycleLength;
+                    isBarMuted = posInCycle >= playB;
+                }
+
+                // Duración del pulso: en compases de /8 (ej. 6/8, 7/8) el pulso es una corchea (mitad de negra)
+                // Nota musical: el BPM marca la negra (quarter note) como estándar universal de estudio,
+                // o podemos escalar /8 como corchea = BPM * 2 para agilidad en compases de amalgama.
+                const secondsPerQuarter = 60.0 / state.bpm;
+                const beatDuration = (sigConfig.denom === 8) ? (secondsPerQuarter / 2) : secondsPerQuarter;
+
+                scheduleBeatAndSubdivisions(state.currentBeatInBar, state.nextBeatTime, beatDuration, isBarMuted);
+
+                // Avanzar reloj interno
+                state.nextBeatTime += beatDuration;
+                state.currentBeatInBar++;
+
+                if (state.currentBeatInBar >= totalBeats) {
+                    state.currentBeatInBar = 0;
+                    state.currentBar++;
+                }
+            }
+
+            state.timerID = setTimeout(scheduler, state.lookahead);
+        }
+
+        // --- GESTIÓN DE ENTRENADORES AL CAMBIAR DE COMPÁS ---
+        function handleNewBarTrainers() {
+            if (!state.speedTrainer.enabled) return;
+
+            const step = parseInt(dom.stStep.value) || 5;
+            const interval = Math.max(1, parseInt(dom.stBars.value) || 4);
+            const target = Math.min(300, Math.max(20, parseInt(dom.stTarget.value) || 160));
+
+            state.speedTrainer.barsCounted++;
+
+            if (state.speedTrainer.barsCounted >= interval) {
+                state.speedTrainer.barsCounted = 0;
+                if (state.bpm < target) {
+                    const nextBpm = Math.min(target, state.bpm + step);
+                    setBpm(nextBpm, false);
+                } else if (state.bpm > target) {
+                    const nextBpm = Math.max(target, state.bpm - step);
+                    setBpm(nextBpm, false);
+                }
+            }
+        }
+
+        // --- BUCLE VISUAL SINCRONIZADO CON REQUESTANIMATIONFRAME ---
+        let lastDrawnBeat = -1;
+        let lastDrawnBar = -1;
+
+        function visualLoop() {
+            if (!state.isPlaying) return;
+
+            const currentTime = state.audioCtx.currentTime;
+
+            while (state.visualQueue.length > 0 && state.visualQueue[0].time <= currentTime) {
+                const event = state.visualQueue.shift();
+                updateVisualUI(event);
+            }
+
+            requestAnimationFrame(visualLoop);
+        }
+
+        function updateVisualUI(event) {
+            // Actualizar contador de compás
+            if (event.bar !== lastDrawnBar) {
+                dom.barCounter.textContent = event.bar;
+                lastDrawnBar = event.bar;
+
+                // Actualizar badge de estado si Silent Trainer está activo
+                if (state.muteTrainer.enabled) {
+                    dom.trainerBadge.classList.remove('hidden');
+                    if (event.isBarMuted) {
+                        dom.trainerBadge.textContent = 'SILENCIO';
+                        dom.trainerBadge.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-studio-amber/20 text-studio-amber border border-studio-amber/40';
+                    } else {
+                        dom.trainerBadge.textContent = 'SONIDO';
+                        dom.trainerBadge.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-studio-cyan/20 text-studio-cyan border border-studio-cyan/30';
+                    }
+                } else if (state.speedTrainer.enabled) {
+                    dom.trainerBadge.classList.remove('hidden');
+                    dom.trainerBadge.textContent = `META: ${dom.stTarget.value}`;
+                    dom.trainerBadge.className = 'px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-studio-cyan/20 text-studio-cyan border border-studio-cyan/30';
+                } else {
+                    dom.trainerBadge.classList.add('hidden');
+                }
+            }
+
+            // Iluminar LED correspondiente
+            const leds = dom.beatsContainer.children;
+            for (let i = 0; i < leds.length; i++) {
+                leds[i].classList.remove('led-active-primary', 'led-active-secondary', 'led-active-normal', 'led-active-mute');
+            }
+
+            const activeLed = leds[event.beat];
+            if (activeLed) {
+                if (event.accent === ACCENT_LEVELS.PRIMARY) activeLed.classList.add('led-active-primary');
+                else if (event.accent === ACCENT_LEVELS.SECONDARY) activeLed.classList.add('led-active-secondary');
+                else if (event.accent === ACCENT_LEVELS.NORMAL) activeLed.classList.add('led-active-normal');
+                else activeLed.classList.add('led-active-mute');
+            }
+        }
+
+        // --- CONSTRUCCIÓN DE PULSOS Y AGRUPACIONES ---
+        function applyGroupingPattern(timeSigKey, groupingStr) {
+            const totalBeats = TIME_SIGNATURES[timeSigKey].beats;
+            const parts = groupingStr.split('+').map(Number);
+            const accents = new Array(totalBeats).fill(ACCENT_LEVELS.NORMAL);
+
+            let cursor = 0;
+            parts.forEach((groupSize, idx) => {
+                if (cursor < totalBeats) {
+                    accents[cursor] = (idx === 0) ? ACCENT_LEVELS.PRIMARY : ACCENT_LEVELS.SECONDARY;
+                }
+                cursor += groupSize;
+            });
+
+            state.beatAccents = accents;
+            renderBeatLeds();
+        }
+
+        function updateTimeSignature(newSigKey) {
+            state.timeSigKey = newSigKey;
+            const config = TIME_SIGNATURES[newSigKey];
+
+            // Rellenar selector de agrupaciones
+            dom.groupingSelect.innerHTML = '';
+            config.groupings.forEach(grp => {
+                const opt = document.createElement('option');
+                opt.value = grp;
+                opt.textContent = grp;
+                dom.groupingSelect.appendChild(opt);
+            });
+
+            state.grouping = config.groupings[0];
+            applyGroupingPattern(newSigKey, state.grouping);
+
+            if (state.isPlaying) {
+                state.currentBeatInBar = 0;
+            }
+        }
+
+        function renderBeatLeds() {
+            const totalBeats = state.beatAccents.length;
+            dom.beatsContainer.innerHTML = '';
+
+            // Ajustar columnas de grid dinámicamente para legibilidad óptima
+            let colsClass = 'grid-cols-4';
+            if (totalBeats <= 3) colsClass = `grid-cols-${totalBeats}`;
+            else if (totalBeats === 5) colsClass = 'grid-cols-5';
+            else if (totalBeats === 6) colsClass = 'grid-cols-6';
+            else if (totalBeats === 7) colsClass = 'grid-cols-7';
+            else if (totalBeats >= 9) colsClass = 'grid-cols-6 sm:grid-cols-9';
+            if (totalBeats === 12) colsClass = 'grid-cols-6 sm:grid-cols-12';
+
+            dom.beatsContainer.className = `grid ${colsClass} gap-2 sm:gap-2.5 min-h-[68px]`;
+
+            state.beatAccents.forEach((level, index) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.setAttribute('aria-label', `Pulso ${index + 1}`);
+                btn.className = 'relative rounded-xl border-2 flex flex-col items-center justify-center py-2.5 transition-all duration-75 cursor-pointer focus:outline-none';
+
+                // Estilo base según nivel de acento configurado
+                let indicatorColor = '';
+                let labelText = '';
+                if (level === ACCENT_LEVELS.PRIMARY) {
+                    btn.classList.add('bg-studio-danger/15', 'border-studio-danger/60', 'text-white');
+                    indicatorColor = 'bg-studio-danger';
+                    labelText = '>';
+                } else if (level === ACCENT_LEVELS.SECONDARY) {
+                    btn.classList.add('bg-studio-amber/15', 'border-studio-amber/60', 'text-white');
+                    indicatorColor = 'bg-studio-amber';
+                    labelText = '-';
+                } else if (level === ACCENT_LEVELS.NORMAL) {
+                    btn.classList.add('bg-studio-cyan/10', 'border-studio-cyan/40', 'text-neutral-200');
+                    indicatorColor = 'bg-studio-cyan';
+                    labelText = '•';
+                } else {
+                    btn.classList.add('bg-studio-panel/40', 'border-neutral-700', 'text-neutral-600');
+                    indicatorColor = 'bg-neutral-700';
+                    labelText = '×';
+                }
+
+                btn.innerHTML = `
+                    <span class="font-mono text-sm sm:text-base font-extrabold leading-none">${index + 1}</span>
+                    <span class="mt-1.5 w-3.5 h-1 rounded-full ${indicatorColor}"></span>
+                `;
+
+                // Clic cíclico: Fuerte (3) -> Semi (2) -> Normal (1) -> Mute (0) -> Fuerte (3)
+                btn.addEventListener('click', () => {
+                    const nextLevel = (state.beatAccents[index] === 0) ? 3 : state.beatAccents[index] - 1;
+                    state.beatAccents[index] = nextLevel;
+                    renderBeatLeds();
+                });
+
+                dom.beatsContainer.appendChild(btn);
+            });
+        }
+
+        // --- CONTROL DE START / STOP ---
+        function togglePlay() {
+            initAudioContext();
+            state.isPlaying = !state.isPlaying;
+
+            if (state.isPlaying) {
+                state.currentBeatInBar = 0;
+                state.currentBar = 1;
+                state.visualQueue = [];
+                state.speedTrainer.barsCounted = 0;
+                lastDrawnBar = -1;
+                lastDrawnBeat = -1;
+
+                state.nextBeatTime = state.audioCtx.currentTime + 0.05;
+
+                // UI Button Stop State
+                dom.playBtn.classList.remove('bg-studio-cyan', 'text-black', 'shadow-[0_0_25px_rgba(0,242,255,0.3)]');
+                dom.playBtn.classList.add('bg-studio-danger', 'text-white', 'shadow-[0_0_25px_rgba(255,75,43,0.4)]');
+                dom.playBtnText.textContent = 'DETENER';
+                dom.playIcon.innerHTML = '<rect x="6" y="6" width="12" height="12" rx="2"/>';
+
+                scheduler();
+                requestAnimationFrame(visualLoop);
+            } else {
+                clearTimeout(state.timerID);
+                state.visualQueue = [];
+
+                // Limpiar LEDs encendidos
+                const leds = dom.beatsContainer.children;
+                for (let i = 0; i < leds.length; i++) {
+                    leds[i].classList.remove('led-active-primary', 'led-active-secondary', 'led-active-normal', 'led-active-mute');
+                }
+
+                // UI Button Start State
+                dom.playBtn.classList.remove('bg-studio-danger', 'text-white', 'shadow-[0_0_25px_rgba(255,75,43,0.4)]');
+                dom.playBtn.classList.add('bg-studio-cyan', 'text-black', 'shadow-[0_0_25px_rgba(0,242,255,0.3)]');
+                dom.playBtnText.textContent = 'INICIAR METRÓNOMO';
+                dom.playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+                dom.trainerBadge.classList.add('hidden');
+            }
+        }
+
+        // --- CONTROL DE BPM Y TAP TEMPO ---
+        function setBpm(newBpm, resetTrainerCounter = true) {
+            const clamped = Math.min(300, Math.max(20, Math.round(newBpm)));
+            state.bpm = clamped;
+            dom.bpmInput.value = clamped;
+            dom.bpmSlider.value = clamped;
+            dom.italianTempo.textContent = getItalianTempoMarking(clamped);
+
+            if (resetTrainerCounter) {
+                state.speedTrainer.barsCounted = 0;
+            }
+        }
+
+        function adjustBpm(delta) {
+            setBpm(state.bpm + delta);
+        }
+
+        function handleTapTempo() {
+            const now = performance.now();
+
+            // Reset automático si han pasado más de 2 segundos desde el último tap
+            if (state.tapTimes.length > 0 && (now - state.tapTimes[state.tapTimes.length - 1]) > 2000) {
+                state.tapTimes = [];
+            }
+
+            state.tapTimes.push(now);
+            // Ventana móvil de los últimos 5 taps (4 intervalos)
+            if (state.tapTimes.length > 5) {
+                state.tapTimes.shift();
+            }
+
+            // Feedback visual en el botón
+            dom.tapBtn.classList.add('border-studio-cyan', 'text-studio-cyan');
+            setTimeout(() => dom.tapBtn.classList.remove('border-studio-cyan', 'text-studio-cyan'), 120);
+
+            if (state.tapTimes.length >= 2) {
+                let sumIntervals = 0;
+                for (let i = 1; i < state.tapTimes.length; i++) {
+                    sumIntervals += (state.tapTimes[i] - state.tapTimes[i - 1]);
+                }
+                const avgInterval = sumIntervals / (state.tapTimes.length - 1);
+                const calculatedBpm = Math.round(60000 / avgInterval);
+                setBpm(calculatedBpm);
+            }
+        }
+
+        // --- LISTENERS DE INTERFAZ ---
+        dom.playBtn.addEventListener('click', togglePlay);
+        dom.tapBtn.addEventListener('click', handleTapTempo);
+
+        dom.bpmSlider.addEventListener('input', (e) => {
+            setBpm(parseInt(e.target.value, 10));
+        });
+
+        dom.bpmInput.addEventListener('change', (e) => {
+            const val = parseInt(e.target.value, 10);
+            setBpm(isNaN(val) ? 120 : val);
+        });
+
+        dom.timeSigSelect.addEventListener('change', (e) => {
+            updateTimeSignature(e.target.value);
+        });
+
+        dom.groupingSelect.addEventListener('change', (e) => {
+            state.grouping = e.target.value;
+            applyGroupingPattern(state.timeSigKey, state.grouping);
+        });
+
+        // Selección de subdivisión
+        dom.subBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                dom.subBtns.forEach(b => {
+                    b.classList.remove('active', 'bg-studio-cyan', 'text-black', 'font-semibold', 'border-studio-cyan');
+                    b.classList.add('bg-studio-panel', 'text-neutral-300', 'font-medium', 'border-studio-border');
+                });
+                btn.classList.remove('bg-studio-panel', 'text-neutral-300', 'font-medium', 'border-studio-border');
+                btn.classList.add('active', 'bg-studio-cyan', 'text-black', 'font-semibold', 'border-studio-cyan');
+                state.subdivision = btn.dataset.sub;
+            });
+        });
+
+        // Volumen de subdivisión
+        dom.subVolume.addEventListener('input', (e) => {
+            state.subVolume = parseFloat(e.target.value);
+            dom.subVolLabel.textContent = `${Math.round(state.subVolume * 100)}%`;
+        });
+
+        // Selección de timbre
+        dom.timbreSelect.addEventListener('change', (e) => {
+            state.timbre = e.target.value;
+        });
+
+        // Acordeón Herramientas de Conservatorio
+        let toolsOpen = false;
+        dom.toggleToolsBtn.addEventListener('click', () => {
+            toolsOpen = !toolsOpen;
+            if (toolsOpen) {
+                dom.toolsPanel.style.maxHeight = dom.toolsPanel.scrollHeight + 40 + 'px';
+                dom.toolsPanel.classList.remove('opacity-0');
+                dom.toolsPanel.classList.add('opacity-100');
+                dom.toolsChevron.classList.add('rotate-180');
+            } else {
+                dom.toolsPanel.style.maxHeight = '0px';
+                dom.toolsPanel.classList.remove('opacity-100');
+                dom.toolsPanel.classList.add('opacity-0');
+                dom.toolsChevron.classList.remove('rotate-180');
+            }
+        });
+
+        function updateToolsPill() {
+            state.speedTrainer.enabled = dom.stEnable.checked;
+            state.muteTrainer.enabled = dom.mtEnable.checked;
+
+            if (state.speedTrainer.enabled || state.muteTrainer.enabled) {
+                dom.toolsActivePill.classList.remove('hidden');
+            } else {
+                dom.toolsActivePill.classList.add('hidden');
+            }
+        }
+
+        dom.stEnable.addEventListener('change', () => {
+            state.speedTrainer.barsCounted = 0;
+            updateToolsPill();
+        });
+        dom.mtEnable.addEventListener('change', updateToolsPill);
+
+        // Atajos de Teclado Globales
+        window.addEventListener('keydown', (e) => {
+            // Ignorar atajos si el usuario está escribiendo dentro de un input numérico
+            if (document.activeElement.tagName === 'INPUT' && document.activeElement.type === 'number') {
+                if (e.key === 'Enter') document.activeElement.blur();
+                return;
+            }
+
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlay();
+            } else if (e.key.toLowerCase() === 't') {
+                e.preventDefault();
+                handleTapTempo();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                adjustBpm(e.shiftKey ? 5 : 1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                adjustBpm(e.shiftKey ? -5 : -1);
+            }
+        });
+
+        // --- INICIALIZACIÓN AL CARGAR ---
+        updateTimeSignature('4/4');
+        setBpm(120);
+    </script>
+</body>
+</html>
