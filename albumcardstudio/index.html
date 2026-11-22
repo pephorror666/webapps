@@ -1,0 +1,2298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d0b16">
+<title>Album Card Studio — Pro Visual Story Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=Oswald:wght@600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,600&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0914;
+  --surface: #141122;
+  --surface-2: #1c182e;
+  --surface-3: #25203b;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  --text: #f7f4ff;
+  --muted: #a69bb8;
+  --accent: #ff43b8;
+  --accent-2: #42e9f5;
+  --radius-lg: 20px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 67, 184, 0.14), transparent 38%),
+    radial-gradient(circle at 92% 25%, rgba(66, 233, 245, 0.11), transparent 36%),
+    var(--bg);
+}
+
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+/* Top Bar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(11, 9, 20, 0.86);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px clamp(14px, 3vw, 32px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand { display: flex; align-items: center; gap: 11px; }
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #9b71ff 55%, var(--accent-2));
+  display: grid;
+  place-items: center;
+  color: #0e0a1a;
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: -0.04em;
+  box-shadow: 0 4px 20px rgba(255, 67, 184, 0.3);
+  flex-shrink: 0;
+}
+.brand h1 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.brand p {
+  margin: 2px 0 0;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.top-actions { display: flex; align-items: center; gap: 8px; }
+.btn-export-top {
+  background: linear-gradient(100deg, var(--accent), #b27dff 55%, var(--accent-2));
+  color: #0e0a1a;
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  border-radius: 999px;
+  box-shadow: 0 4px 18px rgba(255, 67, 184, 0.28);
+  transition: transform 0.15s ease, filter 0.15s ease;
+  white-space: nowrap;
+}
+.btn-export-top:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.btn-export-top:active { transform: translateY(0); }
+
+.btn-ghost {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 9px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-ghost:hover { background: var(--surface-3); border-color: var(--border-strong); }
+
+/* Studio Workspace Grid */
+.workspace {
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 20px clamp(12px, 2.5vw, 32px) 48px;
+  display: grid;
+  grid-template-columns: minmax(340px, 460px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+/* Editor Panel */
+.editor-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+}
+
+/* Navigation Tabs */
+.nav-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: #0f0c1a;
+  border-bottom: 1px solid var(--border);
+  padding: 6px;
+  gap: 4px;
+}
+
+.nav-tab {
+  padding: 10px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+.nav-tab svg { width: 16px; height: 16px; opacity: 0.75; }
+.nav-tab:hover { color: var(--text); background: rgba(255, 255, 255, 0.04); }
+.nav-tab.active {
+  background: var(--surface-2);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+.nav-tab.active svg { opacity: 1; color: var(--accent-2); }
+
+.tab-body { padding: 18px; }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; animation: fadeIn 0.18s ease; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Form Elements */
+.section-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 18px 0;
+}
+
+.field { margin-bottom: 14px; }
+.field-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #dfd6f0;
+  margin-bottom: 6px;
+}
+.badge {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+.badge.req { background: rgba(255, 67, 184, 0.18); color: #ff8cd2; }
+
+input[type="text"], select, textarea {
+  width: 100%;
+  background: #0c0a15;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text);
+  transition: border-color 0.15s;
+}
+input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--accent-2); }
+textarea { resize: vertical; min-height: 62px; line-height: 1.4; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+/* Media Upload Cards */
+.media-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.media-tabs {
+  display: inline-flex;
+  background: #0c0a15;
+  padding: 3px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.media-tabs button {
+  padding: 5px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 5px;
+  color: var(--muted);
+}
+.media-tabs button.active { background: var(--surface-3); color: #fff; }
+
+.file-drop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #0c0a15;
+  border: 1px dashed rgba(255, 255, 255, 0.24);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.file-drop:hover { border-color: var(--accent); color: #fff; }
+.file-drop input[type="file"] { display: none; }
+.file-chip {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--surface-3);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.url-row { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+.btn-sm {
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+}
+.btn-sm:hover { background: #312a4d; }
+
+/* Layout Architecture Cards */
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.preset-card {
+  background: #0e0b18;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+.preset-card:hover { border-color: var(--border-strong); background: var(--surface-2); }
+.preset-card.active {
+  border-color: var(--accent);
+  background: rgba(255, 67, 184, 0.1);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.preset-card strong { font-size: 12px; font-weight: 800; color: #fff; }
+.preset-card span { font-size: 10px; color: var(--muted); line-height: 1.35; }
+
+/* Range Sliders */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #0c0a15;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(66, 233, 245, 0.5);
+}
+.slider-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent-2);
+  min-width: 38px;
+  text-align: right;
+}
+
+/* Swatches */
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  transition: transform 0.15s;
+}
+.swatch:hover { transform: scale(1.1); }
+.swatch[aria-pressed="true"] { outline: 2px solid #fff; outline-offset: 2px; }
+.color-picker-wrap {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  display: grid;
+  place-items: center;
+}
+.color-picker-wrap input[type="color"] {
+  position: absolute;
+  inset: -6px;
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+  border: none;
+}
+
+/* Toggle Switch */
+.toggle-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e4dcf2;
+}
+.toggle-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Quick Corner Snap Buttons */
+.snap-bar { display: flex; gap: 5px; margin-top: 6px; }
+.snap-btn {
+  flex: 1;
+  background: #0c0a15;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.snap-btn:hover { color: #fff; border-color: var(--border-strong); }
+
+/* Stage / Live Canvas Area */
+.stage-column {
+  position: sticky;
+  top: 76px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stage-toolbar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.drag-selector {
+  display: inline-flex;
+  align-items: center;
+  background: #0c0a15;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  gap: 2px;
+}
+.drag-selector span {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+  padding: 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.drag-pill {
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.drag-pill.active { background: var(--accent); color: #12091d; }
+
+.stage-toggles { display: flex; align-items: center; gap: 6px; }
+.tool-chip {
+  background: #0c0a15;
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.tool-chip.active {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+  background: rgba(66, 233, 245, 0.08);
+}
+
+.canvas-frame {
+  position: relative;
+  background:
+    radial-gradient(circle at center, #1d1833 0%, #0b0914 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+}
+
+.canvas-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+canvas#preview {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(74vh, 920px);
+  aspect-ratio: 9 / 16;
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75);
+  cursor: grab;
+}
+canvas#preview:active { cursor: grabbing; }
+
+.stage-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
+/* Status Toast */
+.status-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.status-bar.error { border-color: rgba(255, 107, 129, 0.45); color: #ff9aa8; }
+
+.project-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.hidden { display: none !important; }
+
+/* Responsive Mobile Studio Layout */
+@media (max-width: 920px) {
+  .workspace {
+    grid-template-columns: 1fr;
+    padding: 0 0 40px;
+    gap: 0;
+  }
+
+  /* Sticky Top Stage on Smartphone so user sees live edits effortlessly */
+  .stage-column {
+    order: 1;
+    position: sticky;
+    top: 57px;
+    z-index: 30;
+    background: rgba(11, 9, 20, 0.96);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px 10px;
+    gap: 8px;
+  }
+
+  .canvas-frame {
+    padding: 8px;
+    border-radius: 14px;
+  }
+
+  canvas#preview {
+    max-height: 39vh;
+    transition: max-height 0.25s ease;
+  }
+  .stage-column.expanded canvas#preview {
+    max-height: 68vh;
+  }
+
+  .stage-footer { display: none; }
+
+  .editor-panel {
+    order: 2;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    box-shadow: none;
+  }
+
+  .nav-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .brand p { display: none; }
+  input[type="text"], select, textarea { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">AC</div>
+    <div>
+      <h1>Album Card Studio</h1>
+      <p>Editorial 9:16 Record Story Designer</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button type="button" class="btn-ghost" id="sampleBtn" title="Load a sample layout to explore features">Demo Card</button>
+    <button type="button" class="btn-export-top" id="downloadBtn">↓ Export PNG</button>
+  </div>
+</header>
+
+<main class="workspace">
+  <!-- LEFT / BOTTOM: TABBED DESIGN CONTROLS -->
+  <section class="editor-panel" aria-label="Design controls">
+    <nav class="nav-tabs" role="tablist">
+      <button type="button" class="nav-tab active" role="tab" aria-selected="true" data-tab="media">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        Media
+      </button>
+      <button type="button" class="nav-tab" role="tab" aria-selected="false" data-tab="layout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Layout
+      </button>
+      <button type="button" class="nav-tab" role="tab" aria-selected="false" data-tab="style">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        Type & FX
+      </button>
+      <button type="button" class="nav-tab" role="tab" aria-selected="false" data-tab="details">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        Details
+      </button>
+    </nav>
+
+    <div class="tab-body">
+      <!-- TAB 1: MEDIA & IMAGES -->
+      <div class="tab-pane active" id="pane-media">
+        <div class="section-title"><span>1. Core Artwork</span><span style="color:var(--muted);font-size:10px">Drag directly on canvas</span></div>
+
+        <!-- Artist Photo -->
+        <div class="media-card">
+          <div class="field-label"><span>Artist / Band Photo</span><span class="badge req">Main Layer</span></div>
+          <div class="media-tabs">
+            <button type="button" class="active" data-src-toggle="artistFile">Upload File</button>
+            <button type="button" data-src-toggle="artistUrl">Image URL</button>
+          </div>
+          <div id="artistFile">
+            <label class="file-drop">
+              <span id="artistFileName">Choose portrait or live photo...</span>
+              <span class="file-chip">Browse</span>
+              <input id="artistUpload" type="file" accept="image/*">
+            </label>
+          </div>
+          <div id="artistUrl" class="hidden">
+            <div class="url-row">
+              <input id="artistUrlInput" type="text" placeholder="https://...">
+              <button type="button" class="btn-sm" data-load-url="artist">Load</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Album Cover -->
+        <div class="media-card">
+          <div class="field-label"><span>Album Cover Art</span><span class="badge">Optional</span></div>
+          <div class="media-tabs">
+            <button type="button" class="active" data-src-toggle="albumFile">Upload File</button>
+            <button type="button" data-src-toggle="albumUrl">Image URL</button>
+          </div>
+          <div id="albumFile">
+            <label class="file-drop">
+              <span id="albumFileName">Choose square album sleeve...</span>
+              <span class="file-chip">Browse</span>
+              <input id="albumUpload" type="file" accept="image/*">
+            </label>
+          </div>
+          <div id="albumUrl" class="hidden">
+            <div class="url-row">
+              <input id="albumUrlInput" type="text" placeholder="https://...">
+              <button type="button" class="btn-sm" data-load-url="album">Load</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Band Logo -->
+        <div class="media-card">
+          <div class="field-label"><span>Artist / Band Logo</span><span class="badge">PNG or White BG</span></div>
+          <div class="media-tabs">
+            <button type="button" class="active" data-src-toggle="logoFile">Upload File</button>
+            <button type="button" data-src-toggle="logoUrl">Image URL</button>
+          </div>
+          <div id="logoFile">
+            <label class="file-drop">
+              <span id="logoFileName">Choose band logo image...</span>
+              <span class="file-chip">Browse</span>
+              <input id="logoUpload" type="file" accept="image/*">
+            </label>
+          </div>
+          <div id="logoUrl" class="hidden">
+            <div class="url-row">
+              <input id="logoUrlInput" type="text" placeholder="https://...">
+              <button type="button" class="btn-sm" data-load-url="logo">Load</button>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:10px;margin-bottom:0">
+            <label class="field-label" for="logoBlend"><span>Logo Background Knock-Out</span></label>
+            <select id="logoBlend">
+              <option value="normal">Normal (Transparent PNG)</option>
+              <option value="knockout-white">Remove White Background (Multiply)</option>
+              <option value="invert-white">Remove White & Turn Logo White</option>
+              <option value="knockout-black">Remove Black Background (Screen)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="project-actions">
+          <button type="button" class="btn-sm" id="saveBtn">Save JSON</button>
+          <button type="button" class="btn-sm" id="loadProjectBtn">Load JSON</button>
+          <button type="button" class="btn-sm" id="clearImagesBtn">Clear Media</button>
+        </div>
+        <input id="projectFile" type="file" accept=".json,application/json" class="hidden">
+      </div>
+
+      <!-- TAB 2: LAYOUT & POSITIONING -->
+      <div class="tab-pane" id="pane-layout">
+        <div class="section-title"><span>Art Direction Template</span></div>
+        <div class="preset-grid" id="layoutPresets">
+          <button type="button" class="preset-card active" data-layout="classic">
+            <strong>Classic Story</strong>
+            <span>Full-bleed portrait, floating sleeve & glass card</span>
+          </button>
+          <button type="button" class="preset-card" data-layout="vinyl">
+            <strong>Vinyl Collector</strong>
+            <span>Hero album sleeve with peeking vinyl record</span>
+          </button>
+          <button type="button" class="preset-card" data-layout="editorial">
+            <strong>Editorial Zine</strong>
+            <span>Magazine header, framed photo & liner notes</span>
+          </button>
+          <button type="button" class="preset-card" data-layout="minimal">
+            <strong>Minimal Poster</strong>
+            <span>Clean full-bleed photography & sleek typography</span>
+          </button>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-title"><span>Artist Photo Framing</span></div>
+        <div class="grid-2">
+          <div class="field">
+            <label class="field-label" for="artistZoom"><span>Photo Zoom</span></label>
+            <div class="slider-row">
+              <input id="artistZoom" type="range" min="50" max="240" value="100">
+              <span class="slider-val" id="artistZoomVal">100%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="artistBlur"><span>Backdrop Blur</span></label>
+            <div class="slider-row">
+              <input id="artistBlur" type="range" min="0" max="30" value="0">
+              <span class="slider-val" id="artistBlurVal">0px</span>
+            </div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label class="field-label" for="imageX"><span>Pan X</span></label>
+            <div class="slider-row">
+              <input id="imageX" type="range" min="-100" max="100" value="0">
+              <span class="slider-val" id="imageXVal">0</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="imageY"><span>Pan Y</span></label>
+            <div class="slider-row">
+              <input id="imageY" type="range" min="-100" max="100" value="0">
+              <span class="slider-val" id="imageYVal">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-title"><span>Album Sleeve Controls</span></div>
+        <div class="grid-2">
+          <div class="field">
+            <label class="field-label" for="albumSize"><span>Sleeve Size</span></label>
+            <div class="slider-row">
+              <input id="albumSize" type="range" min="180" max="680" value="310">
+              <span class="slider-val" id="albumSizeVal">310</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="albumGlow"><span>Glow / Shadow</span></label>
+            <div class="slider-row">
+              <input id="albumGlow" type="range" min="0" max="100" value="55">
+              <span class="slider-val" id="albumGlowVal">55%</span>
+            </div>
+          </div>
+        </div>
+        <div class="toggle-item">
+          <label for="showVinyl">Show peeking vinyl disc behind cover</label>
+          <input id="showVinyl" type="checkbox">
+        </div>
+        <div class="field">
+          <span class="field-label"><span>Quick Sleeve Position Snap</span></span>
+          <div class="snap-bar">
+            <button type="button" class="snap-btn" data-snap="bottom-right">Bottom Right</button>
+            <button type="button" class="snap-btn" data-snap="bottom-left">Bottom Left</button>
+            <button type="button" class="snap-btn" data-snap="center-hero">Center Hero</button>
+            <button type="button" class="snap-btn" data-snap="top-right">Top Right</button>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-title"><span>Logo Placement & Scale</span></div>
+        <div class="grid-2">
+          <div class="field">
+            <label class="field-label" for="logoScale"><span>Logo Size</span></label>
+            <div class="slider-row">
+              <input id="logoScale" type="range" min="15" max="95" value="48">
+              <span class="slider-val" id="logoScaleVal">48%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="logoVisibility"><span>Logo Display</span></label>
+            <select id="logoVisibility">
+              <option value="auto">Show Logo / Monogram</option>
+              <option value="image-only">Only Uploaded Logo</option>
+              <option value="hidden">Hide Logo</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: TYPOGRAPHY & COLOR FX -->
+      <div class="tab-pane" id="pane-style">
+        <div class="section-title"><span>Color Palette & Accent</span></div>
+        <div class="field">
+          <div class="swatches" id="swatches">
+            <button type="button" class="swatch" data-palette="synth" aria-pressed="true" title="Synthwave" style="background:linear-gradient(135deg,#ff43b8 0 50%,#42e9f5 50%)"></button>
+            <button type="button" class="swatch" data-palette="crimson" aria-pressed="false" title="Blood Crimson" style="background:linear-gradient(135deg,#ff2a4b 0 50%,#f5d0c5 50%)"></button>
+            <button type="button" class="swatch" data-palette="gold" aria-pressed="false" title="Gold Pressing" style="background:linear-gradient(135deg,#f5b942 0 50%,#1c1917 50%)"></button>
+            <button type="button" class="swatch" data-palette="ember" aria-pressed="false" title="Ember" style="background:linear-gradient(135deg,#ff8c42 0 50%,#e63956 50%)"></button>
+            <button type="button" class="swatch" data-palette="acid" aria-pressed="false" title="Acid" style="background:linear-gradient(135deg,#d4ff3f 0 50%,#8e5cff 50%)"></button>
+            <button type="button" class="swatch" data-palette="forest" aria-pressed="false" title="Emerald Tape" style="background:linear-gradient(135deg,#34d399 0 50%,#a7f3d0 50%)"></button>
+            <button type="button" class="swatch" data-palette="ice" aria-pressed="false" title="Glacier" style="background:linear-gradient(135deg,#7dd3fc 0 50%,#e2e8f0 50%)"></button>
+            <button type="button" class="swatch" data-palette="mono" aria-pressed="false" title="Silver Monochrome" style="background:linear-gradient(135deg,#ffffff 0 50%,#52525b 50%)"></button>
+            <label class="color-picker-wrap" title="Custom Accent Color">
+              <input type="color" id="customAccent" value="#ff43b8">
+            </label>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-title"><span>Typography Direction</span></div>
+        <div class="grid-2">
+          <div class="field">
+            <label class="field-label" for="fontVibe"><span>Font Pairing</span></label>
+            <select id="fontVibe">
+              <option value="brutalist">Condensed Brutalist (Bebas / Oswald)</option>
+              <option value="editorial">Editorial Magazine (Playfair Serif)</option>
+              <option value="modern">Modern Neo-Grotesque (Syne)</option>
+              <option value="archive">Technical Archive (JetBrains Mono)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label" for="titleSize"><span>Artist Name Size</span></label>
+            <div class="slider-row">
+              <input id="titleSize" type="range" min="36" max="140" value="84">
+              <span class="slider-val" id="titleSizeVal">84</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label class="field-label" for="titleTracking"><span>Letter Spacing</span></label>
+            <div class="slider-row">
+              <input id="titleTracking" type="range" min="-4" max="24" value="4">
+              <span class="slider-val" id="titleTrackingVal">4</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="titleY"><span>Title Vertical Pos</span></label>
+            <div class="slider-row">
+              <input id="titleY" type="range" min="180" max="1450" value="960">
+              <span class="slider-val" id="titleYVal">960</span>
+            </div>
+          </div>
+        </div>
+        <div class="toggle-item">
+          <label for="showArtistText">Show Artist Name Text (hide if using big logo)</label>
+          <input id="showArtistText" type="checkbox" checked>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-title"><span>Photo Grade, Grain & Frame</span></div>
+        <div class="grid-2">
+          <div class="field">
+            <label class="field-label" for="imageTreatment"><span>Color Grade</span></label>
+            <select id="imageTreatment">
+              <option value="cinematic">Cinematic Contrast</option>
+              <option value="vivid">Vivid Punch</option>
+              <option value="mono">High-Contrast B&W</option>
+              <option value="duotone">Palette Duotone Tint</option>
+              <option value="vintage">Warm Analog Fade</option>
+              <option value="natural">Natural Original</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label" for="frameStyle"><span>Card Border Frame</span></label>
+            <select id="frameStyle">
+              <option value="neon">Gradient Glow Frame</option>
+              <option value="editorial">Thin Editorial Hairline</option>
+              <option value="corners">Viewfinder Corner Marks</option>
+              <option value="none">Borderless Full Bleed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label class="field-label" for="overlay"><span>Mood Darkening</span></label>
+            <div class="slider-row">
+              <input id="overlay" type="range" min="0" max="80" value="32">
+              <span class="slider-val" id="overlayVal">32%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="grain"><span>Film Grain Texture</span></label>
+            <div class="slider-row">
+              <input id="grain" type="range" min="0" max="60" value="16">
+              <span class="slider-val" id="grainVal">16%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: RECORD DETAILS & CURATOR NOTES -->
+      <div class="tab-pane" id="pane-details">
+        <div class="section-title"><span>Record Metadata</span></div>
+        <div class="field">
+          <label class="field-label" for="artistName"><span>Artist / Band Name</span></label>
+          <input id="artistName" type="text" maxlength="80" placeholder="e.g. Death">
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label class="field-label" for="albumName"><span>Album Title</span></label>
+            <input id="albumName" type="text" maxlength="90" placeholder="e.g. Scream Bloody Gore">
+          </div>
+          <div class="field">
+            <label class="field-label" for="releaseYear"><span>Release Year</span></label>
+            <input id="releaseYear" type="text" maxlength="16" placeholder="1987">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label class="field-label" for="country"><span>Origin / Label</span></label>
+            <input id="country" type="text" maxlength="50" placeholder="United States">
+          </div>
+          <div class="field">
+            <label class="field-label" for="genres"><span>Genres / Tags</span></label>
+            <input id="genres" type="text" maxlength="90" placeholder="Death Metal · Old School">
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-title"><span>Curator Editorial Touch</span></div>
+        <div class="field">
+          <label class="field-label" for="keyTrack"><span>Standout Track</span><span class="badge">Optional</span></label>
+          <input id="keyTrack" type="text" maxlength="70" placeholder="e.g. Zombie Ritual">
+        </div>
+        <div class="field">
+          <label class="field-label" for="curatorNote"><span>Review / Pull Quote</span><span class="badge">Optional</span></label>
+          <textarea id="curatorNote" maxlength="160" placeholder="Why this record matters in 1–2 punchy sentences..."></textarea>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="section-title"><span>Header & Footer Micro-Labels</span></div>
+        <div class="grid-2">
+          <div class="field">
+            <label class="field-label" for="topLeftTag"><span>Top Left Tag</span></label>
+            <input id="topLeftTag" type="text" maxlength="32" value="RECORD RECOMMENDATION">
+          </div>
+          <div class="field">
+            <label class="field-label" for="topRightTag"><span>Top Right Tag</span></label>
+            <input id="topRightTag" type="text" maxlength="32" value="ESSENTIAL LISTENING">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label class="field-label" for="bottomLeftTag"><span>Bottom Left Tag</span></label>
+            <input id="bottomLeftTag" type="text" maxlength="32" value="SOUND MADE VISUAL">
+          </div>
+          <div class="field">
+            <label class="field-label" for="bottomRightTag"><span>Bottom Right / Handle</span></label>
+            <input id="bottomRightTag" type="text" maxlength="32" value="@ALBUMCARDSTUDIO">
+          </div>
+        </div>
+
+        <div class="toggle-item">
+          <label for="showMetadata">Show Bottom Metadata Card</label>
+          <input id="showMetadata" type="checkbox" checked>
+        </div>
+
+        <button type="button" class="btn-sm" id="resetBtn" style="width:100%;margin-top:8px;color:#ff9aa8">Reset Entire Design</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT / STICKY TOP: LIVE INTERACTIVE CANVAS -->
+  <section class="stage-column" id="stageColumn" aria-label="Live card preview">
+    <div class="stage-toolbar">
+      <div class="drag-selector" role="group" aria-label="Active drag layer">
+        <span>Drag:</span>
+        <button type="button" class="drag-pill active" data-drag="artist">Photo</button>
+        <button type="button" class="drag-pill" data-drag="album">Album</button>
+        <button type="button" class="drag-pill" data-drag="logo">Logo</button>
+        <button type="button" class="drag-pill" data-drag="title">Title</button>
+      </div>
+      <div class="stage-toggles">
+        <button type="button" class="tool-chip" id="safeZoneBtn" title="Toggle Instagram/TikTok Story UI safe zones">Story Safe-Zones</button>
+        <button type="button" class="tool-chip" id="expandStageBtn" title="Expand or compact mobile preview">Resize View</button>
+      </div>
+    </div>
+
+    <div class="canvas-frame" id="canvasFrame">
+      <canvas id="preview" width="1080" height="1920" aria-label="1080 by 1920 music story card preview"></canvas>
+    </div>
+
+    <div class="status-bar" id="statusBar" role="status" aria-live="polite">
+      <span id="statusText">Tip: Drag directly on the card to move the active layer, or try "Demo Card".</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;opacity:0.8">1080×1920 PNG</span>
+    </div>
+
+    <div class="stage-footer">
+      <span>DIRECT TOUCH & MOUSE DRAG ENABLED</span>
+      <span>100% LOCAL IN-BROWSER RENDERING</span>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const canvas = $('preview');
+  const ctx = canvas.getContext('2d');
+  const W = 1080, H = 1920;
+
+  // Curated Editorial Color Palettes
+  const PALETTES = {
+    synth:   { a: '#ff43b8', b: '#42e9f5', c: '#9b71ff', bg: '#0e0a1c', card: 'rgba(12, 9, 24, 0.80)', text: '#ffffff', muted: '#d3c6e6' },
+    crimson: { a: '#ff2a4b', b: '#f5d0c5', c: '#991b1b', bg: '#14070a', card: 'rgba(20, 7, 10, 0.84)', text: '#fff5f5', muted: '#e2b8be' },
+    gold:    { a: '#f5b942', b: '#fde68a', c: '#b45309', bg: '#12100c', card: 'rgba(18, 16, 12, 0.84)', text: '#fffbeb', muted: '#d6cbb8' },
+    ember:   { a: '#ff8c42', b: '#e63956', c: '#ffcf7b', bg: '#1a0c12', card: 'rgba(24, 10, 16, 0.82)', text: '#fff6ed', muted: '#e3beb3' },
+    acid:    { a: '#d4ff3f', b: '#8e5cff', c: '#38f2af', bg: '#0d0d1a', card: 'rgba(13, 13, 26, 0.82)', text: '#f9ffe8', muted: '#c7c5de' },
+    forest:  { a: '#34d399', b: '#a7f3d0', c: '#059669', bg: '#071410', card: 'rgba(7, 20, 16, 0.84)', text: '#ecfdf5', muted: '#b3d9cb' },
+    ice:     { a: '#7dd3fc', b: '#e2e8f0', c: '#6366f1', bg: '#0b121e', card: 'rgba(11, 18, 30, 0.82)', text: '#f8fafc', muted: '#bed0e4' },
+    mono:    { a: '#ffffff', b: '#a1a1aa', c: '#52525b', bg: '#0c0c0e', card: 'rgba(14, 14, 17, 0.85)', text: '#ffffff', muted: '#c4c4cc' }
+  };
+
+  // Curated Google Font Stacks
+  const FONTS = {
+    brutalist: { display: '"Bebas Neue", "Oswald", sans-serif', serif: '"Oswald", sans-serif', body: '"Space Grotesk", "Inter", sans-serif', mono: '"JetBrains Mono", monospace' },
+    editorial: { display: '"Playfair Display", Georgia, serif', serif: '"Playfair Display", Georgia, serif', body: '"Inter", sans-serif', mono: '"JetBrains Mono", monospace' },
+    modern:    { display: '"Syne", "Space Grotesk", sans-serif', serif: '"Syne", sans-serif', body: '"Space Grotesk", sans-serif', mono: '"JetBrains Mono", monospace' },
+    archive:   { display: '"JetBrains Mono", monospace', serif: '"JetBrains Mono", monospace', body: '"JetBrains Mono", monospace', mono: '"JetBrains Mono", monospace' }
+  };
+
+  // Application State
+  const state = {
+    layout: 'classic',
+    artistName: '',
+    albumName: '',
+    releaseYear: '',
+    country: '',
+    genres: '',
+    keyTrack: '',
+    curatorNote: '',
+    topLeftTag: 'RECORD RECOMMENDATION',
+    topRightTag: 'ESSENTIAL LISTENING',
+    bottomLeftTag: 'SOUND MADE VISUAL',
+    bottomRightTag: '@ALBUMCARDSTUDIO',
+
+    palette: 'synth',
+    customAccent: null,
+    fontVibe: 'brutalist',
+    titleSize: 84,
+    titleTracking: 4,
+    titleX: 540,
+    titleY: 960,
+    showArtistText: true,
+
+    artistZoom: 100,
+    artistBlur: 0,
+    imageX: 0,
+    imageY: 0,
+    imageTreatment: 'cinematic',
+    overlay: 32,
+    grain: 16,
+    frameStyle: 'neon',
+
+    albumSize: 310,
+    albumX: 650,
+    albumY: 1085,
+    albumGlow: 55,
+    showVinyl: false,
+
+    logoScale: 48,
+    logoX: 540,
+    logoY: 195,
+    logoVisibility: 'auto',
+    logoBlend: 'normal',
+
+    showMetadata: true,
+    showSafeZones: false,
+    activeDragLayer: 'artist'
+  };
+
+  const images = { artist: null, album: null, logo: null };
+  const imageDataUrls = { artist: null, album: null, logo: null };
+  const processedLogos = { cacheKey: '', canvas: null };
+
+  // Pre-generate seamless subtle noise tile for film grain
+  const grainCanvas = document.createElement('canvas');
+  grainCanvas.width = 180;
+  grainCanvas.height = 180;
+  const gCtx = grainCanvas.getContext('2d');
+  const gImg = gCtx.createImageData(180, 180);
+  for (let i = 0; i < gImg.data.length; i += 4) {
+    const v = Math.random() * 255;
+    gImg.data[i] = v;
+    gImg.data[i + 1] = v;
+    gImg.data[i + 2] = v;
+    gImg.data[i + 3] = 255;
+  }
+  gCtx.putImageData(gImg, 0, 0);
+
+  function setStatus(msg, isError = false) {
+    $('statusText').textContent = msg;
+    $('statusBar').classList.toggle('error', isError);
+  }
+
+  function getActivePalette() {
+    const base = PALETTES[state.palette] || PALETTES.synth;
+    if (!state.customAccent) return base;
+    return { ...base, a: state.customAccent };
+  }
+
+  // Process Band Logo for Real-World White/Black Background Knock-Out
+  function getProcessedLogo(img, mode) {
+    if (!img || mode === 'normal') return img;
+    const key = `${img.src.slice(0, 64)}_${mode}`;
+    if (processedLogos.cacheKey === key && processedLogos.canvas) return processedLogos.canvas;
+
+    const off = document.createElement('canvas');
+    off.width = img.naturalWidth || img.width;
+    off.height = img.naturalHeight || img.height;
+    const octx = off.getContext('2d');
+    octx.drawImage(img, 0, 0);
+
+    try {
+      const idata = octx.getImageData(0, 0, off.width, off.height);
+      const d = idata.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i + 1], b = d[i + 2], a = d[i + 3];
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        if (mode === 'knockout-white') {
+          // Make white transparent while preserving dark/colored ink
+          const whiteness = Math.min(r, g, b);
+          if (whiteness > 215) {
+            d[i + 3] = Math.max(0, Math.round(a * (1 - (whiteness - 215) / 40)));
+          }
+        } else if (mode === 'invert-white') {
+          // Knock out white background and convert dark logo marks into crisp pure white
+          const whiteness = Math.min(r, g, b);
+          const alphaFactor = whiteness > 215 ? Math.max(0, 1 - (whiteness - 215) / 40) : 1;
+          d[i] = 255;
+          d[i + 1] = 255;
+          d[i + 2] = 255;
+          d[i + 3] = Math.round(a * alphaFactor * (1 - lum / 255 * 0.35));
+        } else if (mode === 'knockout-black') {
+          const blackness = Math.max(r, g, b);
+          if (blackness < 45) {
+            d[i + 3] = Math.max(0, Math.round(a * (blackness / 45)));
+          }
+        }
+      }
+      octx.putImageData(idata, 0, 0);
+      processedLogos.cacheKey = key;
+      processedLogos.canvas = off;
+      return off;
+    } catch (e) {
+      // Fallback if CORS blocks pixel read
+      return img;
+    }
+  }
+
+  function roundRectPath(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+  }
+
+  function makeGradient(x, y, w, h, stops) {
+    const g = ctx.createLinearGradient(x, y, x + w, y + h);
+    stops.forEach(([pos, col]) => g.addColorStop(pos, col));
+    return g;
+  }
+
+  function drawTrackedText(text, x, y, font, color, align = 'center', tracking = 0, maxWidth = 900) {
+    ctx.save();
+    ctx.font = font;
+    ctx.fillStyle = color;
+    ctx.textBaseline = 'alphabetic';
+
+    if (!tracking || tracking === 0) {
+      ctx.textAlign = align;
+      ctx.fillText(text, x, y, maxWidth);
+      ctx.restore();
+      return;
+    }
+
+    const chars = Array.from(text);
+    const widths = chars.map(ch => ctx.measureText(ch).width);
+    const totalW = widths.reduce((a, b) => a + b, 0) + tracking * Math.max(0, chars.length - 1);
+    const scale = totalW > maxWidth ? maxWidth / totalW : 1;
+
+    ctx.translate(x, y);
+    ctx.scale(scale, 1);
+
+    let cursorX = 0;
+    if (align === 'center') cursorX = -totalW / 2;
+    else if (align === 'right') cursorX = -totalW;
+
+    ctx.textAlign = 'left';
+    chars.forEach((ch, idx) => {
+      ctx.fillText(ch, cursorX, 0);
+      cursorX += widths[idx] + tracking;
+    });
+    ctx.restore();
+  }
+
+  function fitText(text, maxW, font) {
+    ctx.font = font;
+    let t = text;
+    while (t.length > 1 && ctx.measureText(t).width > maxW) {
+      t = t.slice(0, -1);
+    }
+    return t !== text ? t.trimEnd() + '…' : t;
+  }
+
+  function wrapLines(text, maxW, font, maxLines = 3) {
+    ctx.font = font;
+    const words = text.split(/\s+/).filter(Boolean);
+    const lines = [];
+    let line = '';
+    for (const w of words) {
+      const test = line ? `${line} ${w}` : w;
+      if (ctx.measureText(test).width > maxW && line) {
+        lines.push(line);
+        line = w;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    if (lines.length > maxLines) {
+      const sliced = lines.slice(0, maxLines);
+      sliced[maxLines - 1] = fitText(sliced[maxLines - 1], maxW, font);
+      return sliced;
+    }
+    return lines;
+  }
+
+  // Draw Realistic Vinyl Record Peeking Out Behind Album Cover
+  function drawVinylDisc(cx, cy, radius, accentColor) {
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // Outer drop shadow
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.75)';
+    ctx.shadowBlur = 28;
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fillStyle = '#0c0c0f';
+    ctx.fill();
+    ctx.restore();
+
+    // Vinyl base
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fillStyle = '#111115';
+    ctx.fill();
+
+    // Subtle specular sheen across vinyl
+    const sheen = ctx.createLinearGradient(-radius, -radius, radius, radius);
+    sheen.addColorStop(0, 'rgba(255,255,255,0.02)');
+    sheen.addColorStop(0.35, 'rgba(255,255,255,0.14)');
+    sheen.addColorStop(0.5, 'rgba(255,255,255,0.02)');
+    sheen.addColorStop(0.75, 'rgba(255,255,255,0.10)');
+    sheen.addColorStop(1, 'rgba(255,255,255,0.01)');
+    ctx.fillStyle = sheen;
+    ctx.fill();
+
+    // Concentric micro-grooves
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1.5;
+    for (let r = radius * 0.44; r < radius * 0.95; r += 8) {
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Center record label
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.34, 0, Math.PI * 2);
+    ctx.fillStyle = accentColor;
+    ctx.fill();
+
+    // Inner label ring & spindle hole
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.28, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.055, 0, Math.PI * 2);
+    ctx.fillStyle = '#09090b';
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // Draw Artist Background Photo with Pan, Zoom, Blur, and Color Grades
+  function drawArtistLayer(ix, iy, iw, ih, p) {
+    ctx.save();
+    roundRectPath(ix, iy, iw, ih, state.layout === 'minimal' ? 0 : 24);
+    ctx.clip();
+
+    if (images.artist) {
+      const img = images.artist;
+      const natW = img.naturalWidth || img.width;
+      const natH = img.naturalHeight || img.height;
+      const baseScale = Math.max(iw / natW, ih / natH);
+      const zoom = state.artistZoom / 100;
+      const dw = natW * baseScale * zoom;
+      const dh = natH * baseScale * zoom;
+
+      const panX = (state.imageX / 100) * (iw * 0.65);
+      const panY = (state.imageY / 100) * (ih * 0.65);
+      const dx = ix + (iw - dw) / 2 + panX;
+      const dy = iy + (ih - dh) / 2 + panY;
+
+      ctx.save();
+      const filters = [];
+      if (state.artistBlur > 0) filters.push(`blur(${state.artistBlur}px)`);
+      if (state.imageTreatment === 'mono') filters.push('grayscale(1) contrast(1.22) brightness(0.95)');
+      else if (state.imageTreatment === 'vivid') filters.push('saturate(1.48) contrast(1.1)');
+      else if (state.imageTreatment === 'cinematic') filters.push('saturate(0.88) contrast(1.14)');
+      else if (state.imageTreatment === 'vintage') filters.push('sepia(0.28) contrast(1.06) brightness(0.96)');
+      else if (state.imageTreatment === 'duotone') filters.push('grayscale(1) contrast(1.25)');
+      if (filters.length) ctx.filter = filters.join(' ');
+
+      ctx.drawImage(img, dx, dy, dw, dh);
+      ctx.restore();
+
+      // Duotone Palette Wash
+      if (state.imageTreatment === 'duotone') {
+        ctx.save();
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.fillStyle = p.a;
+        ctx.fillRect(ix, iy, iw, ih);
+        ctx.globalCompositeOperation = 'screen';
+        ctx.fillStyle = p.bg;
+        ctx.fillRect(ix, iy, iw, ih);
+        ctx.restore();
+      }
+
+      // Editorial Vignette & Legibility Gradient
+      const dark = state.overlay / 100;
+      const grad = ctx.createLinearGradient(0, iy, 0, iy + ih);
+      grad.addColorStop(0, `rgba(6, 5, 14, ${Math.min(0.85, dark + 0.16)})`);
+      grad.addColorStop(0.25, `rgba(6, 5, 14, ${dark * 0.55})`);
+      grad.addColorStop(0.55, `rgba(6, 5, 14, ${dark * 0.85})`);
+      grad.addColorStop(0.82, `rgba(6, 5, 14, ${Math.min(0.95, dark + 0.48)})`);
+      grad.addColorStop(1, 'rgba(6, 5, 14, 0.96)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(ix, iy, iw, ih);
+    } else {
+      // Stylish Graphic Placeholder when no image is loaded yet
+      ctx.fillStyle = makeGradient(ix, iy, iw, ih, [[0, '#261938'], [0.5, '#131022'], [1, '#080710']]);
+      ctx.fillRect(ix, iy, iw, ih);
+
+      ctx.save();
+      ctx.globalAlpha = 0.28;
+      ctx.strokeStyle = p.a;
+      ctx.lineWidth = 2;
+      for (let r = 80; r <= 560; r += 60) {
+        ctx.beginPath();
+        ctx.arc(540, 760, r, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      ctx.fillStyle = p.text;
+      ctx.font = '800 36px "Space Grotesk", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('UPLOAD ARTIST PHOTO', 540, 750);
+      ctx.fillStyle = p.muted;
+      ctx.font = '500 20px "Inter", sans-serif';
+      ctx.fillText('OR TAP "DEMO CARD" IN THE TOP BAR', 540, 795);
+    }
+
+    // Subtle Accent Rim Tint
+    const tint = makeGradient(ix, iy, iw, ih, [[0, p.a + '22'], [0.4, 'transparent'], [1, p.b + '18']]);
+    ctx.fillStyle = tint;
+    ctx.fillRect(ix, iy, iw, ih);
+
+    ctx.restore();
+  }
+
+  // Main Render Loop
+  function draw() {
+    const p = getActivePalette();
+    const f = FONTS[state.fontVibe] || FONTS.brutalist;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // 1. Outer Canvas Backdrop
+    ctx.fillStyle = makeGradient(0, 0, W, H, [[0, p.bg], [0.5, '#171226'], [1, p.bg]]);
+    ctx.fillRect(0, 0, W, H);
+
+    // Architectural Grid on Outer Mat (unless Minimal Full-Bleed)
+    if (state.layout !== 'minimal') {
+      ctx.save();
+      ctx.globalAlpha = 0.08;
+      ctx.strokeStyle = p.b;
+      ctx.lineWidth = 1.5;
+      for (let x = 0; x <= W; x += 60) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+      for (let y = 0; y <= H; y += 60) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    const inset = state.layout === 'minimal' ? 0 : 48;
+    const ix = inset, iy = inset, iw = W - inset * 2, ih = H - inset * 2;
+
+    // 2. Main Artist Photo Layer
+    drawArtistLayer(ix, iy, iw, ih, p);
+
+    // Editorial Zine Top Header Strip
+    if (state.layout === 'editorial') {
+      ctx.save();
+      ctx.fillStyle = p.bg;
+      ctx.fillRect(ix, iy, iw, 130);
+      ctx.strokeStyle = p.a;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(ix, iy + 130);
+      ctx.lineTo(ix + iw, iy + 130);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 3. Top Micro-Labels (Editable Curator Header)
+    const headerY = state.layout === 'editorial' ? iy + 76 : iy + 54;
+    if (state.topLeftTag.trim()) {
+      ctx.save();
+      ctx.font = `800 18px ${f.mono}`;
+      ctx.fillStyle = p.b;
+      ctx.textAlign = 'left';
+      ctx.fillText(state.topLeftTag.trim().toUpperCase(), ix + 42, headerY);
+      ctx.restore();
+    }
+    if (state.topRightTag.trim()) {
+      ctx.save();
+      ctx.font = `800 18px ${f.mono}`;
+      ctx.fillStyle = p.text;
+      ctx.globalAlpha = 0.85;
+      ctx.textAlign = 'right';
+      ctx.fillText(state.topRightTag.trim().toUpperCase(), ix + iw - 42, headerY);
+      ctx.restore();
+    }
+
+    // 4. Band Logo / Monogram Layer
+    if (state.logoVisibility !== 'hidden') {
+      if (images.logo) {
+        const processed = getProcessedLogo(images.logo, state.logoBlend);
+        const maxLogoW = (state.logoScale / 100) * 860;
+        const maxLogoH = 260;
+        const ratio = Math.min(maxLogoW / processed.width, maxLogoH / processed.height);
+        const lw = processed.width * ratio;
+        const lh = processed.height * ratio;
+
+        ctx.save();
+        if (state.logoBlend === 'knockout-white') ctx.globalCompositeOperation = 'multiply';
+        else if (state.logoBlend === 'knockout-black') ctx.globalCompositeOperation = 'screen';
+
+        ctx.shadowColor = 'rgba(0,0,0,0.45)';
+        ctx.shadowBlur = 18;
+        ctx.drawImage(processed, state.logoX - lw / 2, state.logoY - lh / 2, lw, lh);
+        ctx.restore();
+      } else if (state.logoVisibility === 'auto') {
+        const initials = (state.artistName || 'AC')
+          .split(/\s+/).filter(Boolean).map(s => s[0]).join('').slice(0, 3).toUpperCase();
+        ctx.save();
+        ctx.strokeStyle = p.a;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(state.logoX - 75, state.logoY - 26);
+        ctx.lineTo(state.logoX + 75, state.logoY - 26);
+        ctx.stroke();
+        drawTrackedText(initials, state.logoX, state.logoY + 18, `900 32px ${f.display}`, p.text, 'center', 8, 300);
+        ctx.restore();
+      }
+    }
+
+    // 5. Artist Display Typography
+    if (state.showArtistText) {
+      const rawName = (state.artistName || 'ARTIST / BAND').toUpperCase();
+      const baseSz = state.titleSize;
+      const fontStr = `900 ${baseSz}px ${f.display}`;
+      const lines = wrapLines(rawName, 880, fontStr, 3);
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.82)';
+      ctx.shadowBlur = 28;
+      ctx.shadowOffsetY = 6;
+
+      lines.forEach((line, idx) => {
+        const lineY = state.titleY + idx * (baseSz * 1.04);
+        drawTrackedText(line, state.titleX, lineY, fontStr, p.text, 'center', state.titleTracking, 880);
+      });
+
+      // Accent rule below title
+      const ruleY = state.titleY + (lines.length - 1) * (baseSz * 1.04) + 26;
+      const ruleW = Math.min(440, 180 + rawName.length * 14);
+      ctx.fillStyle = makeGradient(state.titleX - ruleW / 2, ruleY, ruleW, 5, [[0, p.a], [0.5, p.b], [1, p.c]]);
+      ctx.fillRect(state.titleX - ruleW / 2, ruleY, ruleW, 5);
+      ctx.restore();
+    }
+
+    // 6. Album Cover Sleeve + Optional Vinyl Record
+    if (images.album) {
+      const sz = state.albumSize;
+      const ax = state.albumX;
+      const ay = state.albumY;
+
+      // Vinyl Record Peeking Out to the Right
+      if (state.showVinyl) {
+        drawVinylDisc(ax + sz * 0.94, ay + sz * 0.5, sz * 0.47, p.a);
+      }
+
+      // Outer Glow & Elevation Shadow
+      ctx.save();
+      const glowAlpha = Math.round((state.albumGlow / 100) * 200).toString(16).padStart(2, '0');
+      ctx.shadowColor = state.albumGlow > 15 ? p.a + glowAlpha : 'rgba(0,0,0,0.75)';
+      ctx.shadowBlur = 18 + (state.albumGlow * 0.45);
+      ctx.shadowOffsetY = 12;
+      roundRectPath(ax, ay, sz, sz, 10);
+      ctx.fillStyle = '#09080f';
+      ctx.fill();
+      ctx.restore();
+
+      // Album Artwork Image
+      ctx.save();
+      roundRectPath(ax, ay, sz, sz, 10);
+      ctx.clip();
+      const iwRatio = Math.max(sz / images.album.width, sz / images.album.height);
+      const dw = images.album.width * iwRatio;
+      const dh = images.album.height * iwRatio;
+      ctx.drawImage(images.album, ax + (sz - dw) / 2, ay + (sz - dh) / 2, dw, dh);
+
+      // Subtle vinyl sleeve crease highlight on left edge
+      const crease = ctx.createLinearGradient(ax, ay, ax + 24, ay);
+      crease.addColorStop(0, 'rgba(255,255,255,0.22)');
+      crease.addColorStop(0.5, 'rgba(0,0,0,0.18)');
+      crease.addColorStop(1, 'transparent');
+      ctx.fillStyle = crease;
+      ctx.fillRect(ax, ay, 24, sz);
+      ctx.restore();
+
+      // Crisp Sleeve Border
+      ctx.save();
+      roundRectPath(ax, ay, sz, sz, 10);
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 7. Editorial Metadata Panel
+    const hasQuote = Boolean(state.curatorNote.trim());
+    const hasTrack = Boolean(state.keyTrack.trim());
+    const cardH = 220 + (hasTrack ? 42 : 0) + (hasQuote ? 74 : 0);
+    const cardW = iw - 84;
+    const cardX = ix + 42;
+    const cardY = iy + ih - cardH - 86;
+
+    if (state.showMetadata) {
+      ctx.save();
+      roundRectPath(cardX, cardY, cardW, cardH, 20);
+      ctx.fillStyle = p.card;
+      ctx.fill();
+
+      // Subtle top highlight + accent border
+      ctx.strokeStyle = p.a;
+      ctx.globalAlpha = 0.65;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+
+      let curY = cardY + 58;
+      const padL = cardX + 36;
+      const innerW = cardW - 72;
+
+      // Album Title
+      const albumTitle = fitText(state.albumName.trim() || 'ALBUM TITLE', innerW, `900 44px ${f.serif}`);
+      ctx.fillStyle = p.text;
+      ctx.font = `900 44px ${f.serif}`;
+      ctx.textAlign = 'left';
+      ctx.fillText(albumTitle, padL, curY);
+
+      // Accent Bar
+      curY += 20;
+      ctx.fillStyle = p.b;
+      ctx.fillRect(padL, curY, 92, 4);
+
+      // Year & Origin
+      curY += 42;
+      const metaBits = [];
+      if (state.releaseYear.trim()) metaBits.push(state.releaseYear.trim());
+      if (state.country.trim()) metaBits.push(state.country.trim().toUpperCase());
+      if (metaBits.length) {
+        ctx.fillStyle = p.text;
+        ctx.font = `700 22px ${f.mono}`;
+        ctx.fillText(metaBits.join('  ·  '), padL, curY);
+        curY += 36;
+      }
+
+      // Genres
+      if (state.genres.trim()) {
+        ctx.fillStyle = p.muted;
+        ctx.font = `600 21px ${f.body}`;
+        ctx.fillText(fitText(state.genres.trim(), innerW, ctx.font), padL, curY);
+        curY += 38;
+      }
+
+      // Key Track Badge
+      if (hasTrack) {
+        ctx.save();
+        ctx.fillStyle = p.a;
+        ctx.font = `800 18px ${f.mono}`;
+        const label = `KEY TRACK // ${state.keyTrack.trim().toUpperCase()}`;
+        ctx.fillText(fitText(label, innerW, ctx.font), padL, curY + 4);
+        ctx.restore();
+        curY += 40;
+      }
+
+      // Curator Quote
+      if (hasQuote) {
+        ctx.save();
+        ctx.fillStyle = p.text;
+        ctx.globalAlpha = 0.9;
+        ctx.font = `italic 500 20px ${f.body}`;
+        const qLines = wrapLines(`“${state.curatorNote.trim()}”`, innerW, ctx.font, 2);
+        qLines.forEach((ql, i) => ctx.fillText(ql, padL, curY + 6 + i * 28));
+        ctx.restore();
+      }
+    }
+
+    // 8. Bottom Micro-Labels
+    const footY = iy + ih - 36;
+    if (state.bottomLeftTag.trim()) {
+      ctx.save();
+      ctx.font = `700 16px ${f.mono}`;
+      ctx.fillStyle = p.muted;
+      ctx.textAlign = 'left';
+      ctx.fillText(state.bottomLeftTag.trim().toUpperCase(), ix + 42, footY);
+      ctx.restore();
+    }
+    if (state.bottomRightTag.trim()) {
+      ctx.save();
+      ctx.font = `800 16px ${f.mono}`;
+      ctx.fillStyle = p.b;
+      ctx.textAlign = 'right';
+      ctx.fillText(state.bottomRightTag.trim().toUpperCase(), ix + iw - 42, footY);
+      ctx.restore();
+    }
+
+    // 9. Decorative Card Frame Overlay
+    if (state.frameStyle !== 'none' && state.layout !== 'minimal') {
+      ctx.save();
+      if (state.frameStyle === 'neon') {
+        roundRectPath(ix, iy, iw, ih, 24);
+        ctx.strokeStyle = makeGradient(ix, iy, iw, ih, [[0, p.a], [0.5, p.b], [1, p.c]]);
+        ctx.lineWidth = 5;
+        ctx.stroke();
+      } else if (state.frameStyle === 'editorial') {
+        roundRectPath(ix, iy, iw, ih, 12);
+        ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else if (state.frameStyle === 'corners') {
+        ctx.strokeStyle = p.b;
+        ctx.lineWidth = 5;
+        const m = 24, len = 54;
+        // Top-Left
+        ctx.beginPath(); ctx.moveTo(ix + m, iy + m + len); ctx.lineTo(ix + m, iy + m); ctx.lineTo(ix + m + len, iy + m); ctx.stroke();
+        // Top-Right
+        ctx.beginPath(); ctx.moveTo(ix + iw - m - len, iy + m); ctx.lineTo(ix + iw - m, iy + m); ctx.lineTo(ix + iw - m, iy + m + len); ctx.stroke();
+        // Bottom-Left
+        ctx.beginPath(); ctx.moveTo(ix + m, iy + ih - m - len); ctx.lineTo(ix + m, iy + ih - m); ctx.lineTo(ix + m + len, iy + ih - m); ctx.stroke();
+        // Bottom-Right
+        ctx.beginPath(); ctx.moveTo(ix + iw - m - len, iy + ih - m); ctx.lineTo(ix + iw - m, iy + ih - m); ctx.lineTo(ix + iw - m, iy + ih - m - len); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 10. Analog Film Grain Overlay
+    if (state.grain > 0) {
+      ctx.save();
+      ctx.globalAlpha = (state.grain / 100) * 0.28;
+      ctx.globalCompositeOperation = 'overlay';
+      const pat = ctx.createPattern(grainCanvas, 'repeat');
+      ctx.fillStyle = pat;
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
+
+    // 11. Instagram / TikTok Story Safe-Zone Overlay (Preview only, never exported)
+    if (state.showSafeZones && !draw.isExporting) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 59, 92, 0.16)';
+      ctx.strokeStyle = 'rgba(255, 90, 120, 0.75)';
+      ctx.setLineDash([12, 10]);
+      ctx.lineWidth = 3;
+      // Top Story UI bar zone (~220px)
+      ctx.fillRect(0, 0, W, 220);
+      ctx.strokeRect(2, 2, W - 4, 218);
+      // Bottom Story Reply / Action bar zone (~260px)
+      ctx.fillRect(0, H - 260, W, 260);
+      ctx.strokeRect(2, H - 258, W - 4, 256);
+
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#ff9aa8';
+      ctx.font = '800 20px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('STORY UI TOP SAFE ZONE (AVOID KEY TEXT)', W / 2, 120);
+      ctx.fillText('STORY UI BOTTOM REPLY ZONE', W / 2, H - 120);
+      ctx.restore();
+    }
+  }
+
+  // Apply Art Direction Layout Presets
+  function applyLayoutPreset(layout) {
+    state.layout = layout;
+    document.querySelectorAll('#layoutPresets .preset-card').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.layout === layout);
+    });
+
+    if (layout === 'classic') {
+      Object.assign(state, {
+        artistZoom: 100, artistBlur: 0, imageX: 0, imageY: 0,
+        logoX: 540, logoY: 205, logoScale: 48,
+        titleX: 540, titleY: 965, titleSize: 84, showArtistText: true,
+        albumSize: 310, albumX: 650, albumY: 1085, showVinyl: false,
+        showMetadata: true, frameStyle: 'neon'
+      });
+    } else if (layout === 'vinyl') {
+      Object.assign(state, {
+        artistZoom: 120, artistBlur: 14, imageX: 0, imageY: 0,
+        logoX: 540, logoY: 195, logoScale: 46,
+        titleX: 540, titleY: 420, titleSize: 78, showArtistText: true,
+        albumSize: 470, albumX: 205, albumY: 540, showVinyl: true,
+        showMetadata: true, frameStyle: 'neon'
+      });
+    } else if (layout === 'editorial') {
+      Object.assign(state, {
+        artistZoom: 105, artistBlur: 0, imageX: 0, imageY: 5,
+        logoX: 540, logoY: 270, logoScale: 42,
+        titleX: 540, titleY: 980, titleSize: 82, showArtistText: true,
+        albumSize: 290, albumX: 670, albumY: 1090, showVinyl: false,
+        showMetadata: true, frameStyle: 'editorial'
+      });
+    } else if (layout === 'minimal') {
+      Object.assign(state, {
+        artistZoom: 105, artistBlur: 0, imageX: 0, imageY: 0,
+        logoX: 540, logoY: 190, logoScale: 44,
+        titleX: 540, titleY: 1360, titleSize: 92, showArtistText: true,
+        albumSize: 220, albumX: 90, albumY: 1450, showVinyl: false,
+        showMetadata: false, frameStyle: 'none'
+      });
+    }
+    syncInputsFromState();
+    draw();
+    setStatus(`Applied "${layout.toUpperCase()}" art direction preset.`);
+  }
+
+  // Sync UI Inputs with State
+  function syncInputsFromState() {
+    const map = [
+      'artistName', 'albumName', 'releaseYear', 'country', 'genres',
+      'keyTrack', 'curatorNote', 'topLeftTag', 'topRightTag', 'bottomLeftTag', 'bottomRightTag',
+      'fontVibe', 'titleSize', 'titleTracking', 'titleY',
+      'artistZoom', 'artistBlur', 'imageX', 'imageY', 'imageTreatment', 'overlay', 'grain', 'frameStyle',
+      'albumSize', 'albumGlow', 'logoScale', 'logoVisibility', 'logoBlend'
+    ];
+    map.forEach(id => {
+      if ($(id)) $(id).value = state[id];
+    });
+
+    $('showArtistText').checked = state.showArtistText;
+    $('showVinyl').checked = state.showVinyl;
+    $('showMetadata').checked = state.showMetadata;
+
+    $('artistZoomVal').textContent = state.artistZoom + '%';
+    $('artistBlurVal').textContent = state.artistBlur + 'px';
+    $('imageXVal').textContent = state.imageX;
+    $('imageYVal').textContent = state.imageY;
+    $('albumSizeVal').textContent = state.albumSize;
+    $('albumGlowVal').textContent = state.albumGlow + '%';
+    $('logoScaleVal').textContent = state.logoScale + '%';
+    $('titleSizeVal').textContent = state.titleSize;
+    $('titleTrackingVal').textContent = state.titleTracking;
+    $('titleYVal').textContent = state.titleY;
+    $('overlayVal').textContent = state.overlay + '%';
+    $('grainVal').textContent = state.grain + '%';
+
+    document.querySelectorAll('#swatches .swatch').forEach(s => {
+      s.setAttribute('aria-pressed', String(!state.customAccent && s.dataset.palette === state.palette));
+    });
+  }
+
+  // Direct Canvas Touch & Mouse Dragging
+  let dragInfo = null;
+  function getCanvasCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: ((clientX - rect.left) / rect.width) * W,
+      y: ((clientY - rect.top) / rect.height) * H
+    };
+  }
+
+  canvas.addEventListener('pointerdown', e => {
+    canvas.setPointerCapture(e.pointerId);
+    const pt = getCanvasCoords(e);
+    const layer = state.activeDragLayer;
+    dragInfo = {
+      startX: pt.x,
+      startY: pt.y,
+      origImageX: state.imageX,
+      origImageY: state.imageY,
+      origAlbumX: state.albumX,
+      origAlbumY: state.albumY,
+      origLogoX: state.logoX,
+      origLogoY: state.logoY,
+      origTitleX: state.titleX,
+      origTitleY: state.titleY,
+      layer
+    };
+  });
+
+  canvas.addEventListener('pointermove', e => {
+    if (!dragInfo) return;
+    const pt = getCanvasCoords(e);
+    const dx = pt.x - dragInfo.startX;
+    const dy = pt.y - dragInfo.startY;
+
+    if (dragInfo.layer === 'artist') {
+      state.imageX = Math.max(-100, Math.min(100, Math.round(dragInfo.origImageX + (dx / W) * 160)));
+      state.imageY = Math.max(-100, Math.min(100, Math.round(dragInfo.origImageY + (dy / H) * 160)));
+      $('imageX').value = state.imageX;
+      $('imageY').value = state.imageY;
+      $('imageXVal').textContent = state.imageX;
+      $('imageYVal').textContent = state.imageY;
+    } else if (dragInfo.layer === 'album') {
+      state.albumX = Math.max(40, Math.min(W - state.albumSize - 40, Math.round(dragInfo.origAlbumX + dx)));
+      state.albumY = Math.max(60, Math.min(H - state.albumSize - 60, Math.round(dragInfo.origAlbumY + dy)));
+    } else if (dragInfo.layer === 'logo') {
+      let nx = Math.round(dragInfo.origLogoX + dx);
+      if (Math.abs(nx - 540) < 22) nx = 540; // Magnetic center snap
+      state.logoX = Math.max(120, Math.min(W - 120, nx));
+      state.logoY = Math.max(90, Math.min(H - 120, Math.round(dragInfo.origLogoY + dy)));
+    } else if (dragInfo.layer === 'title') {
+      let nx = Math.round(dragInfo.origTitleX + dx);
+      if (Math.abs(nx - 540) < 22) nx = 540; // Magnetic center snap
+      state.titleX = Math.max(160, Math.min(W - 160, nx));
+      state.titleY = Math.max(180, Math.min(1650, Math.round(dragInfo.origTitleY + dy)));
+      $('titleY').value = state.titleY;
+      $('titleYVal').textContent = state.titleY;
+    }
+    draw();
+  });
+
+  canvas.addEventListener('pointerup', () => { dragInfo = null; });
+  canvas.addEventListener('pointercancel', () => { dragInfo = null; });
+
+  // Navigation Tabs
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.nav-tab').forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      $('pane-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Media Source Tabs (File vs URL)
+  document.querySelectorAll('[data-src-toggle]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.media-card');
+      card.querySelectorAll('[data-src-toggle]').forEach(b => b.classList.toggle('active', b === btn));
+      const target = btn.dataset.srcToggle;
+      ['artistFile', 'artistUrl', 'albumFile', 'albumUrl', 'logoFile', 'logoUrl'].forEach(id => {
+        const el = $(id);
+        if (el && el.closest('.media-card') === card) {
+          el.classList.toggle('hidden', id !== target);
+        }
+      });
+    });
+  });
+
+  // Image Loading Helpers
+  function loadImageAsset(src, key, isCrossOrigin = false) {
+    return new Promise((resolve, reject) => {
+      if (!src) {
+        images[key] = null;
+        imageDataUrls[key] = null;
+        draw();
+        return resolve(null);
+      }
+      const im = new Image();
+      if (isCrossOrigin) im.crossOrigin = 'anonymous';
+      im.onload = () => {
+        images[key] = im;
+        imageDataUrls[key] = src;
+        processedLogos.cacheKey = '';
+        draw();
+        resolve(im);
+      };
+      im.onerror = () => reject(new Error('Could not load image URL (CORS blocked or invalid link). Try downloading and uploading the file instead.'));
+      im.src = src;
+    });
+  }
+
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith('image/')) return reject(new Error('Please select a valid image file.'));
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Failed to read local file.'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  ['artist', 'album', 'logo'].forEach(key => {
+    $(key + 'Upload').addEventListener('change', async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const dataUrl = await readFileAsDataURL(file);
+        await loadImageAsset(dataUrl, key);
+        $(key + 'FileName').textContent = file.name.slice(0, 26);
+        // Auto-switch active drag layer to what user just uploaded
+        setActiveDragLayer(key);
+        setStatus(`${key.charAt(0).toUpperCase() + key.slice(1)} image loaded.`);
+      } catch (err) {
+        setStatus(err.message, true);
+      }
+    });
+
+    document.querySelector(`[data-load-url="${key}"]`).addEventListener('click', async () => {
+      const url = $(key + 'UrlInput').value.trim();
+      if (!url) return setStatus('Paste a valid image URL first.', true);
+      try {
+        await loadImageAsset(url, key, true);
+        setActiveDragLayer(key);
+        setStatus(`${key.charAt(0).toUpperCase() + key.slice(1)} image loaded from URL.`);
+      } catch (err) {
+        setStatus(err.message, true);
+      }
+    });
+  });
+
+  // Active Drag Layer Selector
+  function setActiveDragLayer(layer) {
+    state.activeDragLayer = layer;
+    document.querySelectorAll('.drag-pill').forEach(pill => {
+      pill.classList.toggle('active', pill.dataset.drag === layer);
+    });
+  }
+  document.querySelectorAll('.drag-pill').forEach(pill => {
+    pill.addEventListener('click', () => setActiveDragLayer(pill.dataset.drag));
+  });
+
+  // Layout Preset Buttons
+  document.querySelectorAll('#layoutPresets .preset-card').forEach(btn => {
+    btn.addEventListener('click', () => applyLayoutPreset(btn.dataset.layout));
+  });
+
+  // Corner Snap Presets for Album Sleeve
+  document.querySelectorAll('[data-snap]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pos = btn.dataset.snap;
+      const sz = state.albumSize;
+      if (pos === 'bottom-right') { state.albumX = W - sz - 110; state.albumY = 1085; }
+      else if (pos === 'bottom-left') { state.albumX = 110; state.albumY = 1085; }
+      else if (pos === 'center-hero') { state.albumX = Math.round((W - sz) / 2); state.albumY = 540; }
+      else if (pos === 'top-right') { state.albumX = W - sz - 110; state.albumY = 260; }
+      setActiveDragLayer('album');
+      draw();
+    });
+  });
+
+  // Palette Swatches & Custom Color Picker
+  $('swatches').addEventListener('click', e => {
+    const sw = e.target.closest('.swatch');
+    if (!sw) return;
+    state.palette = sw.dataset.palette;
+    state.customAccent = null;
+    syncInputsFromState();
+    draw();
+  });
+
+  $('customAccent').addEventListener('input', e => {
+    state.customAccent = e.target.value;
+    syncInputsFromState();
+    draw();
+  });
+
+  // Bind All Standard Form Controls
+  const numericInputs = new Set([
+    'titleSize', 'titleTracking', 'titleY',
+    'artistZoom', 'artistBlur', 'imageX', 'imageY', 'overlay', 'grain',
+    'albumSize', 'albumGlow', 'logoScale'
+  ]);
+  const checkboxInputs = new Set(['showArtistText', 'showVinyl', 'showMetadata']);
+
+  [
+    'artistName', 'albumName', 'releaseYear', 'country', 'genres',
+    'keyTrack', 'curatorNote', 'topLeftTag', 'topRightTag', 'bottomLeftTag', 'bottomRightTag',
+    'fontVibe', 'titleSize', 'titleTracking', 'titleY', 'showArtistText',
+    'artistZoom', 'artistBlur', 'imageX', 'imageY', 'imageTreatment', 'overlay', 'grain', 'frameStyle',
+    'albumSize', 'albumGlow', 'showVinyl',
+    'logoScale', 'logoVisibility', 'logoBlend', 'showMetadata'
+  ].forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      if (checkboxInputs.has(id)) state[id] = el.checked;
+      else if (numericInputs.has(id)) state[id] = Number(el.value);
+      else state[id] = el.value;
+
+      if (id === 'logoBlend') processedLogos.cacheKey = '';
+      syncInputsFromState();
+      draw();
+    });
+  });
+
+  // Stage Toggles
+  $('safeZoneBtn').addEventListener('click', () => {
+    state.showSafeZones = !state.showSafeZones;
+    $('safeZoneBtn').classList.toggle('active', state.showSafeZones);
+    draw();
+  });
+
+  $('expandStageBtn').addEventListener('click', () => {
+    $('stageColumn').classList.toggle('expanded');
+  });
+
+  // Generate Procedural Demo Card (Zero external network dependencies)
+  $('sampleBtn').addEventListener('click', async () => {
+    // Create synthetic high-contrast artist portrait & album cover on offscreen canvases
+    const pCanvas = document.createElement('canvas');
+    pCanvas.width = 1080; pCanvas.height = 1440;
+    const pctx = pCanvas.getContext('2d');
+    const bg = pctx.createLinearGradient(0, 0, 1080, 1440);
+    bg.addColorStop(0, '#2b121e'); bg.addColorStop(0.5, '#121829'); bg.addColorStop(1, '#09070f');
+    pctx.fillStyle = bg; pctx.fillRect(0, 0, 1080, 1440);
+    // Dramatic stage spotlight beams
+    for (let i = 0; i < 6; i++) {
+      pctx.save();
+      pctx.translate(540, -100);
+      pctx.rotate((-0.45 + i * 0.18));
+      const beam = pctx.createLinearGradient(0, 0, 0, 1600);
+      beam.addColorStop(0, 'rgba(255, 67, 184, 0.34)');
+      beam.addColorStop(1, 'transparent');
+      pctx.fillStyle = beam;
+      pctx.fillRect(-90, 0, 180, 1600);
+      pctx.restore();
+    }
+    // Stylized silhouette figure
+    pctx.fillStyle = '#07060c';
+    pctx.beginPath();
+    pctx.arc(540, 560, 145, 0, Math.PI * 2);
+    pctx.fill();
+    pctx.beginPath();
+    pctx.ellipse(540, 1080, 320, 420, 0, Math.PI, 0, false);
+    pctx.fill();
+
+    // Synthetic Vinyl Cover Artwork
+    const aCanvas = document.createElement('canvas');
+    aCanvas.width = 600; aCanvas.height = 600;
+    const actx = aCanvas.getContext('2d');
+    actx.fillStyle = '#140b18'; actx.fillRect(0, 0, 600, 600);
+    const ag = actx.createRadialGradient(300, 300, 30, 300, 300, 290);
+    ag.addColorStop(0, '#ff2a4b'); ag.addColorStop(0.55, '#581c87'); ag.addColorStop(1, '#09090b');
+    actx.fillStyle = ag; actx.fillRect(0, 0, 600, 600);
+    actx.strokeStyle = '#fde68a'; actx.lineWidth = 6;
+    actx.strokeRect(36, 36, 528, 528);
+    actx.fillStyle = '#fff'; actx.font = '900 54px "Bebas Neue", sans-serif';
+    actx.textAlign = 'center'; actx.fillText('NOCTURNE PRESSING', 300, 315);
+
+    await loadImageAsset(pCanvas.toDataURL('image/png'), 'artist');
+    await loadImageAsset(aCanvas.toDataURL('image/png'), 'album');
+
+    Object.assign(state, {
+      layout: 'vinyl',
+      artistName: 'DEAD SIGNAL',
+      albumName: 'Midnight Telemetry',
+      releaseYear: '1989',
+      country: 'United Kingdom',
+      genres: 'Post-Punk · Coldwave · Dark Synth',
+      keyTrack: 'Static Cathedral',
+      curatorNote: 'Razor-sharp analog basslines colliding with cavernous reverb—an essential late-night spin.',
+      palette: 'crimson',
+      customAccent: null,
+      fontVibe: 'brutalist',
+      artistZoom: 105,
+      artistBlur: 4,
+      albumSize: 430,
+      albumX: 215,
+      albumY: 530,
+      showVinyl: true,
+      titleX: 540,
+      titleY: 390,
+      titleSize: 94,
+      showMetadata: true
+    });
+    syncInputsFromState();
+    draw();
+    setStatus('Loaded interactive demo card—try dragging the vinyl sleeve or switching templates!');
+  });
+
+  // Export 1080x1920 PNG
+  function slugify(str) {
+    return (str || 'card').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50) || 'card';
+  }
+
+  $('downloadBtn').addEventListener('click', () => {
+    try {
+      draw.isExporting = true;
+      draw();
+      canvas.toBlob(blob => {
+        draw.isExporting = false;
+        draw();
+        if (!blob) return setStatus('Export blocked by cross-origin image URL. Upload the image locally to export.', true);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${slugify(state.artistName)}-${slugify(state.albumName)}-1080x1920.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+        setStatus('Exported 1080 × 1920 PNG successfully.');
+      }, 'image/png');
+    } catch (err) {
+      draw.isExporting = false;
+      draw();
+      setStatus('Export failed due to external URL security rules. Use local image uploads.', true);
+    }
+  });
+
+  // Save / Load Project JSON
+  $('saveBtn').addEventListener('click', () => {
+    const payload = {
+      app: 'Album Card Studio Pro',
+      version: 2,
+      state,
+      images: imageDataUrls
+    };
+    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${slugify(state.artistName)}-project.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1200);
+    setStatus('Saved project JSON file.');
+  });
+
+  $('loadProjectBtn').addEventListener('click', () => $('projectFile').click());
+  $('projectFile').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const parsed = JSON.parse(await file.text());
+      if (!parsed.state) throw new Error('Invalid project file.');
+      Object.assign(state, parsed.state);
+      for (const k of ['artist', 'album', 'logo']) {
+        images[k] = null;
+        imageDataUrls[k] = null;
+        if (parsed.images && parsed.images[k]) {
+          await loadImageAsset(parsed.images[k], k, parsed.images[k].startsWith('http'));
+        }
+      }
+      syncInputsFromState();
+      draw();
+      setStatus('Project loaded.');
+    } catch (err) {
+      setStatus('Could not load project: ' + err.message, true);
+    }
+    e.target.value = '';
+  });
+
+  $('clearImagesBtn').addEventListener('click', () => {
+    ['artist', 'album', 'logo'].forEach(k => {
+      images[k] = null;
+      imageDataUrls[k] = null;
+      $(k + 'Upload').value = '';
+      $(k + 'UrlInput').value = '';
+      $(k + 'FileName').textContent = k === 'artist' ? 'Choose portrait or live photo...' : k === 'album' ? 'Choose square album sleeve...' : 'Choose band logo image...';
+    });
+    processedLogos.cacheKey = '';
+    draw();
+    setStatus('All uploaded media cleared.');
+  });
+
+  $('resetBtn').addEventListener('click', () => {
+    ['artist', 'album', 'logo'].forEach(k => {
+      images[k] = null;
+      imageDataUrls[k] = null;
+    });
+    Object.assign(state, {
+      layout: 'classic', artistName: '', albumName: '', releaseYear: '', country: '', genres: '',
+      keyTrack: '', curatorNote: '', topLeftTag: 'RECORD RECOMMENDATION', topRightTag: 'ESSENTIAL LISTENING',
+      bottomLeftTag: 'SOUND MADE VISUAL', bottomRightTag: '@ALBUMCARDSTUDIO',
+      palette: 'synth', customAccent: null, fontVibe: 'brutalist',
+      titleSize: 84, titleTracking: 4, titleX: 540, titleY: 960, showArtistText: true,
+      artistZoom: 100, artistBlur: 0, imageX: 0, imageY: 0, imageTreatment: 'cinematic',
+      overlay: 32, grain: 16, frameStyle: 'neon',
+      albumSize: 310, albumX: 650, albumY: 1085, albumGlow: 55, showVinyl: false,
+      logoScale: 48, logoX: 540, logoY: 195, logoVisibility: 'auto', logoBlend: 'normal',
+      showMetadata: true
+    });
+    syncInputsFromState();
+    draw();
+    setStatus('Workspace reset to default.');
+  });
+
+  // Redraw once Google Fonts finish loading so custom display fonts render immediately
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => draw());
+  }
+
+  syncInputsFromState();
+  draw();
+})();
+</script>
+</body>
+</html>
